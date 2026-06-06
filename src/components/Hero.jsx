@@ -1,32 +1,41 @@
 import logo from '../assets/logo-buba.svg';
-import heroImage from '../assets/hero.png';
+import tiger from '../assets/tigre-buba-optimized.png';
 import { menuCategories } from '../data/menu';
 
 function Hero() {
     return (
         <header className="hero">
             <div className="hero-shell">
-                <div className="brand-badge">
+                <div className="hero-brand-row">
+                    <div className="brand-badge">
+                        <img
+                            src={logo}
+                            alt="Logo de BuBa"
+                            className="logo"
+                        />
+                    </div>
+
                     <img
-                        src={logo}
-                        alt="Logo de BuBa"
-                        className="logo"
+                        src={tiger}
+                        alt=""
+                        className="mascot-badge"
+                        aria-hidden="true"
                     />
                 </div>
 
-                <div className="hero-visual" aria-hidden="true">
-                    <img src={heroImage} alt="" />
-                </div>
-
                 <div className="hero-content">
-                    <p className="eyebrow">Bubble tea bar</p>
+                    <p className="eyebrow">
+                        {'\uD83E\uDDCB Bubble Tea \u2022 \u2615 Caf\u00e9 \u2022 \uD83E\uDDC7 Dulces'}
+                    </p>
+
                     <h1>{'B\u00fcBa'}</h1>
+
                     <p className="description">
-                        Bebidas frias, cafe y dulces para disfrutar en Mar del Plata.
+                        {'El sabor m\u00e1s divertido de Mar del Plata.'}
                     </p>
 
                     <a href="#menu" className="menu-button">
-                        Ver menu
+                        {'Ver Men\u00fa'}
                     </a>
                 </div>
 

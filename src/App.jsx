@@ -7,20 +7,25 @@ import StorySection from './components/StorySection';
 import LocationSection from './components/LocationSection';
 import InstagramSection from './components/InstagramSection';
 import Cart from './components/Cart';
+import StickyNav from './components/StickyNav';
 import { CartProvider } from './context/CartContext';
 
-function getCurrentView() {
-    return window.location.hash === '#historia' ? 'story' : 'home';
-}
-
 function App() {
-    const [view, setView] = useState(getCurrentView);
+    const [view, setView] = useState(
+        () => window.location.hash === '#historia' ? 'story' : 'home'
+    );
 
     useEffect(() => {
-        const handleHashChange = () => setView(getCurrentView());
+        const handleHashChange = () => {
+            if (window.location.hash === '#historia') {
+                setView('story');
+            } else if (view === 'story') {
+                setView('home');
+            }
+        };
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
-    }, []);
+    }, [view]);
 
     if (view === 'story') {
         return <StorySection />;
@@ -28,6 +33,7 @@ function App() {
 
     return (
         <CartProvider>
+            <StickyNav />
             <Hero />
             <MenuSection />
             <InstagramSection />

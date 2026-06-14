@@ -3,49 +3,66 @@ import tiger from '../assets/tigre-buba-optimized.png';
 import { menuCategories } from '../data/menu';
 
 function Hero() {
+    const handleCategoryClick = (e, id) => {
+        e.preventDefault();
+        const el = document.getElementById(id);
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY - 68;
+        window.scrollTo({ top, behavior: 'smooth' });
+    };
+
     return (
         <header className="hero">
-            <div className="hero-shell">
-                <div className="hero-brand-row">
-                    <div className="brand-badge">
-                        <img
-                            src={logo}
-                            alt="Logo de BuBa"
-                            className="logo"
-                        />
-                    </div>
+            <div className="pearl pearl-1" />
+            <div className="pearl pearl-2" />
+            <div className="pearl pearl-3" />
+            <div className="pearl pearl-4" />
+            <div className="pearl pearl-5" />
+            <div className="pearl pearl-6" />
+            <div className="pearl pearl-7" />
+            <div className="pearl pearl-8" />
 
-                    <img
-                        src={tiger}
-                        alt=""
-                        className="mascot-badge"
-                        aria-hidden="true"
-                    />
+            <div className="hero-shell">
+                <div className="hero-logo-wrap">
+                    <div className="hero-logo-ring">
+                        <img src={logo} alt="BüBa" className="hero-logo-img" />
+                    </div>
                 </div>
 
                 <div className="hero-content">
-                    <p className="eyebrow">
-                        {'\uD83E\uDDCB Bubble Tea \u2022 \u2615 Caf\u00e9 \u2022 \uD83E\uDDC7 Dulces'}
+                    <div className="hero-pills-row">
+                        <span className="hero-pill">🧋 Bubble Tea</span>
+                        <span className="hero-pill">☕ Café</span>
+                        <span className="hero-pill">🧇 Waffles</span>
+                    </div>
+                    <p className="hero-slogan">
+                        Viví la experiencia <em>BüBa</em>
                     </p>
-
-                    <h1>{'B\u00fcBa'}</h1>
-
-                    <p className="description">
-                        {'El sabor m\u00e1s divertido de Mar del Plata.'}
+                    <p className="hero-sub">
+                        El sabor más divertido de Mar del Plata
                     </p>
-
-                    <a href="#menu" className="menu-button">
-                        {'Ver Men\u00fa'}
-                    </a>
                 </div>
 
-                <nav className="category-strip" aria-label="Categorias del menu">
-                    {menuCategories.map((category) => (
-                        <a href={`#${category.id}`} className="category-pill" key={category.id}>
-                            <span>{category.icon}</span>
-                            {category.name}
-                        </a>
-                    ))}
+                <div className="hero-action-row">
+                    <img src={tiger} alt="" className="hero-tiger" aria-hidden="true" />
+                    <p className="hero-scroll-hint">Scrolleá para ver el menú ↓</p>
+                </div>
+
+                <nav className="hero-nav" aria-label="Categorías del menú">
+                    <p className="hero-nav-label">¿Qué vas a pedir hoy?</p>
+                    <div className="hero-nav-grid">
+                        {menuCategories.map((category) => (
+                            <a
+                                key={category.id}
+                                href={`#${category.id}`}
+                                className="hero-nav-item"
+                                onClick={(e) => handleCategoryClick(e, category.id)}
+                            >
+                                <span className="hero-nav-icon">{category.icon}</span>
+                                <span className="hero-nav-name">{category.name}</span>
+                            </a>
+                        ))}
+                    </div>
                 </nav>
             </div>
         </header>

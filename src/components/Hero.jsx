@@ -1,4 +1,4 @@
-import logo from '../assets/logo-buba.svg';
+import logo from '../assets/logo-buba-optimized.png';
 import tiger from '../assets/tigre-buba-optimized.png';
 import { menuCategories } from '../data/menu';
 

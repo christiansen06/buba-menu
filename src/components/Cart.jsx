@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
-import { sendOrderToWhatsApp } from '../utils/whatsapp';
+import { sendOrderToWhatsApp } from '../utils/whatsapp.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);

@@ -2,8 +2,11 @@ function LocationSection() {
     return (
         <footer className="location-section">
             <div className="location-card">
-                <span className="section-kicker">Ubicacion</span>
-                <h2>Bolivar 2120</h2>
+                <div className="location-pearl location-pearl-1" />
+                <div className="location-pearl location-pearl-2" />
+
+                <span className="section-kicker location-kicker">📍 Encontranos en</span>
+                <h2>Bolívar 2120</h2>
                 <p>Mar del Plata, Argentina</p>
 
                 <div className="footer-actions">
@@ -13,7 +16,7 @@ function LocationSection() {
                         rel="noreferrer"
                         className="action-button"
                     >
-                        Como llegar
+                        Cómo llegar
                     </a>
 
                     <a href="#historia" className="text-link">

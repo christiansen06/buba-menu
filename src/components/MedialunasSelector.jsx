@@ -1,20 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
 
+const formatPrice = (n) =>
+    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+
 function MedialunasSelector({ category }) {
-    const { addItem } = useCart();
+    const { addItem, updateItem, editingItem, clearEdit } = useCart();
 
-    const initialCounts = Object.fromEntries(category.products.map((p) => [p.id, 0]));
+    const initialCounts = useMemo(
+        () => Object.fromEntries(category.products.map((p) => [p.id, 0])),
+        [category]
+    );
+
     const [counts, setCounts] = useState(initialCounts);
-    const [toast, setToast] = useState(false);
+    const [toast, setToast] = useState(null);
 
-    const showToast = () => {
-        setToast(true);
-        setTimeout(() => setToast(false), 2000);
+    const isEditing = editingItem?.builderType === 'medialunas';
+
+    useEffect(() => {
+        if (isEditing && editingItem.config) {
+            setCounts({ ...initialCounts, ...editingItem.config.counts });
+        }
+    }, [editingItem]); // eslint-disable-line
+
+    const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 2000);
     };
 
-    const increment = (id) => setCounts((prev) => ({ ...prev, [id]: prev[id] + 1 }));
-    const decrement = (id) => setCounts((prev) => ({ ...prev, [id]: Math.max(0, prev[id] - 1) }));
+    const increment = (id) => setCounts((p) => ({ ...p, [id]: p[id] + 1 }));
+    const decrement = (id) => setCounts((p) => ({ ...p, [id]: Math.max(0, p[id] - 1) }));
+
+    // Permite escribir la cantidad directamente
+    const handleInputChange = (id, value) => {
+        if (value === '') {
+            setCounts((p) => ({ ...p, [id]: 0 }));
+            return;
+        }
+        const num = parseInt(value, 10);
+        if (Number.isNaN(num) || num < 0) return;
+        setCounts((p) => ({ ...p, [id]: num }));
+    };
 
     const getSubtotal = (product) => {
         const qty = counts[product.id];
@@ -29,39 +55,52 @@ function MedialunasSelector({ category }) {
     const total = category.products.reduce((sum, p) => sum + getSubtotal(p), 0);
     const totalUnits = Object.values(counts).reduce((sum, v) => sum + v, 0);
 
-    const formatPrice = (price) =>
-        new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            maximumFractionDigits: 0,
-        }).format(price);
+    const handleSave = () => {
+        const parts = category.products
+            .filter((p) => counts[p.id] > 0)
+            .map((p) => `${p.label.replace('Medialuna de ', '')} ×${counts[p.id]}`);
+        const label = `Medialunas: ${parts.join(', ')}`;
+        const config = { counts: { ...counts } };
 
-    const handleAddToCart = () => {
-        category.products.forEach((product) => {
-            const qty = counts[product.id];
-            if (qty === 0) return;
+        if (isEditing) {
+            updateItem(editingItem.id, { label, unitPrice: total, config });
+            clearEdit();
+            showToast('¡Pedido actualizado! 🥐');
+        } else {
             addItem({
-                id: `${product.id}-${Date.now()}`,
                 categoryId: category.id,
                 categoryName: category.name,
-                label: `${product.label} × ${qty}`,
-                price: getSubtotal(product),
+                builderType: 'medialunas',
+                label,
+                unitPrice: total,
+                config,
             });
-        });
-        showToast();
+            showToast('¡Agregado al pedido! 🥐');
+        }
+        setCounts(initialCounts);
+    };
+
+    const handleCancelEdit = () => {
+        clearEdit();
         setCounts(initialCounts);
     };
 
     return (
         <div className="builder-wrapper">
-            {toast && <div className="builder-toast">¡Agregado al pedido! 🥐</div>}
+            {toast && <div className="builder-toast">{toast}</div>}
+
+            {isEditing && (
+                <div className="builder-edit-banner">
+                    <span>✏️ Editando tus medialunas</span>
+                    <button className="builder-edit-cancel" onClick={handleCancelEdit}>Cancelar</button>
+                </div>
+            )}
 
             <div className="medialunas-table">
                 {category.products.map((product) => {
                     const qty = counts[product.id];
                     const subtotal = getSubtotal(product);
                     const hasDiscount = product.discountAt && product.discountAmount && qty >= product.discountAt;
-
                     return (
                         <div key={product.id}>
                             <div className="medialuna-row">
@@ -69,29 +108,21 @@ function MedialunasSelector({ category }) {
                                     <strong>{product.label}</strong>
                                     <span>{formatPrice(product.pricePerUnit)} c/u</span>
                                 </div>
-
                                 <div className="medialuna-counter">
-                                    <button
-                                        className="counter-btn"
-                                        onClick={() => decrement(product.id)}
-                                        disabled={qty === 0}
-                                    >
-                                        −
-                                    </button>
-                                    <span className="counter-value">{qty}</span>
-                                    <button
-                                        className="counter-btn"
-                                        onClick={() => increment(product.id)}
-                                    >
-                                        +
-                                    </button>
+                                    <button className="counter-btn" onClick={() => decrement(product.id)} disabled={qty === 0}>−</button>
+                                    <input
+                                        type="number"
+                                        className="counter-input"
+                                        value={qty}
+                                        min="0"
+                                        inputMode="numeric"
+                                        onChange={(e) => handleInputChange(product.id, e.target.value)}
+                                        onFocus={(e) => e.target.select()}
+                                    />
+                                    <button className="counter-btn" onClick={() => increment(product.id)}>+</button>
                                 </div>
-
-                                <span className="medialuna-subtotal">
-                  {qty > 0 ? formatPrice(subtotal) : '—'}
-                </span>
+                                <span className="medialuna-subtotal">{qty > 0 ? formatPrice(subtotal) : '—'}</span>
                             </div>
-
                             {hasDiscount && (
                                 <div className="discount-banner">
                                     🎉 ¡Descuento aplicado! −{formatPrice(product.discountAmount)} por llevar {product.discountAt} o más
@@ -109,11 +140,11 @@ function MedialunasSelector({ category }) {
 
             <button
                 className="builder-add-btn"
-                onClick={handleAddToCart}
+                onClick={handleSave}
                 disabled={totalUnits === 0}
                 style={{ opacity: totalUnits === 0 ? 0.4 : 1, cursor: totalUnits === 0 ? 'not-allowed' : 'pointer' }}
             >
-                Agregar al pedido 🛒
+                {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
             </button>
         </div>
     );

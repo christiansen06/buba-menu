@@ -1,21 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import StepProgress from './StepProgress';
+
+const formatPrice = (n) =>
+    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+
+const types = [
+    { id: 'simple', label: 'Simple', frutas: '1 fruta' },
+    { id: 'mixto', label: 'Mixto', frutas: '2 frutas' },
+];
+
+const TOTAL_STEPS = 4;
 
 function LicuadoBuilder({ category }) {
-    const { addItem } = useCart();
+    const { addItem, updateItem, editingItem, clearEdit } = useCart();
 
     const [step, setStep] = useState(1);
     const [selectedType, setSelectedType] = useState(null);
     const [selectedFruits, setSelectedFruits] = useState([]);
     const [selectedBase, setSelectedBase] = useState(null);
     const [selectedSugar, setSelectedSugar] = useState(null);
-    const [toast, setToast] = useState(false);
+    const [toast, setToast] = useState(null);
 
+    const isEditing = editingItem?.builderType === 'licuado';
     const maxFruits = selectedType?.id === 'simple' ? 1 : 2;
 
-    const showToast = () => {
-        setToast(true);
-        setTimeout(() => setToast(false), 2000);
+    useEffect(() => {
+        if (isEditing && editingItem.config) {
+            const cfg = editingItem.config;
+            setSelectedType(types.find((t) => t.id === cfg.typeId) || null);
+            setSelectedFruits(category.fruits.filter((f) => cfg.fruitIds.includes(f.id)));
+            setSelectedBase(category.bases.find((b) => b.id === cfg.baseId) || null);
+            setSelectedSugar(cfg.sugar);
+            setStep(4);
+        }
+    }, [editingItem]); // eslint-disable-line
+
+    const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 2000);
+    };
+
+    const reset = () => {
+        setStep(1);
+        setSelectedType(null);
+        setSelectedFruits([]);
+        setSelectedBase(null);
+        setSelectedSugar(null);
     };
 
     const handleTypeSelect = (type) => {
@@ -26,9 +57,7 @@ function LicuadoBuilder({ category }) {
 
     const handleFruitToggle = (fruit) => {
         setSelectedFruits((prev) => {
-            if (prev.find((f) => f.id === fruit.id)) {
-                return prev.filter((f) => f.id !== fruit.id);
-            }
+            if (prev.find((f) => f.id === fruit.id)) return prev.filter((f) => f.id !== fruit.id);
             if (prev.length >= maxFruits) return prev;
             return [...prev, fruit];
         });
@@ -39,35 +68,37 @@ function LicuadoBuilder({ category }) {
         setStep(4);
     };
 
-    const handleSugarSelect = (sugar) => {
-        setSelectedSugar(sugar);
-    };
-
-    const handleAddToCart = () => {
+    const handleSave = () => {
         const label = `Licuado ${selectedType.label} · ${selectedFruits.map((f) => f.label).join(', ')} · ${selectedBase.label} · ${selectedSugar}`;
+        const config = {
+            typeId: selectedType.id,
+            fruitIds: selectedFruits.map((f) => f.id),
+            baseId: selectedBase.id,
+            sugar: selectedSugar,
+        };
 
-        addItem({
-            id: `licuado-${Date.now()}`,
-            categoryId: category.id,
-            categoryName: category.name,
-            label,
-            price: category.price[selectedType.id],
-        });
-
-        showToast();
-        setStep(1);
-        setSelectedType(null);
-        setSelectedFruits([]);
-        setSelectedBase(null);
-        setSelectedSugar(null);
+        if (isEditing) {
+            updateItem(editingItem.id, { label, unitPrice: category.price[selectedType.id], config });
+            clearEdit();
+            showToast('¡Pedido actualizado! 🍓');
+        } else {
+            addItem({
+                categoryId: category.id,
+                categoryName: category.name,
+                builderType: 'licuado',
+                label,
+                unitPrice: category.price[selectedType.id],
+                config,
+            });
+            showToast('¡Agregado al pedido! 🍓');
+        }
+        reset();
     };
 
-    const formatPrice = (price) =>
-        new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            maximumFractionDigits: 0,
-        }).format(price);
+    const handleCancelEdit = () => {
+        clearEdit();
+        reset();
+    };
 
     const isStepComplete = (s) => {
         if (s === 1) return selectedType !== null;
@@ -78,20 +109,22 @@ function LicuadoBuilder({ category }) {
     };
 
     const canProceedTo = (s) => {
-        for (let i = 1; i < s; i++) {
-            if (!isStepComplete(i)) return false;
-        }
+        for (let i = 1; i < s; i++) if (!isStepComplete(i)) return false;
         return true;
     };
 
-    const types = [
-        { id: 'simple', label: 'Simple', frutas: '1 fruta' },
-        { id: 'mixto', label: 'Mixto', frutas: '2 frutas' },
-    ];
-
     return (
         <div className="builder-wrapper">
-            {toast && <div className="builder-toast">¡Agregado al pedido! 🍓</div>}
+            {toast && <div className="builder-toast">{toast}</div>}
+
+            <StepProgress current={step} total={TOTAL_STEPS} />
+
+            {isEditing && (
+                <div className="builder-edit-banner">
+                    <span>✏️ Editando tu licuado</span>
+                    <button className="builder-edit-cancel" onClick={handleCancelEdit}>Cancelar</button>
+                </div>
+            )}
 
             {/* PASO 1 — Tipo */}
             <div className={`builder-step ${step === 1 ? 'active' : ''} ${isStepComplete(1) && step !== 1 ? 'done' : ''}`}>
@@ -101,21 +134,16 @@ function LicuadoBuilder({ category }) {
                         <span>Tipo</span>
                     </div>
                     {isStepComplete(1) && step !== 1 && (
-                        <span className="builder-step-summary">
-              {selectedType.label} · {formatPrice(category.price[selectedType.id])}
-            </span>
+                        <span className="builder-step-summary">{selectedType.label} · {formatPrice(category.price[selectedType.id])}</span>
                     )}
                 </div>
-
                 {step === 1 && (
                     <div className="builder-step-body">
                         <div className="licuado-type-chips">
                             {types.map((type) => (
-                                <button
-                                    key={type.id}
-                                    className={`licuado-type-chip ${selectedType?.id === type.id ? 'selected' : ''}`}
-                                    onClick={() => handleTypeSelect(type)}
-                                >
+                                <button key={type.id}
+                                        className={`licuado-type-chip ${selectedType?.id === type.id ? 'selected' : ''}`}
+                                        onClick={() => handleTypeSelect(type)}>
                                     <span className="licuado-type-name">{type.label}</span>
                                     <span className="licuado-type-price">{type.frutas}</span>
                                     <span className="licuado-type-price">{formatPrice(category.price[type.id])}</span>
@@ -134,12 +162,9 @@ function LicuadoBuilder({ category }) {
                         <span>Frutas</span>
                     </div>
                     {isStepComplete(2) && step > 2 && (
-                        <span className="builder-step-summary">
-              {selectedFruits.map((f) => f.label).join(', ')}
-            </span>
+                        <span className="builder-step-summary">{selectedFruits.map((f) => f.label).join(', ')}</span>
                     )}
                 </div>
-
                 {step === 2 && (
                     <div className="builder-step-body">
                         <div className="builder-chips">
@@ -147,24 +172,17 @@ function LicuadoBuilder({ category }) {
                                 const isSelected = selectedFruits.find((f) => f.id === fruit.id);
                                 const isDisabled = !isSelected && selectedFruits.length >= maxFruits;
                                 return (
-                                    <button
-                                        key={fruit.id}
-                                        className={`builder-chip builder-chip-cyan ${isSelected ? 'selected' : ''} ${isDisabled ? 'chip-disabled' : ''}`}
-                                        onClick={() => !isDisabled && handleFruitToggle(fruit)}
-                                        disabled={isDisabled}
-                                    >
+                                    <button key={fruit.id}
+                                            className={`builder-chip builder-chip-cyan ${isSelected ? 'selected' : ''} ${isDisabled ? 'chip-disabled' : ''}`}
+                                            onClick={() => !isDisabled && handleFruitToggle(fruit)} disabled={isDisabled}>
                                         {fruit.label}
                                     </button>
                                 );
                             })}
                         </div>
-                        <p className="builder-counter">
-                            {selectedFruits.length}/{maxFruits} frutas seleccionadas
-                        </p>
+                        <p className="builder-counter">{selectedFruits.length}/{maxFruits} frutas seleccionadas</p>
                         {selectedFruits.length === maxFruits && (
-                            <button className="builder-next-btn" onClick={() => setStep(3)}>
-                                Continuar →
-                            </button>
+                            <button className="builder-next-btn" onClick={() => setStep(3)}>Continuar →</button>
                         )}
                     </div>
                 )}
@@ -181,16 +199,13 @@ function LicuadoBuilder({ category }) {
                         <span className="builder-step-summary">{selectedBase.label}</span>
                     )}
                 </div>
-
                 {step === 3 && (
                     <div className="builder-step-body">
                         <div className="builder-chips">
                             {category.bases.map((base) => (
-                                <button
-                                    key={base.id}
-                                    className={`builder-chip builder-chip-cyan ${selectedBase?.id === base.id ? 'selected' : ''}`}
-                                    onClick={() => handleBaseSelect(base)}
-                                >
+                                <button key={base.id}
+                                        className={`builder-chip builder-chip-cyan ${selectedBase?.id === base.id ? 'selected' : ''}`}
+                                        onClick={() => handleBaseSelect(base)}>
                                     {base.label}
                                 </button>
                             ))}
@@ -207,24 +222,20 @@ function LicuadoBuilder({ category }) {
                         <span>Azúcar</span>
                     </div>
                 </div>
-
                 {step === 4 && (
                     <div className="builder-step-body">
                         <div className="builder-chips">
                             {['Con azúcar', 'Sin azúcar'].map((option) => (
-                                <button
-                                    key={option}
-                                    className={`builder-chip builder-chip-cyan ${selectedSugar === option ? 'selected' : ''}`}
-                                    onClick={() => handleSugarSelect(option)}
-                                >
+                                <button key={option}
+                                        className={`builder-chip builder-chip-cyan ${selectedSugar === option ? 'selected' : ''}`}
+                                        onClick={() => setSelectedSugar(option)}>
                                     {option}
                                 </button>
                             ))}
                         </div>
-
                         {selectedSugar && (
-                            <button className="builder-add-btn" onClick={handleAddToCart}>
-                                Agregar al pedido 🛒
+                            <button className="builder-add-btn" onClick={handleSave}>
+                                {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
                             </button>
                         )}
                     </div>

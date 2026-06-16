@@ -1,21 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import StepProgress from './StepProgress';
+
+const formatPrice = (n) =>
+    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+
+const TOTAL_STEPS = 4;
 
 function IceCreamBuilder({ category }) {
-    const { addItem } = useCart();
+    const { addItem, updateItem, editingItem, clearEdit } = useCart();
 
     const [step, setStep] = useState(1);
     const [selectedSize, setSelectedSize] = useState(null);
     const [selectedFlavors, setSelectedFlavors] = useState([]);
     const [selectedSauces, setSelectedSauces] = useState([]);
     const [selectedCup, setSelectedCup] = useState(null);
-    const [toast, setToast] = useState(false);
+    const [toast, setToast] = useState(null);
 
+    const isEditing = editingItem?.builderType === 'icecream';
     const maxFlavors = selectedSize ? parseInt(selectedSize.id) : 0;
 
-    const showToast = () => {
-        setToast(true);
-        setTimeout(() => setToast(false), 2000);
+    useEffect(() => {
+        if (isEditing && editingItem.config) {
+            const cfg = editingItem.config;
+            setSelectedSize(category.sizes.find((s) => s.id === cfg.sizeId) || null);
+            setSelectedFlavors(category.flavors.filter((f) => cfg.flavorIds.includes(f.id)));
+            setSelectedSauces(category.sauces.filter((s) => cfg.sauceIds.includes(s.id)));
+            setSelectedCup(category.cupTypes.find((c) => c.id === cfg.cupId) || null);
+            setStep(4);
+        }
+    }, [editingItem]); // eslint-disable-line
+
+    const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 2000);
+    };
+
+    const reset = () => {
+        setStep(1);
+        setSelectedSize(null);
+        setSelectedFlavors([]);
+        setSelectedSauces([]);
+        setSelectedCup(null);
     };
 
     const handleSizeSelect = (size) => {
@@ -26,53 +52,48 @@ function IceCreamBuilder({ category }) {
 
     const handleFlavorToggle = (flavor) => {
         setSelectedFlavors((prev) => {
-            if (prev.find((f) => f.id === flavor.id)) {
-                return prev.filter((f) => f.id !== flavor.id);
-            }
+            if (prev.find((f) => f.id === flavor.id)) return prev.filter((f) => f.id !== flavor.id);
             if (prev.length >= maxFlavors) return prev;
             return [...prev, flavor];
         });
     };
 
     const handleSauceToggle = (sauce) => {
-        setSelectedSauces((prev) => {
-            if (prev.find((s) => s.id === sauce.id)) {
-                return prev.filter((s) => s.id !== sauce.id);
-            }
-            return [...prev, sauce];
-        });
+        setSelectedSauces((prev) => (prev.find((s) => s.id === sauce.id) ? [] : [sauce]));
     };
 
-    const handleCupSelect = (cup) => {
-        setSelectedCup(cup);
-    };
-
-    const handleAddToCart = () => {
-        const saucesLabel =
-            selectedSauces.length > 0
-                ? selectedSauces.map((s) => s.label).join(', ')
-                : 'Sin salsa';
-
+    const handleSave = () => {
+        const saucesLabel = selectedSauces.length > 0 ? selectedSauces.map((s) => s.label).join(', ') : 'Sin salsa';
         const label = `Helado · ${selectedSize.label} · ${selectedFlavors.map((f) => f.label).join(', ')} · ${saucesLabel} · ${selectedCup.label}`;
+        const config = {
+            sizeId: selectedSize.id,
+            flavorIds: selectedFlavors.map((f) => f.id),
+            sauceIds: selectedSauces.map((s) => s.id),
+            cupId: selectedCup.id,
+        };
 
-        addItem({
-            id: `helado-${Date.now()}`,
-            categoryId: category.id,
-            categoryName: category.name,
-            label,
-            price: selectedSize.price,
-        });
-
-        showToast();
-        setStep(1);
-        setSelectedSize(null);
-        setSelectedFlavors([]);
-        setSelectedSauces([]);
-        setSelectedCup(null);
+        if (isEditing) {
+            updateItem(editingItem.id, { label, unitPrice: selectedSize.price, config });
+            clearEdit();
+            showToast('¡Pedido actualizado! 🍦');
+        } else {
+            addItem({
+                categoryId: category.id,
+                categoryName: category.name,
+                builderType: 'icecream',
+                label,
+                unitPrice: selectedSize.price,
+                config,
+            });
+            showToast('¡Agregado al pedido! 🍦');
+        }
+        reset();
     };
 
-    const formatPrice = (price) =>
-        new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price);
+    const handleCancelEdit = () => {
+        clearEdit();
+        reset();
+    };
 
     const isStepComplete = (s) => {
         if (s === 1) return selectedSize !== null;
@@ -83,17 +104,20 @@ function IceCreamBuilder({ category }) {
     };
 
     const canProceedTo = (s) => {
-        for (let i = 1; i < s; i++) {
-            if (!isStepComplete(i)) return false;
-        }
+        for (let i = 1; i < s; i++) if (!isStepComplete(i)) return false;
         return true;
     };
 
     return (
         <div className="builder-wrapper">
-            {toast && (
-                <div className="builder-toast">
-                    ¡Agregado al pedido! 🍦
+            {toast && <div className="builder-toast">{toast}</div>}
+
+            <StepProgress current={step} total={TOTAL_STEPS} />
+
+            {isEditing && (
+                <div className="builder-edit-banner">
+                    <span>✏️ Editando tu helado</span>
+                    <button className="builder-edit-cancel" onClick={handleCancelEdit}>Cancelar</button>
                 </div>
             )}
 
@@ -108,16 +132,13 @@ function IceCreamBuilder({ category }) {
                         <span className="builder-step-summary">{selectedSize.label} · {formatPrice(selectedSize.price)}</span>
                     )}
                 </div>
-
                 {step === 1 && (
                     <div className="builder-step-body">
                         <div className="builder-chips">
                             {category.sizes.map((size) => (
-                                <button
-                                    key={size.id}
-                                    className={`builder-chip builder-chip-pink ${selectedSize?.id === size.id ? 'selected' : ''}`}
-                                    onClick={() => handleSizeSelect(size)}
-                                >
+                                <button key={size.id}
+                                        className={`builder-chip builder-chip-pink ${selectedSize?.id === size.id ? 'selected' : ''}`}
+                                        onClick={() => handleSizeSelect(size)}>
                                     <span className="chip-label">{size.label}</span>
                                     <span className="chip-price">{formatPrice(size.price)}</span>
                                 </button>
@@ -138,7 +159,6 @@ function IceCreamBuilder({ category }) {
                         <span className="builder-step-summary">{selectedFlavors.map((f) => f.label).join(', ')}</span>
                     )}
                 </div>
-
                 {step === 2 && (
                     <div className="builder-step-body">
                         <div className="builder-chips">
@@ -146,24 +166,17 @@ function IceCreamBuilder({ category }) {
                                 const isSelected = selectedFlavors.find((f) => f.id === flavor.id);
                                 const isDisabled = !isSelected && selectedFlavors.length >= maxFlavors;
                                 return (
-                                    <button
-                                        key={flavor.id}
-                                        className={`builder-chip builder-chip-pink ${isSelected ? 'selected' : ''} ${isDisabled ? 'chip-disabled' : ''}`}
-                                        onClick={() => !isDisabled && handleFlavorToggle(flavor)}
-                                        disabled={isDisabled}
-                                    >
+                                    <button key={flavor.id}
+                                            className={`builder-chip builder-chip-pink ${isSelected ? 'selected' : ''} ${isDisabled ? 'chip-disabled' : ''}`}
+                                            onClick={() => !isDisabled && handleFlavorToggle(flavor)} disabled={isDisabled}>
                                         {flavor.label}
                                     </button>
                                 );
                             })}
                         </div>
-                        <p className="builder-counter">
-                            {selectedFlavors.length}/{maxFlavors} sabores seleccionados
-                        </p>
+                        <p className="builder-counter">{selectedFlavors.length}/{maxFlavors} sabores seleccionados</p>
                         {selectedFlavors.length === maxFlavors && (
-                            <button className="builder-next-btn" onClick={() => setStep(3)}>
-                                Continuar →
-                            </button>
+                            <button className="builder-next-btn" onClick={() => setStep(3)}>Continuar →</button>
                         )}
                     </div>
                 )}
@@ -177,35 +190,23 @@ function IceCreamBuilder({ category }) {
                         <span>Salsas</span>
                     </div>
                     {step > 3 && (
-                        <span className="builder-step-summary">
-              {selectedSauces.length > 0 ? selectedSauces.map((s) => s.label).join(', ') : 'Sin salsa'}
-            </span>
+                        <span className="builder-step-summary">{selectedSauces.length > 0 ? selectedSauces.map((s) => s.label).join(', ') : 'Sin salsa'}</span>
                     )}
                 </div>
-
                 {step === 3 && (
                     <div className="builder-step-body">
-                        <p className="builder-included-label">Incluidas en el precio ✓</p>
+                        <p className="builder-included-label">Incluidas en el precio ✓ · Elegí 1 salsa</p>
                         <div className="builder-chips">
                             {category.sauces.map((sauce) => (
-                                <button
-                                    key={sauce.id}
-                                    className={`builder-chip builder-chip-pink ${selectedSauces.find((s) => s.id === sauce.id) ? 'selected' : ''}`}
-                                    onClick={() => handleSauceToggle(sauce)}
-                                >
+                                <button key={sauce.id}
+                                        className={`builder-chip builder-chip-pink ${selectedSauces.find((s) => s.id === sauce.id) ? 'selected' : ''}`}
+                                        onClick={() => handleSauceToggle(sauce)}>
                                     {sauce.label}
                                 </button>
                             ))}
                         </div>
-                        <button
-                            className="builder-skip-btn"
-                            onClick={() => setSelectedSauces([])}
-                        >
-                            Sin salsa
-                        </button>
-                        <button className="builder-next-btn" onClick={() => setStep(4)}>
-                            Continuar →
-                        </button>
+                        <button className="builder-skip-btn" onClick={() => setSelectedSauces([])}>Sin salsa</button>
+                        <button className="builder-next-btn" onClick={() => setStep(4)}>Continuar →</button>
                     </div>
                 )}
             </div>
@@ -218,26 +219,22 @@ function IceCreamBuilder({ category }) {
                         <span>Vasito</span>
                     </div>
                 </div>
-
                 {step === 4 && (
                     <div className="builder-step-body">
                         <div className="builder-cup-options">
                             {category.cupTypes.map((cup) => (
-                                <button
-                                    key={cup.id}
-                                    className={`builder-cup-card ${selectedCup?.id === cup.id ? 'selected' : ''}`}
-                                    onClick={() => handleCupSelect(cup)}
-                                >
+                                <button key={cup.id}
+                                        className={`builder-cup-card ${selectedCup?.id === cup.id ? 'selected' : ''}`}
+                                        onClick={() => setSelectedCup(cup)}>
                                     <span className="cup-icon">{cup.id === 'barquillo' ? '🍦' : '🥤'}</span>
                                     <span className="cup-label">{cup.label}</span>
                                     <span className="cup-desc">{cup.description}</span>
                                 </button>
                             ))}
                         </div>
-
                         {selectedCup && (
-                            <button className="builder-add-btn" onClick={handleAddToCart}>
-                                Agregar al pedido 🛒
+                            <button className="builder-add-btn" onClick={handleSave}>
+                                {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
                             </button>
                         )}
                     </div>

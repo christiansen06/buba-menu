@@ -344,49 +344,86 @@ export const menuCategories = [
   },
 
   // ===== WAFFLES =====
+  // ===== REEMPLAZAR LA CATEGORÍA WAFFLES EN src/data/menu.js =====
+// Buscá el bloque que empieza con  id: 'waffles'  y reemplazalo ENTERO por esto:
+
+  // ===== WAFFLES =====
   {
     id: 'waffles',
     name: 'Waffles',
     icon: '🧇',
     accent: 'pink',
-    description: 'Waffles recién hechos. Esponjosos y deliciosos',
-    items: [
+    description: 'Elegí uno listo o armá el tuyo. Simple o mixto según lo que elijas',
+    type: 'builder',
+    builderType: 'waffle',
+    price: { simple: 7000, mixto: 8000 },
+    nutellaSaucePrice: 500,
+    presets: [
       {
-        id: 'waffle-clasico',
-        name: 'Waffle Clásico',
-        description: 'Waffle crujiente con manteca y mermelada',
-        image: 'Waffle-Clásico',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$4.200',
-          large: 'N/A',
+        id: 'frutilla',
+        name: 'Waffle Frutilla',
+        description: 'Crema chantilly, frutillas y salsa de chocolate',
+        image: 'Frutilla',
+        config: {
+          rellenos: [{ id: 'crema', type: 'crema', label: 'Crema' }],
+          toppings: ['frutilla'],
+          salsas: ['chocolate'],
+          extraNutella: false,
         },
       },
       {
-        id: 'waffle-chocolate',
-        name: 'Waffle con Chocolate',
-        description: 'Waffle crujiente con salsa de chocolate caliente',
-        image: 'Waffle-Chocolate',
-        badge: 'Recomendado',
-        featured: true,
-        sizes: {
-          medium: '$5.200',
-          large: 'N/A',
+        id: 'oreo',
+        name: 'Waffle Oreo',
+        description: 'Helado americana, Oreos y salsa de chocolate',
+        image: 'Oreo',
+        config: {
+          rellenos: [{ id: 'helado-americana-p', type: 'helado', flavor: 'americana', label: 'Helado Americana' }],
+          toppings: ['oreo'],
+          salsas: ['chocolate'],
+          extraNutella: false,
         },
       },
       {
-        id: 'waffle-frutas',
-        name: 'Waffle con Frutas',
-        description: 'Waffle con frutas frescas y crema',
-        image: 'Waffle-Frutas',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$5.500',
-          large: 'N/A',
+        id: 'nutella',
+        name: 'Waffle Nutella',
+        description: 'Nutella, banana y salsa de chocolate',
+        image: 'Nutella',
+        config: {
+          rellenos: [{ id: 'nutella', type: 'nutella', label: 'Nutella' }],
+          toppings: ['banana'],
+          salsas: ['chocolate'],
+          extraNutella: false,
         },
       },
+    ],
+    rellenos: [
+      { id: 'helado', label: 'Helado', hasFlavors: true },
+      { id: 'ddl', label: 'Dulce de Leche' },
+      { id: 'crema', label: 'Crema' },
+      { id: 'nutella', label: 'Nutella', forcesMixto: true },
+    ],
+    heladoFlavors: [
+      { id: 'chocolate', label: 'Chocolate' },
+      { id: 'frutilla', label: 'Frutilla' },
+      { id: 'americana', label: 'Americana' },
+      { id: 'menta', label: 'Menta Granizada' },
+      { id: 'ddl', label: 'Dulce de Leche' },
+      { id: 'vainilla', label: 'Vainilla' },
+    ],
+    toppings: [
+      { id: 'banana', label: 'Banana', group: 'Frutas' },
+      { id: 'frutilla', label: 'Frutilla', group: 'Frutas' },
+      { id: 'durazno', label: 'Durazno', group: 'Frutas' },
+      { id: 'oreo', label: 'Oreo', group: 'Galletitas' },
+      { id: 'chocolinas', label: 'Chocolinas', group: 'Galletitas' },
+    ],
+    salsas: [
+      { id: 'chocolate', label: 'Chocolate' },
+      { id: 'caramelo', label: 'Caramelo' },
+      { id: 'frutilla', label: 'Frutilla' },
+      { id: 'pistacho', label: 'Pistacho' },
+      { id: 'ddl', label: 'Dulce de Leche' },
+      { id: 'nutella', label: 'Nutella', forcesMixto: true },
     ],
   },
 
@@ -474,6 +511,41 @@ export const menuCategories = [
       { id: 'jyq', label: 'Medialuna de Jamón y Queso', pricePerUnit: 1500 },
     ],
   },
+
+  // ===== TOSTADOS =====
+  {
+    id: 'tostados',
+    name: 'Tostados',
+    icon: '🥪',
+    accent: 'pink',
+    description: 'Tostados de pan de miga con jamón y queso. Recién hechos',
+    items: [
+      {
+        id: 'tostado-entero',
+        name: 'Tostado',
+        description: 'Pan de miga con jamón y queso, cortado en 4 triangulitos',
+        image: 'Tostado',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$3.000',
+          large: 'N/A',
+        },
+      },
+      {
+        id: 'tostado-medio',
+        name: 'Medio Tostado',
+        description: 'Pan de miga con jamón y queso, cortado en 2 triangulitos',
+        image: 'Medio Tostado',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$1.700',
+          large: 'N/A',
+        },
+      },
+    ],
+  },
 ];
 
 /**
@@ -542,5 +614,15 @@ export const getTotalCategories = () => {
 
 export const getBuilderCategories = () => {
   return menuCategories.filter((cat) => cat.type === 'builder');
+};
+/**
+ * Convierte un precio en texto ("$5.500") a número (5500).
+ * Devuelve null si no se puede parsear ("Consultar", "N/A", etc.)
+ */
+export const parsePrice = (str) => {
+  if (!str || typeof str !== 'string') return null;
+  const digits = str.replace(/[^\d]/g, '');
+  if (!digits) return null;
+  return parseInt(digits, 10);
 };
 

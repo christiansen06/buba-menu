@@ -1,39 +1,39 @@
 import { useEffect, useState, useRef } from 'react';
 import { menuCategories } from '../data/menu';
+import { useCart } from '../context/CartContext';
+
+const navItems = [
+    { id: 'destacados', name: 'Destacados', icon: '✨' },
+    ...menuCategories.map((c) => ({ id: c.id, name: c.name, icon: c.icon })),
+];
 
 function StickyNav() {
+    const { theme, toggleTheme } = useCart();
     const [visible, setVisible] = useState(false);
-    const [activeId, setActiveId] = useState(null);
+    const [activeId, setActiveId] = useState(navItems[0].id);
     const navRef = useRef(null);
 
     useEffect(() => {
         const onScroll = () => {
-            // Simple y robusto: aparece después de 400px de scroll
             setVisible(window.scrollY > 400);
-
-            // Detectar categoría activa
-            let current = menuCategories[0].id;
-            for (const cat of menuCategories) {
-                const el = document.getElementById(cat.id);
-                if (el && el.getBoundingClientRect().top < 120) {
-                    current = cat.id;
-                }
+            let current = navItems[0].id;
+            for (const item of navItems) {
+                const el = document.getElementById(item.id);
+                if (el && el.getBoundingClientRect().top < 120) current = item.id;
             }
             setActiveId(current);
         };
-
         window.addEventListener('scroll', onScroll, { passive: true });
         onScroll();
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    // Scroll horizontal del nav sin tocar el scroll vertical
     useEffect(() => {
         if (!activeId || !navRef.current) return;
         const activeEl = navRef.current.querySelector(`[data-id="${activeId}"]`);
         if (!activeEl) return;
         const navEl = navRef.current;
-        const targetScroll = activeEl.offsetLeft - (navEl.offsetWidth / 2) + (activeEl.offsetWidth / 2);
+        const targetScroll = activeEl.offsetLeft - navEl.offsetWidth / 2 + activeEl.offsetWidth / 2;
         navEl.scrollTo({ left: targetScroll, behavior: 'smooth' });
     }, [activeId]);
 
@@ -46,22 +46,25 @@ function StickyNav() {
     };
 
     return (
-        <nav className={`sticky-nav ${visible ? 'sticky-nav-visible' : ''}`}
-             aria-label="Navegación de categorías">
+        <nav className={`sticky-nav ${visible ? 'sticky-nav-visible' : ''}`} aria-label="Navegación de categorías">
             <div className="sticky-nav-inner" ref={navRef}>
-                {menuCategories.map((category) => (
+                {navItems.map((item) => (
                     <a
-                        key={category.id}
-                        href={`#${category.id}`}
-                        data-id={category.id}
-                        className={`sticky-nav-item ${activeId === category.id ? 'active' : ''}`}
-                        onClick={(e) => handleClick(e, category.id)}
+                        key={item.id}
+                        href={`#${item.id}`}
+                        data-id={item.id}
+                        className={`sticky-nav-item ${item.id === 'destacados' ? 'destacados' : ''} ${activeId === item.id ? 'active' : ''}`}
+                        onClick={(e) => handleClick(e, item.id)}
                     >
-                        <span className="sticky-nav-icon">{category.icon}</span>
-                        <span className="sticky-nav-name">{category.name}</span>
+                        <span className="sticky-nav-icon">{item.icon}</span>
+                        <span className="sticky-nav-name">{item.name}</span>
                     </a>
                 ))}
             </div>
+
+            <button className="theme-toggle" onClick={toggleTheme} aria-label="Cambiar tema">
+                {theme === 'light' ? '🌙' : '☀️'}
+            </button>
         </nav>
     );
 }

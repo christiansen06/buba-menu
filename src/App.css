@@ -158,9 +158,10 @@ a {
 }
 
 .hero-logo-img {
-  width: 88%;
-  height: 88%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 /* --- Content (slogan, pills) --- */

@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
+import { sendOrderToWhatsApp } from '../utils/whatsapp';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
 function Cart() {
-    const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit } = useCart();
+    const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
     const [open, setOpen] = useState(false);
-    const [confirmed, setConfirmed] = useState(false);
+    const [checkout, setCheckout] = useState(false);
+    const [sent, setSent] = useState(false);
+    const [name, setName] = useState('');
+    const [note, setNote] = useState('');
+    const [nameError, setNameError] = useState(false);
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
 
-    // Dispara el salto cada vez que se agrega un ítem
     useEffect(() => {
         if (count > prevCount.current) {
             setBump(true);
@@ -35,29 +39,47 @@ function Cart() {
     };
 
     const handleOpen = () => {
-        setConfirmed(false);
+        setCheckout(false);
+        setSent(false);
         setOpen(true);
     };
 
     const handleClose = () => {
         setOpen(false);
-        setConfirmed(false);
+        setCheckout(false);
+        setSent(false);
     };
 
-    const handleConfirm = () => setConfirmed(true);
+    const goToCheckout = () => setCheckout(true);
+
+    const handleSend = () => {
+        if (!name.trim()) {
+            setNameError(true);
+            return;
+        }
+        setNameError(false);
+        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems });
+        setSent(true);
+    };
 
     const handleNewOrder = () => {
         clearCart();
-        setConfirmed(false);
+        setName('');
+        setNote('');
+        setCheckout(false);
+        setSent(false);
         setOpen(false);
     };
 
     return (
         <>
-            <button
-                className={`cart-fab ${bump ? 'cart-fab-bump' : ''}`}
-                onClick={handleOpen}
-            >
+            {/* Toggle de tema — flotante arriba del carrito */}
+            <button className="theme-toggle theme-toggle-fab" onClick={toggleTheme} aria-label="Cambiar tema">
+                {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+
+            {/* Botón del carrito */}
+            <button className={`cart-fab ${bump ? 'cart-fab-bump' : ''}`} onClick={handleOpen}>
                 🛒
                 {items.length > 0 && <span className="cart-fab-count">{count}</span>}
             </button>
@@ -67,38 +89,82 @@ function Cart() {
                     <div className="cart-overlay" onClick={handleClose} />
                     <div className="cart-panel">
 
-                        {confirmed ? (
+                        {/* PEDIDO ENVIADO */}
+                        {sent ? (
                             <div className="cart-confirm">
                                 <div className="cart-confirm-icon">✅</div>
-                                <h3>¡Pedido listo!</h3>
-                                <p>Mostrá esta pantalla en caja para pagar y retirar tu pedido.</p>
-                                <div className="cart-confirm-summary">
-                                    {items.map((item) => (
-                                        <div className="cart-confirm-item" key={item.id}>
-                                            <span>{item.quantity > 1 ? `${item.quantity}× ` : ''}{item.label}</span>
-                                            <span>{item.unitPrice == null ? 'A consultar' : formatPrice(item.unitPrice * item.quantity)}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="cart-confirm-total">
-                                    <span>Total</span>
-                                    <strong>{formatPrice(total)}</strong>
-                                </div>
-                                {hasConsultarItems && (
-                                    <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>
-                                )}
+                                <h3>¡Pedido enviado!</h3>
+                                <p>
+                                    Tu pedido a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
+                                    Si no se abrió solo, revisá que WhatsApp esté instalado.
+                                </p>
                                 <button className="builder-add-btn" onClick={handleNewOrder}>Hacer un nuevo pedido</button>
-                                <button className="cart-clear-btn" onClick={() => setConfirmed(false)}>Volver y seguir editando</button>
+                                <button className="cart-clear-btn" onClick={handleClose}>Cerrar</button>
                             </div>
 
+                            /* CHECKOUT: nombre + nota */
+                        ) : checkout ? (
+                            <>
+                                <div className="cart-panel-header">
+                                    <h3>Últimos datos</h3>
+                                    <button className="cart-close-btn" onClick={() => setCheckout(false)}>←</button>
+                                </div>
+
+                                <div className="cart-checkout-body">
+                                    <label className="checkout-field">
+                                        <span>¿A nombre de quién? <em className="req">*</em></span>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            placeholder="Tu nombre"
+                                            maxLength={40}
+                                            className={nameError ? 'input-error' : ''}
+                                            onChange={(e) => { setName(e.target.value); if (e.target.value.trim()) setNameError(false); }}
+                                            autoFocus
+                                        />
+                                        {nameError && <span className="field-error">Necesitamos tu nombre para preparar el pedido</span>}
+                                    </label>
+
+                                    <label className="checkout-field">
+                                        <span>Aclaración <span className="opcional-tag">opcional</span></span>
+                                        <textarea
+                                            value={note}
+                                            placeholder="Ej: sin azúcar, para llevar, sin maní…"
+                                            maxLength={200}
+                                            rows={3}
+                                            onChange={(e) => setNote(e.target.value)}
+                                        />
+                                    </label>
+
+                                    <div className="checkout-summary">
+                                        <div className="cart-total-row">
+                                            <span className="cart-total-label">Total del pedido</span>
+                                            <span className="cart-total-price">{formatPrice(total)}</span>
+                                        </div>
+                                        {hasConsultarItems && (
+                                            <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="cart-panel-footer">
+                                    <button className="builder-add-btn" onClick={handleSend}>
+                                        Enviar pedido por WhatsApp 📲
+                                    </button>
+                                    <p className="cart-hint">Se abrirá WhatsApp con tu pedido ya escrito — solo tenés que enviarlo</p>
+                                </div>
+                            </>
+
+                            /* CARRITO VACÍO */
                         ) : items.length === 0 ? (
                             <div className="cart-empty">
                                 <div className="cart-empty-icon">🧋</div>
                                 <h3>Todavía no agregaste nada</h3>
-                                <p>Explorá el menú y armá tu pedido — vas a poder revisarlo acá antes de pagar.</p>
+                                <p>Explorá el menú y armá tu pedido — vas a poder revisarlo acá antes de enviarlo.</p>
                                 <button className="builder-add-btn" onClick={handleClose}>Explorar el menú 👆</button>
                             </div>
 
+                            /* LISTA NORMAL */
                         ) : (
                             <>
                                 <div className="cart-panel-header">
@@ -142,7 +208,7 @@ function Cart() {
                                     {hasConsultarItems && (
                                         <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>
                                     )}
-                                    <button className="builder-add-btn" onClick={handleConfirm}>Finalizar pedido ✓</button>
+                                    <button className="builder-add-btn" onClick={goToCheckout}>Continuar →</button>
                                     <button className="cart-clear-btn" onClick={clearCart}>Limpiar pedido</button>
                                 </div>
                             </>

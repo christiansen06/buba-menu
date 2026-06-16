@@ -1,11 +1,8 @@
 import logo from '../assets/logo-buba.svg';
 import tiger from '../assets/tigre-buba-optimized.png';
 import { menuCategories } from '../data/menu';
-import { useCart } from '../context/CartContext';
 
 function Hero() {
-    const { theme, toggleTheme } = useCart();
-
     const handleCategoryClick = (e, id) => {
         e.preventDefault();
         const el = document.getElementById(id);
@@ -16,10 +13,6 @@ function Hero() {
 
     return (
         <header className="hero">
-            <button className="theme-toggle theme-toggle-hero" onClick={toggleTheme} aria-label="Cambiar tema">
-                {theme === 'light' ? '🌙' : '☀️'}
-            </button>
-
             <div className="pearl pearl-1" />
             <div className="pearl pearl-2" />
             <div className="pearl pearl-3" />

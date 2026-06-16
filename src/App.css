@@ -2071,7 +2071,7 @@ a {
   }
 }
 /* =============================================
-   12. STEP PROGRESS
+12. STEP PROGRESS
    ============================================= */
 
 .step-progress {
@@ -2102,52 +2102,499 @@ a {
   color: #686868;
   white-space: nowrap;
 }
-
 /* =============================================
-   13. THEME TOGGLE
+   13. THEME TOGGLE — flotante arriba del carrito
    ============================================= */
 
 .theme-toggle {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid rgba(76, 229, 235, 0.25);
-  background: rgba(255, 255, 255, 0.6);
-  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  font-size: 1.15rem;
   cursor: pointer;
   transition: all 160ms ease;
   flex-shrink: 0;
 }
 
 .theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.9);
-  transform: translateY(-1px) rotate(10deg);
+  background: rgba(255, 255, 255, 0.95);
+  transform: scale(1.08);
 }
 
-/* En el hero: flotante arriba a la derecha */
-.theme-toggle-hero {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 5;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(6px);
+/* Posición: arriba del FAB del carrito */
+.theme-toggle-fab {
+  position: fixed;
+  bottom: 5rem;
+  right: 1.45rem;
+  z-index: 49;
+  box-shadow: 0 4px 14px rgba(37, 37, 37, 0.12);
 }
 
-/* En el sticky nav: al final de la barra */
-.sticky-nav {
-  display: flex;
-  align-items: center;
+[data-theme="dark"] .theme-toggle {
+  background: rgba(22, 40, 42, 0.85);
+  border-color: rgba(76, 229, 235, 0.2);
 }
 
-.sticky-nav .theme-toggle {
-  margin: 0.4rem 0.6rem 0.4rem 0.2rem;
+[data-theme="dark"] .theme-toggle:hover {
+  background: rgba(29, 52, 55, 0.95);
 }
 
 /* =============================================
-   14. CARRITO — ESTADO VACÍO Y CONFIRMACIÓN
+   14. MODO NOCHE — COMPLETO Y MEJORADO
+   ============================================= */
+
+[data-theme="dark"] {
+  --buba-bg: #0f1c1d;
+}
+
+[data-theme="dark"] body {
+  background: #0f1c1d;
+  color: #e6f7f8;
+}
+
+/* --- Hero --- */
+[data-theme="dark"] .hero {
+  background: linear-gradient(160deg, #0c1f21 0%, #112a2c 45%, #16363a 100%);
+}
+
+[data-theme="dark"] .hero-logo-ring {
+  background: #16282a;
+  border-color: rgba(76, 229, 235, 0.25);
+  box-shadow:
+          0 0 0 8px rgba(76, 229, 235, 0.06),
+          0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .hero-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(76, 229, 235, 0.2);
+  color: #9fe9ec;
+}
+
+[data-theme="dark"] .hero-slogan {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .hero-sub,
+[data-theme="dark"] .hero-scroll-hint,
+[data-theme="dark"] .hero-nav-label {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+[data-theme="dark"] .hero-nav-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(76, 229, 235, 0.15);
+  color: #cdeff0;
+}
+
+[data-theme="dark"] .hero-nav-item:hover {
+  background: rgba(76, 229, 235, 0.12);
+  color: #ffffff;
+}
+
+/* --- Sticky nav --- */
+[data-theme="dark"] .sticky-nav {
+  background: rgba(15, 28, 29, 0.92);
+  border-bottom-color: rgba(76, 229, 235, 0.15);
+}
+
+[data-theme="dark"] .sticky-nav-item {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+[data-theme="dark"] .sticky-nav-item:hover {
+  color: #ffffff;
+  background: rgba(76, 229, 235, 0.08);
+}
+
+[data-theme="dark"] .sticky-nav-item.active {
+  color: #4CE5EB;
+}
+
+/* --- Menú general --- */
+[data-theme="dark"] .menu-section {
+  background: linear-gradient(180deg, #0f1c1d 0%, #122224 100%);
+}
+
+[data-theme="dark"] .section-heading h2 {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .section-kicker {
+  background: rgba(76, 229, 235, 0.12);
+  color: #6fe6eb;
+}
+
+[data-theme="dark"] .featured-section {
+  background: linear-gradient(135deg, rgba(76, 229, 235, 0.06) 0%, rgba(255, 151, 189, 0.04) 100%);
+  border-color: rgba(76, 229, 235, 0.1);
+}
+
+[data-theme="dark"] .featured-header h3 {
+  color: #eafdfd;
+}
+
+/* Textos secundarios */
+[data-theme="dark"] .featured-header p,
+[data-theme="dark"] .category-title p,
+[data-theme="dark"] .product-content p,
+[data-theme="dark"] .featured-content p,
+[data-theme="dark"] .preset-info p,
+[data-theme="dark"] .builder-counter,
+[data-theme="dark"] .medialuna-info span,
+[data-theme="dark"] .cart-total-label,
+[data-theme="dark"] .step-progress-label,
+[data-theme="dark"] .medialunas-total-label,
+[data-theme="dark"] .cart-empty p,
+[data-theme="dark"] .cart-confirm p,
+[data-theme="dark"] .social-hint,
+[data-theme="dark"] .waffle-price-row,
+[data-theme="dark"] .checkout-field .opcional-tag,
+[data-theme="dark"] .cart-hint,
+[data-theme="dark"] .cup-desc,
+[data-theme="dark"] .chip-price {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+/* --- Cards contenedoras --- */
+[data-theme="dark"] .menu-category,
+[data-theme="dark"] .featured-card,
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .preset-card,
+[data-theme="dark"] .cart-panel,
+[data-theme="dark"] .story-card {
+  background: #16282a;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Títulos y textos principales */
+[data-theme="dark"] .featured-content h4,
+[data-theme="dark"] .product-content h4,
+[data-theme="dark"] .category-title h3,
+[data-theme="dark"] .preset-info h4,
+[data-theme="dark"] .medialuna-info strong,
+[data-theme="dark"] .cart-item-label,
+[data-theme="dark"] .cart-total-price,
+[data-theme="dark"] .medialunas-total-price,
+[data-theme="dark"] .cart-panel-header h3,
+[data-theme="dark"] .cart-empty h3,
+[data-theme="dark"] .cart-confirm h3,
+[data-theme="dark"] .social-info h2,
+[data-theme="dark"] .location-card h2,
+[data-theme="dark"] .waffle-price-row strong,
+[data-theme="dark"] .cart-confirm-item,
+[data-theme="dark"] .cart-confirm-total strong,
+[data-theme="dark"] .checkout-field > span {
+  color: #eafdfd;
+}
+
+/* --- BUILDERS: pasos con guiado claro en modo noche --- */
+
+/* Paso activo: borde pink visible + fondo diferenciado */
+[data-theme="dark"] .builder-step.active {
+  background: #1a3035;
+  border: 2px solid #FF97BD;
+  box-shadow: 0 4px 20px rgba(255, 151, 189, 0.15);
+}
+
+/* Número del paso activo */
+[data-theme="dark"] .builder-step.active .builder-step-number {
+  background: #FF97BD;
+  color: #ffffff;
+}
+
+/* Título del paso activo más brillante */
+[data-theme="dark"] .builder-step.active .builder-step-title {
+  color: #ffffff;
+}
+
+/* Paso normal (no activo, no completado) */
+[data-theme="dark"] .builder-step {
+  background: #16282a;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Paso completado: sutil pero reconocible */
+[data-theme="dark"] .builder-step.done {
+  background: #14252a;
+  border-color: rgba(76, 229, 235, 0.15);
+}
+
+[data-theme="dark"] .builder-step.done .builder-step-number {
+  background: #4CE5EB;
+  color: #063335;
+}
+
+[data-theme="dark"] .builder-step.done .builder-step-header {
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .builder-step.done .builder-step-header:hover {
+  opacity: 1;
+}
+
+[data-theme="dark"] .builder-step-summary {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+/* Paso deshabilitado */
+[data-theme="dark"] .builder-step.disabled {
+  opacity: 0.3;
+}
+
+/* Número del paso (base) */
+[data-theme="dark"] .builder-step-number {
+  background: #1d3437;
+  color: rgba(230, 247, 248, 0.5);
+}
+
+/* Título del paso (base) */
+[data-theme="dark"] .builder-step-title {
+  color: #cdeff0;
+}
+
+/* --- Chips, tiles, opciones — con colores visibles --- */
+[data-theme="dark"] .builder-chip,
+[data-theme="dark"] .licuado-type-chip,
+[data-theme="dark"] .builder-cup-card,
+[data-theme="dark"] .waffle-tab {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cdeff0;
+}
+
+[data-theme="dark"] .builder-chip:hover {
+  border-color: rgba(255, 151, 189, 0.4);
+  background: rgba(255, 151, 189, 0.08);
+}
+
+/* Chip seleccionado pink — mantiene los colores vivos */
+[data-theme="dark"] .builder-chip-pink.selected {
+  background: #FF97BD;
+  border-color: #FF97BD;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 151, 189, 0.3);
+}
+
+/* Chip seleccionado cyan */
+[data-theme="dark"] .builder-chip-cyan.selected {
+  background: #4CE5EB;
+  border-color: #4CE5EB;
+  color: #063335;
+  box-shadow: 0 4px 14px rgba(76, 229, 235, 0.3);
+}
+
+/* Licuado type chip seleccionado */
+[data-theme="dark"] .licuado-type-chip.selected {
+  border-color: #4CE5EB;
+  background: rgba(76, 229, 235, 0.15);
+  box-shadow: 0 4px 14px rgba(76, 229, 235, 0.2);
+}
+
+[data-theme="dark"] .licuado-type-chip.selected .licuado-type-name {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .licuado-type-chip.selected .licuado-type-price {
+  color: #4CE5EB;
+}
+
+/* Cup card seleccionado */
+[data-theme="dark"] .builder-cup-card.selected {
+  border-color: #FF97BD;
+  background: rgba(255, 151, 189, 0.12);
+  box-shadow: 0 4px 14px rgba(255, 151, 189, 0.2);
+}
+
+/* Waffle tab activo */
+[data-theme="dark"] .waffle-tab.active {
+  border-color: #FF97BD;
+  background: rgba(255, 151, 189, 0.15);
+  color: #FF97BD;
+}
+
+/* Option tiles (rellenos, toppings, salsas) */
+[data-theme="dark"] .option-name {
+  background: #1d3437;
+  color: #cdeff0;
+}
+
+[data-theme="dark"] .option-tile.selected .option-name {
+  background: rgba(255, 151, 189, 0.2);
+  color: #FF97BD;
+}
+
+[data-theme="dark"] .option-circle {
+  background: radial-gradient(circle at 35% 30%, #3a2535, #8c4068);
+}
+
+[data-theme="dark"] .option-tile.selected .option-circle {
+  box-shadow: 0 0 0 3px #FF97BD,
+  inset -3px -4px 8px rgba(100, 30, 60, 0.3),
+  inset 3px 4px 8px rgba(255, 200, 220, 0.15);
+}
+
+/* Relleno pills */
+[data-theme="dark"] .relleno-pill {
+  background: rgba(255, 151, 189, 0.15);
+  border-color: rgba(255, 151, 189, 0.35);
+  color: #FF97BD;
+}
+
+/* Medialuna row */
+[data-theme="dark"] .medialuna-row {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Botones counter */
+[data-theme="dark"] .counter-btn,
+[data-theme="dark"] .cart-qty button,
+[data-theme="dark"] .cart-close-btn {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cdeff0;
+}
+
+[data-theme="dark"] .counter-btn:hover:not(:disabled),
+[data-theme="dark"] .cart-qty button:hover {
+  border-color: #4CE5EB;
+  background: rgba(76, 229, 235, 0.12);
+}
+
+/* Size options & single price */
+[data-theme="dark"] .size-option {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .size-option span {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+[data-theme="dark"] .size-option strong,
+[data-theme="dark"] .chip-label,
+[data-theme="dark"] .licuado-type-name,
+[data-theme="dark"] .cup-label,
+[data-theme="dark"] .counter-value {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .size-option.selected {
+  border-color: #4CE5EB;
+  background: rgba(76, 229, 235, 0.12);
+}
+
+[data-theme="dark"] .single-price {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .single-price strong {
+  color: #eafdfd;
+}
+
+/* Step progress track */
+[data-theme="dark"] .step-progress-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Category empty */
+[data-theme="dark"] .category-empty {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(230, 247, 248, 0.5);
+}
+
+/* Banners (upsell, mixto, descuento, edit) */
+[data-theme="dark"] .waffle-tier-banner.upsell,
+[data-theme="dark"] .builder-edit-banner {
+  background: rgba(255, 200, 87, 0.1);
+  border-color: rgba(228, 180, 60, 0.3);
+  color: #e4b43c;
+}
+
+[data-theme="dark"] .waffle-tier-banner.mixto {
+  background: rgba(76, 229, 235, 0.1);
+  border-color: rgba(76, 229, 235, 0.25);
+  color: #6fe6eb;
+}
+
+[data-theme="dark"] .discount-banner {
+  background: rgba(76, 229, 235, 0.08);
+  border-color: rgba(76, 229, 235, 0.2);
+  color: #6fe6eb;
+}
+
+/* --- Carrito --- */
+[data-theme="dark"] .cart-item {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .cart-panel-header,
+[data-theme="dark"] .cart-panel-footer {
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+[data-theme="dark"] .cart-edit-btn {
+  border-color: rgba(76, 229, 235, 0.3);
+  background: rgba(76, 229, 235, 0.08);
+  color: #4CE5EB;
+}
+
+/* --- Footer --- */
+[data-theme="dark"] .social-section {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(76, 229, 235, 0.04) 100%);
+  border-color: rgba(76, 229, 235, 0.12);
+}
+
+[data-theme="dark"] .location-card {
+  background: linear-gradient(160deg, #11292c 0%, #143034 45%, #18383c 100%);
+  border-color: rgba(76, 229, 235, 0.15);
+}
+
+[data-theme="dark"] .location-kicker {
+  background: rgba(76, 229, 235, 0.12);
+  color: #6fe6eb;
+}
+
+[data-theme="dark"] .location-card p {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+[data-theme="dark"] .location-card .text-link {
+  color: #6fe6eb;
+  -webkit-text-fill-color: #6fe6eb;
+}
+
+/* --- Historia --- */
+[data-theme="dark"] .story-page {
+  background: #0f1c1d;
+}
+
+[data-theme="dark"] .story-card p {
+  color: rgba(230, 247, 248, 0.6);
+}
+
+/* --- Botón Agregar en dark mode --- */
+[data-theme="dark"] .product-add-btn {
+  background: linear-gradient(135deg, #4ecba0 0%, #3bb88d 100%);
+  color: #063325;
+}
+
+[data-theme="dark"] .product-add-btn.added {
+  background: linear-gradient(135deg, #4CE5EB 0%, #38d6dc 100%);
+  color: #063335;
+}
+
+/* =============================================
+   15. CARRITO — ESTADO VACÍO Y CONFIRMACIÓN
    ============================================= */
 
 .cart-empty,
@@ -2230,248 +2677,6 @@ a {
   width: 100%;
   max-width: 360px;
   margin-top: 0.4rem;
-}
-
-/* =============================================
-   15. MODO NOCHE
-   ============================================= */
-
-[data-theme="dark"] body {
-  background: #0f1c1d;
-}
-
-[data-theme="dark"] {
-  --buba-bg: #0f1c1d;
-}
-
-[data-theme="dark"] body {
-  background: var(--buba-bg);
-  color: #e6f7f8;
-}
-
-/* --- Hero --- */
-[data-theme="dark"] .hero {
-  background: linear-gradient(160deg, #0c1f21 0%, #112a2c 45%, #16363a 100%);
-}
-
-[data-theme="dark"] .hero-logo-ring {
-  background: #16282a;
-  border-color: rgba(76, 229, 235, 0.25);
-  box-shadow:
-          0 0 0 8px rgba(76, 229, 235, 0.06),
-          0 20px 50px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .hero-pill {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(76, 229, 235, 0.2);
-  color: #9fe9ec;
-}
-
-[data-theme="dark"] .hero-slogan {
-  color: #eafdfd;
-}
-
-[data-theme="dark"] .hero-sub,
-[data-theme="dark"] .hero-scroll-hint,
-[data-theme="dark"] .hero-nav-label {
-  color: rgba(230, 247, 248, 0.55);
-}
-
-[data-theme="dark"] .hero-nav-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(76, 229, 235, 0.15);
-  color: #cdeff0;
-}
-
-[data-theme="dark"] .hero-nav-item:hover {
-  background: rgba(76, 229, 235, 0.12);
-  color: #ffffff;
-}
-
-[data-theme="dark"] .theme-toggle {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(76, 229, 235, 0.2);
-}
-
-[data-theme="dark"] .theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-/* --- Sticky nav --- */
-[data-theme="dark"] .sticky-nav {
-  background: rgba(15, 28, 29, 0.88);
-  border-bottom-color: rgba(76, 229, 235, 0.15);
-}
-
-[data-theme="dark"] .sticky-nav-item {
-  color: rgba(230, 247, 248, 0.55);
-}
-
-[data-theme="dark"] .sticky-nav-item:hover {
-  color: #ffffff;
-  background: rgba(76, 229, 235, 0.08);
-}
-
-[data-theme="dark"] .sticky-nav-item.active {
-  color: #4CE5EB;
-}
-
-/* --- Menú general --- */
-[data-theme="dark"] .menu-section {
-  background: linear-gradient(180deg, #0f1c1d 0%, #122224 100%);
-}
-
-[data-theme="dark"] .section-heading h2 {
-  color: #eafdfd;
-}
-
-[data-theme="dark"] .section-kicker {
-  background: rgba(76, 229, 235, 0.12);
-  color: #6fe6eb;
-}
-
-[data-theme="dark"] .featured-section {
-  background: linear-gradient(135deg, rgba(76, 229, 235, 0.06) 0%, rgba(255, 151, 189, 0.05) 100%);
-  border-color: rgba(76, 229, 235, 0.1);
-}
-
-[data-theme="dark"] .featured-header h3 {
-  color: #eafdfd;
-}
-
-[data-theme="dark"] .featured-header p,
-[data-theme="dark"] .category-title p,
-[data-theme="dark"] .product-content p,
-[data-theme="dark"] .featured-content p,
-[data-theme="dark"] .preset-info p,
-[data-theme="dark"] .builder-counter,
-[data-theme="dark"] .medialuna-info span,
-[data-theme="dark"] .cart-total-label,
-[data-theme="dark"] .step-progress-label,
-[data-theme="dark"] .medialunas-total-label,
-[data-theme="dark"] .cart-empty p,
-[data-theme="dark"] .cart-confirm p,
-[data-theme="dark"] .social-hint,
-[data-theme="dark"] .location-card p {
-  color: rgba(230, 247, 248, 0.5);
-}
-
-/* --- Cards --- */
-[data-theme="dark"] .menu-category,
-[data-theme="dark"] .featured-card,
-[data-theme="dark"] .product-card,
-[data-theme="dark"] .preset-card,
-[data-theme="dark"] .builder-step,
-[data-theme="dark"] .cart-panel,
-[data-theme="dark"] .story-card {
-  background: #16282a;
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-[data-theme="dark"] .featured-content h4,
-[data-theme="dark"] .product-content h4,
-[data-theme="dark"] .category-title h3,
-[data-theme="dark"] .preset-info h4,
-[data-theme="dark"] .medialuna-info strong,
-[data-theme="dark"] .builder-step-title,
-[data-theme="dark"] .cart-item-label,
-[data-theme="dark"] .cart-total-price,
-[data-theme="dark"] .medialunas-total-price,
-[data-theme="dark"] .cart-panel-header h3,
-[data-theme="dark"] .cart-empty h3,
-[data-theme="dark"] .cart-confirm h3,
-[data-theme="dark"] .social-info h2,
-[data-theme="dark"] .location-card h2,
-[data-theme="dark"] .waffle-price-row strong,
-[data-theme="dark"] .cart-confirm-item,
-[data-theme="dark"] .cart-confirm-total strong {
-  color: #eafdfd;
-}
-
-/* --- Chips, tiles y opciones --- */
-[data-theme="dark"] .builder-chip,
-[data-theme="dark"] .size-option,
-[data-theme="dark"] .licuado-type-chip,
-[data-theme="dark"] .builder-cup-card,
-[data-theme="dark"] .medialuna-row,
-[data-theme="dark"] .waffle-tab,
-[data-theme="dark"] .option-name,
-[data-theme="dark"] .counter-btn,
-[data-theme="dark"] .cart-qty button,
-[data-theme="dark"] .cart-close-btn {
-  background: #1d3437;
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #cdeff0;
-}
-
-[data-theme="dark"] .builder-chip:hover {
-  background: rgba(255, 151, 189, 0.1);
-}
-
-[data-theme="dark"] .size-option span,
-[data-theme="dark"] .size-option strong,
-[data-theme="dark"] .chip-label,
-[data-theme="dark"] .licuado-type-name,
-[data-theme="dark"] .cup-label,
-[data-theme="dark"] .counter-value {
-  color: #eafdfd;
-}
-
-[data-theme="dark"] .builder-step-number {
-  background: #1d3437;
-  color: #cdeff0;
-}
-
-[data-theme="dark"] .category-empty {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: rgba(230, 247, 248, 0.5);
-}
-
-[data-theme="dark"] .step-progress-track {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-/* --- Carrito --- */
-[data-theme="dark"] .cart-item {
-  background: #1d3437;
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-[data-theme="dark"] .cart-panel-header,
-[data-theme="dark"] .cart-panel-footer {
-  border-color: rgba(255, 255, 255, 0.07);
-}
-
-/* --- Footer --- */
-[data-theme="dark"] .social-section {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(76, 229, 235, 0.05) 100%);
-  border-color: rgba(76, 229, 235, 0.12);
-}
-
-[data-theme="dark"] .location-card {
-  background: linear-gradient(160deg, #11292c 0%, #143034 45%, #18383c 100%);
-  border-color: rgba(76, 229, 235, 0.15);
-}
-
-[data-theme="dark"] .location-kicker {
-  background: rgba(76, 229, 235, 0.12);
-  color: #6fe6eb;
-}
-
-[data-theme="dark"] .location-card .text-link {
-  color: #6fe6eb;
-  -webkit-text-fill-color: #6fe6eb;
-}
-
-/* --- Historia --- */
-[data-theme="dark"] .story-page {
-  background: #0f1c1d;
-}
-
-[data-theme="dark"] .story-card p {
-  color: rgba(230, 247, 248, 0.6);
 }
 /* =============================================
    16. FIXES — precio único + preset waffles compacto
@@ -2620,7 +2825,7 @@ a {
   border-color: #4CE5EB;
 }
 /* =============================================
-   18. CARRITO — animación bump al agregar
+   18. CART BUMP — animación al agregar
    ============================================= */
 
 @keyframes cartBump {
@@ -2635,23 +2840,24 @@ a {
 }
 
 /* =============================================
-   19. BUILDERS — focus mode (contraste claro/activo)
+   19. BUILDERS — focus mode
    ============================================= */
 
-/* El paso activo tiene fondo levemente coloreado y borde más visible */
 .builder-step.active {
   border-color: #FF97BD;
   box-shadow: 0 6px 24px rgba(255, 151, 189, 0.18);
   background: #ffffff;
 }
 
-/* Los pasos que todavía no se desbloquearon: más apagados */
-.builder-step.disabled {
-  opacity: 0.35;
-  pointer-events: none;
+.builder-step.active .builder-step-number {
+  transform: scale(1.1);
 }
 
-/* Los pasos completados (done): fondo neutro, sin protagonismo */
+.builder-step.active .builder-step-title {
+  color: #1a1a1a;
+  font-size: 1.05rem;
+}
+
 .builder-step.done {
   background: #f9fafa;
   border-color: rgba(37, 37, 37, 0.06);
@@ -2659,7 +2865,6 @@ a {
 }
 
 .builder-step.done .builder-step-header {
-  cursor: pointer;
   opacity: 0.75;
   transition: opacity 150ms ease;
 }
@@ -2667,32 +2872,101 @@ a {
 .builder-step.done .builder-step-header:hover {
   opacity: 1;
 }
+/* =============================================
+   20. CHECKOUT — campos nombre + nota
+   ============================================= */
 
-/* El número del paso activo más grande y visible */
-.builder-step.active .builder-step-number {
-  background: #FF97BD;
-  color: #ffffff;
-  transform: scale(1.1);
+.cart-checkout-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem 0.5rem;
+  display: grid;
+  gap: 1.1rem;
 }
 
-/* Título del paso activo más pesado */
-.builder-step.active .builder-step-title {
-  color: #1a1a1a;
-  font-size: 1.05rem;
+.checkout-field {
+  display: grid;
+  gap: 0.4rem;
 }
 
-/* Separador visual entre pasos */
-.builder-step + .builder-step {
-  margin-top: 0.1rem;
+.checkout-field > span {
+  font-size: 0.88rem;
+  font-weight: 850;
+  color: #252525;
 }
 
-/* Modo noche — ajustes de focus mode */
-[data-theme="dark"] .builder-step.active {
-  background: #1a2f31;
-  border-color: #FF97BD;
+.checkout-field .req {
+  color: #FF6B9D;
+  font-style: normal;
 }
 
-[data-theme="dark"] .builder-step.done {
-  background: #14252a;
-  border-color: rgba(255, 255, 255, 0.04);
+.checkout-field input,
+.checkout-field textarea {
+  width: 100%;
+  border: 1.5px solid rgba(37, 37, 37, 0.15);
+  border-radius: 14px;
+  background: #f9ffff;
+  color: #252525;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 0.75rem 0.9rem;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.checkout-field textarea {
+  resize: vertical;
+  min-height: 64px;
+  line-height: 1.4;
+}
+
+.checkout-field input::placeholder,
+.checkout-field textarea::placeholder {
+  color: #aaa;
+  font-weight: 600;
+}
+
+.checkout-field input:focus,
+.checkout-field textarea:focus {
+  outline: none;
+  border-color: #4CE5EB;
+  background: rgba(76, 229, 235, 0.05);
+}
+
+.checkout-field input.input-error {
+  border-color: #FF6B9D;
+  background: rgba(255, 107, 157, 0.05);
+}
+
+.field-error {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #FF6B9D;
+}
+
+.checkout-summary {
+  border-top: 1px solid rgba(37, 37, 37, 0.08);
+  padding-top: 0.85rem;
+}
+
+/* Modo noche */
+[data-theme="dark"] .checkout-field > span {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .checkout-field input,
+[data-theme="dark"] .checkout-field textarea {
+  background: #1d3437;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .checkout-field input:focus,
+[data-theme="dark"] .checkout-field textarea:focus {
+  background: rgba(76, 229, 235, 0.1);
+  border-color: #4CE5EB;
+}
+
+[data-theme="dark"] .checkout-summary {
+  border-color: rgba(255, 255, 255, 0.08);
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { menuCategories } from '../data/menu';
-import { useCart } from '../context/CartContext';
 
 const navItems = [
     { id: 'destacados', name: 'Destacados', icon: '✨' },
@@ -8,7 +7,6 @@ const navItems = [
 ];
 
 function StickyNav() {
-    const { theme, toggleTheme } = useCart();
     const [visible, setVisible] = useState(false);
     const [activeId, setActiveId] = useState(navItems[0].id);
     const navRef = useRef(null);
@@ -61,10 +59,6 @@ function StickyNav() {
                     </a>
                 ))}
             </div>
-
-            <button className="theme-toggle" onClick={toggleTheme} aria-label="Cambiar tema">
-                {theme === 'light' ? '🌙' : '☀️'}
-            </button>
         </nav>
     );
 }

@@ -11,6 +11,13 @@ function Hero() {
         window.scrollTo({ top, behavior: 'smooth' });
     };
 
+    const handleScrollClick = () => {
+        const el = document.getElementById('destacados') || document.getElementById(menuCategories[0]?.id);
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY - 68;
+        window.scrollTo({ top, behavior: 'smooth' });
+    };
+
     return (
         <header className="hero">
             <div className="pearl pearl-1" />
@@ -45,7 +52,10 @@ function Hero() {
 
                 <div className="hero-action-row">
                     <img src={tiger} alt="" className="hero-tiger" aria-hidden="true" />
-                    <p className="hero-scroll-hint">Scrolleá para ver el menú ↓</p>
+                    <button className="hero-scroll-btn" onClick={handleScrollClick}>
+                        <span className="hero-scroll-text">Ver el menú</span>
+                        <span className="hero-scroll-arrow">↓</span>
+                    </button>
                 </div>
 
                 <nav className="hero-nav" aria-label="Categorías del menú">

@@ -12,7 +12,9 @@ const OPTION_EMOJI = {
 };
 const emojiFor = (id) => OPTION_EMOJI[id] || '🧇';
 
-const MAX_PER_CATEGORY = 2; // siempre se puede elegir hasta 2 de cada cosa
+const MAX_RELLENOS = 2;
+const MAX_TOPPINGS = 3; // hasta 3 toppings, mixto desde 2
+const MAX_SALSAS = 2;
 
 /** Mixto si hay 2+ en cualquier categoría, o Nutella (relleno o salsa). */
 function computeIsMixto(rellenos, toppings, salsas) {
@@ -105,12 +107,12 @@ function WaffleBuilder({ category }) {
         setHeladoPickerOpen(false);
         const existing = selectedRellenos.find((r) => r.type === opt.id);
         if (existing) return removeRelleno(existing.id);
-        if (selectedRellenos.length >= MAX_PER_CATEGORY) return;
+        if (selectedRellenos.length >= MAX_RELLENOS) return;
         setSelectedRellenos((prev) => [...prev, { id: opt.id, type: opt.id, label: opt.label }]);
     };
 
     const addHeladoFlavor = (flavor) => {
-        if (selectedRellenos.length >= MAX_PER_CATEGORY) return;
+        if (selectedRellenos.length >= MAX_RELLENOS) return;
         setSelectedRellenos((prev) => [
             ...prev,
             { id: `helado-${flavor.id}-${Date.now()}`, type: 'helado', flavor: flavor.id, label: `Helado ${flavor.label}` },
@@ -122,7 +124,7 @@ function WaffleBuilder({ category }) {
     const toggleTopping = (id) => {
         setSelectedToppings((prev) => {
             if (prev.includes(id)) return prev.filter((t) => t !== id);
-            if (prev.length >= MAX_PER_CATEGORY) return prev;
+            if (prev.length >= MAX_TOPPINGS) return prev;
             return [...prev, id];
         });
     };
@@ -131,7 +133,7 @@ function WaffleBuilder({ category }) {
     const toggleSalsa = (id) => {
         setSelectedSalsas((prev) => {
             if (prev.includes(id)) return prev.filter((s) => s !== id);
-            if (prev.length >= MAX_PER_CATEGORY) return prev;
+            if (prev.length >= MAX_SALSAS) return prev;
             return [...prev, id];
         });
     };
@@ -256,7 +258,7 @@ function WaffleBuilder({ category }) {
                         <div className="builder-step-header">
                             <div className="builder-step-title">
                                 <span className="builder-step-number">1</span>
-                                <span>Relleno {selectedRellenos.length}/{MAX_PER_CATEGORY}</span>
+                                <span>Relleno {selectedRellenos.length}/{MAX_RELLENOS}</span>
                             </div>
                         </div>
                         <div className="builder-step-body">
@@ -276,12 +278,12 @@ function WaffleBuilder({ category }) {
                                     emoji={emojiFor('helado')}
                                     name="Helado"
                                     selected={heladoPickerOpen}
-                                    disabled={selectedRellenos.length >= MAX_PER_CATEGORY}
+                                    disabled={selectedRellenos.length >= MAX_RELLENOS}
                                     onClick={() => setHeladoPickerOpen((o) => !o)}
                                 />
                                 {category.rellenos.filter((r) => r.id !== 'helado').map((opt) => {
                                     const selected = !!selectedRellenos.find((r) => r.type === opt.id);
-                                    const disabled = !selected && selectedRellenos.length >= MAX_PER_CATEGORY;
+                                    const disabled = !selected && selectedRellenos.length >= MAX_RELLENOS;
                                     return (
                                         <OptionTile
                                             key={opt.id}
@@ -316,7 +318,7 @@ function WaffleBuilder({ category }) {
                         <div className="builder-step-header">
                             <div className="builder-step-title">
                                 <span className="builder-step-number">2</span>
-                                <span>Toppings {selectedToppings.length}/{MAX_PER_CATEGORY} <span className="opcional-tag">opcional</span></span>
+                                <span>Toppings {selectedToppings.length}/{MAX_TOPPINGS} <span className="opcional-tag">opcional</span></span>
                             </div>
                         </div>
                         <div className="builder-step-body">
@@ -326,7 +328,7 @@ function WaffleBuilder({ category }) {
                                     <div className="option-tiles">
                                         {items.map((t) => {
                                             const selected = selectedToppings.includes(t.id);
-                                            const disabled = !selected && selectedToppings.length >= MAX_PER_CATEGORY;
+                                            const disabled = !selected && selectedToppings.length >= MAX_TOPPINGS;
                                             return (
                                                 <OptionTile
                                                     key={t.id}
@@ -349,14 +351,14 @@ function WaffleBuilder({ category }) {
                         <div className="builder-step-header">
                             <div className="builder-step-title">
                                 <span className="builder-step-number">3</span>
-                                <span>Salsas {selectedSalsas.length}/{MAX_PER_CATEGORY} <span className="opcional-tag">opcional</span></span>
+                                <span>Salsas {selectedSalsas.length}/{MAX_SALSAS} <span className="opcional-tag">opcional</span></span>
                             </div>
                         </div>
                         <div className="builder-step-body">
                             <div className="option-tiles">
                                 {category.salsas.map((s) => {
                                     const selected = selectedSalsas.includes(s.id);
-                                    const disabled = !selected && selectedSalsas.length >= MAX_PER_CATEGORY;
+                                    const disabled = !selected && selectedSalsas.length >= MAX_SALSAS;
                                     const tag = (s.id === 'nutella' && selected && hasNutellaRelleno) ? '(doble)' : (s.forcesMixto ? '✨' : '');
                                     return (
                                         <OptionTile

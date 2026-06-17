@@ -173,6 +173,18 @@ export const menuCategories = [
           large: '$4.800',
         },
       },
+      {
+        id: 'submarino',
+        name: 'Submarino',
+        description: 'Leche caliente con una barra de chocolate para derretir. Tamaño grande.',
+        image: 'Submarino',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: 'N/A',
+          large: '$4.000',
+        },
+      },
     ],
   },
 

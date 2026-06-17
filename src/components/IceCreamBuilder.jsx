@@ -19,6 +19,12 @@ function IceCreamBuilder({ category }) {
 
     const isEditing = editingItem?.builderType === 'icecream';
     const maxFlavors = selectedSize ? parseInt(selectedSize.id) : 0;
+    const is3Bochas = selectedSize?.id === '3';
+
+    // Si son 3 bochas, vasito ecológico automático (variable derivada, sin setState)
+    const effectiveCup = is3Bochas
+        ? category.cupTypes.find((c) => c.id === 'papel') || selectedCup
+        : selectedCup;
 
     useEffect(() => {
         if (isEditing && editingItem.config) {
@@ -64,12 +70,13 @@ function IceCreamBuilder({ category }) {
 
     const handleSave = () => {
         const saucesLabel = selectedSauces.length > 0 ? selectedSauces.map((s) => s.label).join(', ') : 'Sin salsa';
-        const label = `Helado · ${selectedSize.label} · ${selectedFlavors.map((f) => f.label).join(', ')} · ${saucesLabel} · ${selectedCup.label}`;
+        const cupLabel = is3Bochas ? 'Vasito ecológico (incluido)' : effectiveCup?.label;
+        const label = `Helado · ${selectedSize.label} · ${selectedFlavors.map((f) => f.label).join(', ')} · ${saucesLabel} · ${cupLabel}`;
         const config = {
             sizeId: selectedSize.id,
             flavorIds: selectedFlavors.map((f) => f.id),
             sauceIds: selectedSauces.map((s) => s.id),
-            cupId: selectedCup.id,
+            cupId: effectiveCup?.id,
         };
 
         if (isEditing) {
@@ -99,7 +106,7 @@ function IceCreamBuilder({ category }) {
         if (s === 1) return selectedSize !== null;
         if (s === 2) return selectedFlavors.length === maxFlavors;
         if (s === 3) return true;
-        if (s === 4) return selectedCup !== null;
+        if (s === 4) return effectiveCup !== null;
         return false;
     };
 
@@ -108,11 +115,13 @@ function IceCreamBuilder({ category }) {
         return true;
     };
 
+    const effectiveSteps = is3Bochas ? 3 : TOTAL_STEPS;
+
     return (
         <div className="builder-wrapper">
             {toast && <div className="builder-toast">{toast}</div>}
 
-            <StepProgress current={step} total={TOTAL_STEPS} />
+            <StepProgress current={Math.min(step, effectiveSteps)} total={effectiveSteps} />
 
             {isEditing && (
                 <div className="builder-edit-banner">
@@ -206,40 +215,54 @@ function IceCreamBuilder({ category }) {
                             ))}
                         </div>
                         <button className="builder-skip-btn" onClick={() => setSelectedSauces([])}>Sin salsa</button>
-                        <button className="builder-next-btn" onClick={() => setStep(4)}>Continuar →</button>
-                    </div>
-                )}
-            </div>
 
-            {/* PASO 4 — Vasito */}
-            <div className={`builder-step ${step === 4 ? 'active' : ''} ${!canProceedTo(4) ? 'disabled' : ''}`}>
-                <div className="builder-step-header" onClick={() => canProceedTo(4) && setStep(4)}>
-                    <div className="builder-step-title">
-                        <span className="builder-step-number">4</span>
-                        <span>Vasito</span>
-                    </div>
-                </div>
-                {step === 4 && (
-                    <div className="builder-step-body">
-                        <div className="builder-cup-options">
-                            {category.cupTypes.map((cup) => (
-                                <button key={cup.id}
-                                        className={`builder-cup-card ${selectedCup?.id === cup.id ? 'selected' : ''}`}
-                                        onClick={() => setSelectedCup(cup)}>
-                                    <span className="cup-icon">{cup.id === 'barquillo' ? '🍦' : '🥤'}</span>
-                                    <span className="cup-label">{cup.label}</span>
-                                    <span className="cup-desc">{cup.description}</span>
+                        {is3Bochas ? (
+                            <div>
+                                <div className="waffle-tier-banner mixto" style={{marginBottom: '0.5rem'}}>
+                                    🥤 3 bochas incluyen vasito ecológico automáticamente
+                                </div>
+                                <button className="builder-add-btn" onClick={handleSave}>
+                                    {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
                                 </button>
-                            ))}
-                        </div>
-                        {selectedCup && (
-                            <button className="builder-add-btn" onClick={handleSave}>
-                                {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
-                            </button>
+                            </div>
+                        ) : (
+                            <button className="builder-next-btn" onClick={() => setStep(4)}>Continuar →</button>
                         )}
                     </div>
                 )}
             </div>
+
+            {/* PASO 4 — Vasito (solo si NO son 3 bochas) */}
+            {!is3Bochas && (
+                <div className={`builder-step ${step === 4 ? 'active' : ''} ${!canProceedTo(4) ? 'disabled' : ''}`}>
+                    <div className="builder-step-header" onClick={() => canProceedTo(4) && setStep(4)}>
+                        <div className="builder-step-title">
+                            <span className="builder-step-number">4</span>
+                            <span>Vasito</span>
+                        </div>
+                    </div>
+                    {step === 4 && (
+                        <div className="builder-step-body">
+                            <div className="builder-cup-options">
+                                {category.cupTypes.map((cup) => (
+                                    <button key={cup.id}
+                                            className={`builder-cup-card ${selectedCup?.id === cup.id ? 'selected' : ''}`}
+                                            onClick={() => setSelectedCup(cup)}>
+                                        <span className="cup-icon">{cup.id === 'barquillo' ? '🍦' : '🥤'}</span>
+                                        <span className="cup-label">{cup.label}</span>
+                                        <span className="cup-desc">{cup.description}</span>
+                                    </button>
+                                ))}
+                            </div>
+                            {selectedCup && (
+                                <button className="builder-add-btn" onClick={handleSave}>
+                                    {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

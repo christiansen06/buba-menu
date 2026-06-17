@@ -235,17 +235,6 @@ a {
   flex-shrink: 0;
 }
 
-.hero-scroll-hint {
-  flex: 1;
-  max-width: 220px;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 750;
-  color: rgba(26, 74, 78, 0.55);
-  line-height: 1.4;
-  padding: 0.5rem 0;
-}
-
 /* --- Nav grid (categorías en el hero) --- */
 .hero-nav {
   display: grid;
@@ -2970,4 +2959,64 @@ a {
 
 [data-theme="dark"] .checkout-summary {
   border-color: rgba(255, 255, 255, 0.08);
+}
+/* =============================================
+   21. HERO SCROLL BUTTON — animación rebote
+   ============================================= */
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
+}
+
+.hero-scroll-btn {
+  flex: 1;
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border: 2px solid rgba(76, 229, 235, 0.4);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(6px);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.hero-scroll-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #4CE5EB;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(76, 229, 235, 0.2);
+}
+
+.hero-scroll-text {
+  font-size: 0.95rem;
+  font-weight: 850;
+  color: #1a4a4e;
+  line-height: 1;
+}
+
+.hero-scroll-arrow {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: #4CE5EB;
+  animation: scrollBounce 1.2s ease-in-out infinite;
+  display: block;
+}
+
+[data-theme="dark"] .hero-scroll-btn {
+  background: rgba(22, 40, 42, 0.65);
+  border-color: rgba(76, 229, 235, 0.3);
+}
+
+[data-theme="dark"] .hero-scroll-text {
+  color: #cdeff0;
+}
+
+[data-theme="dark"] .hero-scroll-btn:hover {
+  background: rgba(29, 52, 55, 0.9);
 }

@@ -27,8 +27,8 @@ export const menuCategories = [
         badge: 'Recomendado',
         featured: true,
         sizes: {
-          medium: '$5.500',
-          large: 'Consultar',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -39,8 +39,8 @@ export const menuCategories = [
         badge: 'Nuevo',
         featured: false,
         sizes: {
-          medium: 'Consultar',
-          large: 'Consultar',
+          medium: '$8.500',
+          large: '$9.500',
         },
       },
       {
@@ -51,8 +51,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: 'Consultar',
-          large: 'Consultar',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -63,8 +63,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: 'Consultar',
-          large: 'Consultar',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -75,8 +75,8 @@ export const menuCategories = [
         badge: 'Más vendido',
         featured: true,
         sizes: {
-          medium: 'Consultar',
-          large: 'Consultar',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -87,8 +87,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: 'Consultar',
-          large: 'Consultar',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -99,8 +99,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: 'Consultar',
-          large: 'Consultar',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
     ],
@@ -115,15 +115,15 @@ export const menuCategories = [
     description: 'Café recién preparado. Espresso, lattes y especialidades',
     items: [
       {
-        id: 'espresso-doble',
-        name: 'Espresso Doble',
+        id: 'cafe-negro',
+        name: 'Cafe Negro',
         description: 'Espresso puro y intenso. 2 shots.',
         image: 'Espresso',
         badge: null,
         featured: false,
         sizes: {
-          medium: '$2.800',
-          large: '$3.000',
+          medium: '$3.000',
+          large: '$3.500',
         },
       },
       {
@@ -134,8 +134,8 @@ export const menuCategories = [
         badge: 'Recomendado',
         featured: false,
         sizes: {
-          medium: '$3.500',
-          large: '$4.000',
+          medium: '$4.000',
+          large: '$4.500',
         },
       },{
         id: 'lagrima',
@@ -145,8 +145,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$3.500',
-          large: '$4.000',
+          medium: '$4.000',
+          large: '$4.500',
         },
       },
       {
@@ -157,8 +157,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$4.000',
-          large: '$4.800',
+          medium: '$4.500',
+          large: '$5.000',
         },
       },
       {
@@ -169,8 +169,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$4.000',
-          large: '$4.800',
+          medium: '$4.500',
+          large: '$5.000',
         },
       },
       {
@@ -182,7 +182,7 @@ export const menuCategories = [
         featured: false,
         sizes: {
           medium: 'N/A',
-          large: '$4.000',
+          large: '$5.000',
         },
       },
     ],
@@ -204,8 +204,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$3.500',
-          large: '$4.000',
+          medium: '$7.000',
+          large: '$7.500',
         },
       },
       {
@@ -216,8 +216,8 @@ export const menuCategories = [
         badge: 'Más vendido',
         featured: true,
         sizes: {
-          medium: '$4.000',
-          large: '$4.800',
+          medium: '$7.500',
+          large: '$8.000',
         },
       },
       {
@@ -228,8 +228,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$4.200',
-          large: '$5.000',
+          medium: '$7.500',
+          large: '$8.000',
         },
       },
       {
@@ -240,8 +240,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$4.500',
-          large: '$5.200',
+          medium: '$7.500',
+          large: '$8.000',
         },
       },
       {
@@ -252,8 +252,8 @@ export const menuCategories = [
         badge: 'Nuevo',
         featured: false,
         sizes: {
-          medium: '$4.500',
-          large: '$5.200',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
     ],
@@ -275,8 +275,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$5.000',
-          large: '$5.800',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -287,8 +287,8 @@ export const menuCategories = [
         badge: 'Más vendido',
         featured: true,
         sizes: {
-          medium: '$6.200',
-          large: '$7.000',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -299,8 +299,8 @@ export const menuCategories = [
         badge: 'Recomendado',
         featured: false,
         sizes: {
-          medium: '$5.800',
-          large: '$6.500',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -311,8 +311,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$5.300',
-          large: '$6.000',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
       {
@@ -323,8 +323,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$5.500',
-          large: '$6.200',
+          medium: '$8.000',
+          large: '$9.000',
         },
       },
     ],
@@ -339,14 +339,12 @@ export const menuCategories = [
     description: 'Licuados frescos. Elegís vos cómo los querés',
     type: 'builder',
     builderType: 'licuado',
-    price: { simple: 3800, mixto: 4500 },
+    price: { simple: 7500, mixto: 8000 },
     fruits: [
       { id: 'frutilla', label: 'Frutilla' },
       { id: 'banana', label: 'Banana' },
       { id: 'durazno', label: 'Durazno' },
       { id: 'mango', label: 'Mango' },
-      { id: 'naranja', label: 'Naranja' },
-      { id: 'anana', label: 'Ananá' },
     ],
     bases: [
       { id: 'leche', label: 'Leche' },
@@ -368,7 +366,7 @@ export const menuCategories = [
     description: 'Elegí uno listo o armá el tuyo. Simple o mixto según lo que elijas',
     type: 'builder',
     builderType: 'waffle',
-    price: { simple: 7000, mixto: 8000 },
+    price: { simple: 8000, mixto: 9000 },
     nutellaSaucePrice: 500,
     presets: [
       {
@@ -404,7 +402,7 @@ export const menuCategories = [
           rellenos: [{ id: 'nutella', type: 'nutella', label: 'Nutella' }],
           toppings: ['banana'],
           salsas: ['chocolate'],
-          extraNutella: false,
+          extraNutella: true,
         },
       },
     ],
@@ -413,6 +411,7 @@ export const menuCategories = [
       { id: 'ddl', label: 'Dulce de Leche' },
       { id: 'crema', label: 'Crema' },
       { id: 'nutella', label: 'Nutella', forcesMixto: true },
+      { id: 'mani', label: 'Mantequilla de mani' },
     ],
     heladoFlavors: [
       { id: 'chocolate', label: 'Chocolate' },
@@ -420,7 +419,6 @@ export const menuCategories = [
       { id: 'americana', label: 'Americana' },
       { id: 'menta', label: 'Menta Granizada' },
       { id: 'ddl', label: 'Dulce de Leche' },
-      { id: 'vainilla', label: 'Vainilla' },
     ],
     toppings: [
       { id: 'banana', label: 'Banana', group: 'Frutas' },
@@ -428,6 +426,8 @@ export const menuCategories = [
       { id: 'durazno', label: 'Durazno', group: 'Frutas' },
       { id: 'oreo', label: 'Oreo', group: 'Galletitas' },
       { id: 'chocolinas', label: 'Chocolinas', group: 'Galletitas' },
+      { id: 'pepito', label: 'Pepito', group: 'Galletitas' },
+      { id: 'coffler', label: 'Coffler', group: 'Galletitas' },
     ],
     salsas: [
       { id: 'chocolate', label: 'Chocolate' },
@@ -450,12 +450,12 @@ export const menuCategories = [
       {
         id: 'chocotorta',
         name: 'Chocotorta',
-        description: 'Chocotorta clásica con dulce de leche y crema',
+        description: 'Chocotorta clásica con Dulce de Leche y Queso Crema',
         image: 'Chocotorta',
         badge: 'Más vendido',
         featured: true,
         sizes: {
-          medium: '$5.500',
+          medium: '$7.000',
           large: 'N/A',
         },
       },
@@ -467,7 +467,7 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$5.500',
+          medium: '$7.000',
           large: 'N/A',
         },
       },
@@ -484,9 +484,9 @@ export const menuCategories = [
     type: 'builder',
     builderType: 'icecream',
     sizes: [
-      { id: '1', label: '1 bocha', price: 2500 },
-      { id: '2', label: '2 bochas', price: 4500 },
-      { id: '3', label: '3 bochas', price: 6000 },
+      { id: '1', label: '1 bocha', price: 3000 },
+      { id: '2', label: '2 bochas', price: 3500 },
+      { id: '3', label: '3 bochas', price: 4000 },
     ],
     flavors: [
       { id: 'chocolate', label: 'Chocolate' },
@@ -494,7 +494,6 @@ export const menuCategories = [
       { id: 'americana', label: 'Americana' },
       { id: 'menta', label: 'Menta Granizada' },
       { id: 'ddl', label: 'Dulce de Leche' },
-      { id: 'vainilla', label: 'Vainilla' },
     ],
     sauces: [
       { id: 'chocolate', label: 'Chocolate' },
@@ -519,8 +518,8 @@ export const menuCategories = [
     type: 'builder',
     builderType: 'medialunas',
     products: [
-      { id: 'manteca', label: 'Medialuna de Manteca', pricePerUnit: 1000, discountAt: 6, discountAmount: 500 },
-      { id: 'jyq', label: 'Medialuna de Jamón y Queso', pricePerUnit: 1500 },
+      { id: 'manteca', label: 'Medialuna de Manteca', pricePerUnit: 1500, discountAt: 6, discountAmount: 500 },
+      { id: 'jyq', label: 'Medialuna de Jamón y Queso', pricePerUnit: 2000 },
     ],
   },
 
@@ -540,7 +539,7 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$3.000',
+          medium: '$8.000',
           large: 'N/A',
         },
       },
@@ -552,10 +551,128 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$1.700',
+          medium: '$3.500',
           large: 'N/A',
         },
       },
+    ],
+  },
+
+  // ===== PASTELERÍA =====
+  {
+    id: 'pasteleria',
+    name: 'Pastelería',
+    icon: '🧁',
+    accent: 'pink',
+    type: 'builder',
+    builderType: 'medialunas',
+    description: 'Cookies, budines y scones de Sisu Pastelería',
+    products: [
+      {
+        id: 'cookie-doble-choco',
+        label: 'Cookie Doble Chocolate',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'cookie-red-velvet',
+        label: 'Cookie Red Velvet',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'cookie-chips',
+        label: 'Cookie Chips de Chocolate',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'budin-chips',
+        label: 'Budín de Chips (porción)',
+        pricePerUnit: 3000,
+      },
+      {
+        id: 'budin-limon',
+        label: 'Budín de Limón (porción)',
+        pricePerUnit: 3000,
+      },
+      {
+        id: 'scones-bolsa',
+        label: 'Bolsita de Scones de Queso (x4)',
+        pricePerUnit: 4000,
+      },
+    ],
+  },
+];
+
+// ===== AGREGAR EN src/data/menu.js =====
+// Array nuevo, separado de menuCategories.
+// Exportalo junto a menuCategories al final del archivo.
+export const promociones = [
+  {
+    id: 'promo-cafe-medialunas',
+    name: 'Café + 2 Medialunas',
+    description: 'Café grande + 2 medialunas a elección',
+    price: 6500,
+    slots: [
+      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
+      { label: 'Medialunas', options: ['Manteca', 'Jamón y Queso', '1 de cada una'] },
+    ],
+  },
+  {
+    id: 'promo-cafe-tostado',
+    name: 'Café + Tostado',
+    description: 'Café grande + 1 tostado completo',
+    price: 11000,
+    slots: [
+      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
+    ],
+  },
+  {
+    id: 'promo-cafe-waffle',
+    name: 'Café + Waffle',
+    description: 'Café grande + 1 waffle simple',
+    price: 11000,
+    slots: [
+      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
+      { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },
+    ],
+  },
+  {
+    id: 'promo-bubble-waffle',
+    name: 'Bubble Tea + Waffle',
+    description: 'Bubble Tea grande + 1 waffle simple',
+    price: 15000,
+    slots: [
+      { label: 'Bubble Tea', options: ['Brown Sugar', 'Matcha', 'Frutilla', 'Thai', 'Oreo', 'Taro', 'Chocolate'] },
+      { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },
+    ],
+  },
+  {
+    id: 'promo-cafe-cookie-medialuna',
+    name: 'Café + Cookie + Medialuna',
+    description: 'Café grande + 1 cookie + 1 medialuna',
+    price: 10000,
+    slots: [
+      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
+      { label: 'Cookie', options: ['Doble Chocolate', 'Red Velvet', 'Chips de Chocolate'] },
+      { label: 'Medialuna', options: ['Manteca', 'Jamón y Queso'] },
+    ],
+  },
+  {
+    id: 'promo-bubble-postre',
+    name: 'Bubble Tea + Postre',
+    description: 'Bubble Tea grande + 1 postre',
+    price: 14500,
+    slots: [
+      { label: 'Bubble Tea', options: ['Brown Sugar', 'Matcha', 'Frutilla', 'Thai', 'Oreo', 'Taro', 'Chocolate'] },
+      { label: 'Postre', options: ['Chocotorta', 'Postre Oreo'] },
+    ],
+  },
+  {
+    id: 'promo-capuccino-budin',
+    name: 'Capuccino + Budín',
+    description: 'Capuccino + 1 porción de budín',
+    price: 6500,
+    slots: [
+      { label: 'Budín', options: ['Chips de Chocolate', 'Limón'] },
     ],
   },
 ];

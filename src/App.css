@@ -3020,3 +3020,235 @@ a {
 [data-theme="dark"] .hero-scroll-btn:hover {
   background: rgba(29, 52, 55, 0.9);
 }
+/* =============================================
+   22. SECCIÓN PROMOCIONES
+   ============================================= */
+
+.promo-section {
+  scroll-margin-top: 72px;
+  max-width: 940px;
+  margin: 0 auto 2.5rem;
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(255, 200, 87, 0.1) 0%, rgba(255, 151, 189, 0.08) 100%);
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 200, 87, 0.2);
+}
+
+.promo-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.promo-kicker {
+  background: rgba(255, 200, 87, 0.25) !important;
+  color: #8a6a12 !important;
+}
+
+.promo-header h3 {
+  margin-top: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 850;
+  color: #252525;
+  line-height: 1;
+}
+
+.promo-header p {
+  margin-top: 0.4rem;
+  color: #686868;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.promo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.promo-card {
+  position: relative;
+  border: 1.5px solid rgba(255, 200, 87, 0.3);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(255, 200, 87, 0.12);
+  padding: 1rem 1.1rem;
+  overflow: hidden;
+}
+
+.promo-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #FFC857 0%, #FFB52E 100%);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.9rem;
+  border-radius: 0 22px 0 14px;
+}
+
+.promo-content h4 {
+  font-size: 1.08rem;
+  font-weight: 850;
+  color: #252525;
+  line-height: 1.2;
+  padding-right: 4.5rem;
+}
+
+.promo-content p {
+  margin-top: 0.4rem;
+  color: #686868;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.promo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.promo-price {
+  font-size: 1.1rem;
+  font-weight: 850;
+  color: #d18b00;
+}
+
+.promo-add-btn {
+  width: auto !important;
+  margin-top: 0 !important;
+  padding: 0.55rem 1.1rem !important;
+  background: linear-gradient(135deg, #FFC857 0%, #FFB52E 100%) !important;
+  color: #5c3d00 !important;
+}
+
+.promo-add-btn.added {
+  background: linear-gradient(135deg, #4CE5EB 0%, #38d6dc 100%) !important;
+  color: #063335 !important;
+}
+
+@media (min-width: 760px) {
+  .promo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Modo noche */
+[data-theme="dark"] .promo-section {
+  background: linear-gradient(135deg, rgba(255, 200, 87, 0.06) 0%, rgba(255, 151, 189, 0.05) 100%);
+  border-color: rgba(255, 200, 87, 0.15);
+}
+
+[data-theme="dark"] .promo-header h3 {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .promo-header p {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+[data-theme="dark"] .promo-card {
+  background: #16282a;
+  border-color: rgba(255, 200, 87, 0.2);
+}
+
+[data-theme="dark"] .promo-content h4 {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .promo-content p {
+  color: rgba(230, 247, 248, 0.5);
+}
+
+[data-theme="dark"] .promo-price {
+  color: #FFC857;
+}
+/* =============================================
+   23. PROMO — selección por chips
+   ============================================= */
+
+.promo-slots {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(255, 200, 87, 0.3);
+}
+
+.promo-slot {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.promo-slot-label {
+  font-size: 0.82rem;
+  font-weight: 850;
+  color: #8a6a12;
+}
+
+.promo-slot-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.promo-slot-chip {
+  border: 1.5px solid rgba(255, 200, 87, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 200, 87, 0.08);
+  color: #5c3d00;
+  font-size: 0.82rem;
+  font-weight: 780;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.promo-slot-chip:hover {
+  border-color: rgba(255, 200, 87, 0.6);
+  background: rgba(255, 200, 87, 0.15);
+}
+
+.promo-slot-chip.selected {
+  background: #FFC857;
+  border-color: #FFC857;
+  color: #3d2800;
+  box-shadow: 0 3px 10px rgba(255, 200, 87, 0.35);
+}
+
+.promo-confirm-btn {
+  margin-top: 0.25rem !important;
+  padding: 0.6rem 1rem !important;
+  background: linear-gradient(135deg, #FFC857 0%, #FFB52E 100%) !important;
+  color: #5c3d00 !important;
+}
+
+/* Modo noche */
+[data-theme="dark"] .promo-slot-label {
+  color: #e4b43c;
+}
+
+[data-theme="dark"] .promo-slot-chip {
+  background: rgba(255, 200, 87, 0.06);
+  border-color: rgba(255, 200, 87, 0.2);
+  color: #e4b43c;
+}
+
+[data-theme="dark"] .promo-slot-chip:hover {
+  background: rgba(255, 200, 87, 0.12);
+  border-color: rgba(255, 200, 87, 0.4);
+}
+
+[data-theme="dark"] .promo-slot-chip.selected {
+  background: #FFC857;
+  border-color: #FFC857;
+  color: #3d2800;
+}
+
+[data-theme="dark"] .promo-slots {
+  border-top-color: rgba(255, 200, 87, 0.2);
+}

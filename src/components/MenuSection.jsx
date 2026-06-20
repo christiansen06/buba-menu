@@ -6,6 +6,7 @@ import MedialunasSelector from './MedialunasSelector';
 import LicuadoBuilder from './LicuadoBuilder';
 import WaffleBuilder from './WaffleBuilder';
 import ProductCard from './ProductCard';
+import PromoSection from './PromoSection';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -131,6 +132,8 @@ function MenuSection() {
                     </div>
                 </section>
             )}
+
+            <PromoSection />
 
             <div className="menu-category-list">
                 {menuCategories.map((category) => (

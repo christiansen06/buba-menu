@@ -1,19 +1,14 @@
 // =============================================
 // src/utils/whatsapp.js
-// Arma el mensaje de pedido y abre WhatsApp
 // =============================================
 
-// ⚠️ PONÉ ACÁ EL NÚMERO DE WHATSAPP DEL LOCAL
-// Formato internacional sin + ni espacios ni guiones.
-// Argentina: 54 + 9 + código de área sin 0 + número sin 15
-// Ej: para 223 555-1234 (Mar del Plata) => '5492235551234'
-export const BUBA_WHATSAPP = '5492236833119'; // ← reemplazá con el número real
+export const BUBA_WHATSAPP = '5492236833119'; // ← REEMPLAZÁ CON TU NÚMERO REAL
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
-// Orden visual de categorías en el mensaje
 const CATEGORY_ORDER = [
+    'promociones',
     'bubble-tea',
     'frappuccinos',
     'cafe',
@@ -24,9 +19,11 @@ const CATEGORY_ORDER = [
     'postres',
     'medialunas',
     'tostados',
+    'pasteleria',
 ];
 
 const CATEGORY_EMOJI = {
+    'promociones':  '🎉',
     'bubble-tea':   '🧋',
     'frappuccinos': '🥤',
     'cafe':         '☕',
@@ -37,9 +34,11 @@ const CATEGORY_EMOJI = {
     'postres':      '🍰',
     'medialunas':   '🥐',
     'tostados':     '🥪',
+    'pasteleria':   '🧁',
 };
 
 const CATEGORY_LABEL = {
+    'promociones':  'Promociones',
     'bubble-tea':   'Bubble Tea',
     'frappuccinos': 'Frappuccinos',
     'cafe':         'Café',
@@ -50,6 +49,7 @@ const CATEGORY_LABEL = {
     'postres':      'Postres',
     'medialunas':   'Medialunas',
     'tostados':     'Tostados',
+    'pasteleria':   'Pastelería',
 };
 
 function splitLabel(label) {
@@ -66,7 +66,6 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems 
     L.push(`👤 *Nombre:* ${name}`);
     L.push('');
 
-    // Agrupar items por categoría
     const groups = {};
     items.forEach((item) => {
         const cat = item.categoryId || 'otros';
@@ -74,7 +73,6 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems 
         groups[cat].push(item);
     });
 
-    // Ordenar grupos según CATEGORY_ORDER
     const sortedCats = Object.keys(groups).sort((a, b) => {
         const ia = CATEGORY_ORDER.indexOf(a);
         const ib = CATEGORY_ORDER.indexOf(b);

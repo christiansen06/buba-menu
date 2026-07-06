@@ -629,7 +629,7 @@ export const promociones = [
     id: 'promo-cafe-waffle',
     name: 'Café + Waffle',
     description: 'Café grande + 1 waffle simple',
-    price: 11000,
+    price: 13000,
     slots: [
       { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
       { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },
@@ -639,7 +639,7 @@ export const promociones = [
     id: 'promo-bubble-waffle',
     name: 'Bubble Tea + Waffle',
     description: 'Bubble Tea grande + 1 waffle simple',
-    price: 15000,
+    price: 18000,
     slots: [
       { label: 'Bubble Tea', options: ['Brown Sugar', 'Matcha', 'Frutilla', 'Thai', 'Oreo', 'Taro', 'Chocolate'] },
       { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },
@@ -649,7 +649,7 @@ export const promociones = [
     id: 'promo-cafe-cookie-medialuna',
     name: 'Café + Cookie + Medialuna',
     description: 'Café grande + 1 cookie + 1 medialuna',
-    price: 10000,
+    price: 11000,
     slots: [
       { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
       { label: 'Cookie', options: ['Doble Chocolate', 'Red Velvet', 'Chips de Chocolate'] },
@@ -660,7 +660,7 @@ export const promociones = [
     id: 'promo-bubble-postre',
     name: 'Bubble Tea + Postre',
     description: 'Bubble Tea grande + 1 postre',
-    price: 14500,
+    price: 16000,
     slots: [
       { label: 'Bubble Tea', options: ['Brown Sugar', 'Matcha', 'Frutilla', 'Thai', 'Oreo', 'Taro', 'Chocolate'] },
       { label: 'Postre', options: ['Chocotorta', 'Postre Oreo'] },

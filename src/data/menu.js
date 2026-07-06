@@ -27,8 +27,8 @@ export const menuCategories = [
         badge: 'Recomendado',
         featured: true,
         sizes: {
-          medium: '$8.000',
-          large: '$9.000',
+          medium: '$9.000',
+          large: '$10.000',
         },
       },
       {
@@ -39,8 +39,8 @@ export const menuCategories = [
         badge: 'Nuevo',
         featured: false,
         sizes: {
-          medium: '$8.500',
-          large: '$9.500',
+          medium: '$9.500',
+          large: '$10.500',
         },
       },
       {
@@ -51,8 +51,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$8.000',
-          large: '$9.000',
+          medium: '$9.000',
+          large: '$10.000',
         },
       },
       {
@@ -63,8 +63,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$8.000',
-          large: '$9.000',
+          medium: '$9.000',
+          large: '$10.000',
         },
       },
       {
@@ -75,8 +75,8 @@ export const menuCategories = [
         badge: 'Más vendido',
         featured: true,
         sizes: {
-          medium: '$8.000',
-          large: '$9.000',
+          medium: '$9.000',
+          large: '$10.000',
         },
       },
       {
@@ -87,8 +87,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$8.000',
-          large: '$9.000',
+          medium: '$9.000',
+          large: '$10.000',
         },
       },
       {
@@ -99,8 +99,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$8.000',
-          large: '$9.000',
+          medium: '$9.000',
+          large: '$10.000',
         },
       },
     ],
@@ -366,7 +366,7 @@ export const menuCategories = [
     description: 'Elegí uno listo o armá el tuyo. Simple o mixto según lo que elijas',
     type: 'builder',
     builderType: 'waffle',
-    price: { simple: 8000, mixto: 9000 },
+    price: { simple: 9000, mixto: 10000 },
     nutellaSaucePrice: 500,
     presets: [
       {
@@ -551,7 +551,7 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$3.500',
+          medium: '$4.000',
           large: 'N/A',
         },
       },

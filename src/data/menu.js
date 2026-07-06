@@ -629,7 +629,7 @@ export const promociones = [
     id: 'promo-cafe-waffle',
     name: 'Café + Waffle',
     description: 'Café grande + 1 waffle simple',
-    price: 13000,
+    price: 12000,
     slots: [
       { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
       { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },

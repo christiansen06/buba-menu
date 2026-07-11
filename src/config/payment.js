@@ -4,6 +4,6 @@
 // =============================================
 
 export const PAYMENT_CONFIG = {
-    alias: 'buba.alias.mp', // ← REEMPLAZÁ CON TU ALIAS REAL
+    alias: 'buba.co',
     aliasHolder: 'Agustín Christiansen',
 };

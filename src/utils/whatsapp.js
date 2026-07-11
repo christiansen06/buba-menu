@@ -4,7 +4,7 @@
 
 import { formatPrice } from './format.js';
 
-export const BUBA_WHATSAPP = '5492236833119'; // ← REEMPLAZÁ CON TU NÚMERO REAL
+export const BUBA_WHATSAPP = '5492236833119';
 
 const CATEGORY_ORDER = [
     'promociones',

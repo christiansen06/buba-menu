@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { sendOrderToWhatsApp } from '../utils/whatsapp.js';
-
-const formatPrice = (n) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+import { formatPrice } from '../utils/format.js';
+import PaymentInfo from './PaymentInfo.jsx';
 
 function Cart() {
     const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
@@ -96,8 +95,9 @@ function Cart() {
                                 <h3>¡Pedido enviado!</h3>
                                 <p>
                                     Tu pedido a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
-                                    Si no se abrió solo, revisá que WhatsApp esté instalado.
+                                    Ahora elegí cómo pagarlo 👇
                                 </p>
+                                <PaymentInfo total={total} hasConsultarItems={hasConsultarItems} />
                                 <button className="builder-add-btn" onClick={handleNewOrder}>Hacer un nuevo pedido</button>
                                 <button className="cart-clear-btn" onClick={handleClose}>Cerrar</button>
                             </div>

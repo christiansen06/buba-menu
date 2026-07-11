@@ -3252,3 +3252,171 @@ a {
 [data-theme="dark"] .promo-slots {
   border-top-color: rgba(255, 200, 87, 0.2);
 }
+/* =============================================
+   18. PAGO — transferencia tras enviar el pedido
+   ============================================= */
+.payment-info {
+  width: 100%;
+  max-width: 360px;
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border: 1.5px solid rgba(46, 208, 216, 0.35);
+  border-radius: 18px;
+  background: rgba(76, 229, 235, 0.08);
+  text-align: left;
+}
+
+.payment-info-title {
+  font-size: 0.95rem;
+  font-weight: 850;
+  color: #252525;
+  text-align: center;
+}
+
+.payment-copy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid rgba(37, 37, 37, 0.08);
+  border-radius: 14px;
+  padding: 0.6rem 0.75rem;
+}
+
+.payment-copy-info {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.payment-copy-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888888;
+}
+
+.payment-copy-value {
+  font-size: 1rem;
+  font-weight: 850;
+  color: #252525;
+  word-break: break-all;
+}
+
+.payment-copy-holder {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #686868;
+}
+
+.payment-copy-btn {
+  flex-shrink: 0;
+  min-height: 44px;
+  min-width: 92px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4CE5EB 0%, #2ED0D8 100%);
+  color: #0d4a4e;
+  font-size: 0.82rem;
+  font-weight: 850;
+  font-family: inherit;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+  box-shadow: 0 4px 12px rgba(46, 208, 216, 0.3);
+}
+
+.payment-copy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(46, 208, 216, 0.4);
+}
+
+.payment-copy-btn.copied {
+  background: linear-gradient(135deg, #FF97BD 0%, #FF6B9D 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 151, 189, 0.35);
+}
+
+.cart-confirm .payment-partial-note {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #a3541a;
+  background: rgba(255, 200, 87, 0.18);
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
+  text-align: center;
+  max-width: none;
+}
+
+.cart-confirm .payment-hint {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #888888;
+  text-align: center;
+  max-width: none;
+}
+
+.payment-cash-btn {
+  width: 100%;
+  margin-top: 0 !important;
+}
+
+.cart-confirm .payment-cash-done {
+  font-size: 0.95rem;
+  font-weight: 850;
+  color: #252525;
+  text-align: center;
+  max-width: none;
+}
+
+.payment-back-btn {
+  border: 0;
+  background: transparent;
+  color: #1a9ba1;
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-family: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  justify-self: center;
+  padding: 0.3rem;
+}
+
+/* Modo noche */
+[data-theme="dark"] .payment-info {
+  background: rgba(76, 229, 235, 0.05);
+  border-color: rgba(76, 229, 235, 0.2);
+}
+
+[data-theme="dark"] .payment-info-title,
+[data-theme="dark"] .payment-copy-value,
+[data-theme="dark"] .cart-confirm .payment-cash-done {
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .payment-copy-row {
+  background: #16282a;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .payment-copy-holder {
+  color: #9fb9ba;
+}
+
+[data-theme="dark"] .cart-confirm .payment-partial-note {
+  color: #e4b43c;
+  background: rgba(255, 200, 87, 0.1);
+}
+
+[data-theme="dark"] .payment-back-btn {
+  color: #4CE5EB;
+}
+
+[data-theme="dark"] .payment-cash-btn {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #9fb9ba;
+}

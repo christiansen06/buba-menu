@@ -2,10 +2,9 @@
 // src/utils/whatsapp.js
 // =============================================
 
-export const BUBA_WHATSAPP = '5492236833119'; // ← REEMPLAZÁ CON TU NÚMERO REAL
+import { formatPrice } from './format.js';
 
-const formatPrice = (n) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
+export const BUBA_WHATSAPP = '5492236833119'; // ← REEMPLAZÁ CON TU NÚMERO REAL
 
 const CATEGORY_ORDER = [
     'promociones',

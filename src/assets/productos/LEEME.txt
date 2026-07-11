@@ -1,0 +1,19 @@
+FOTOS DE PRODUCTOS
+==================
+
+Soltá acá las imágenes descargadas de Canva y aparecen solas en el menú.
+
+El nombre del archivo tiene que coincidir con el producto — sirve el id,
+el nombre completo o el campo "image" de src/data/menu.js.
+Mayúsculas, tildes y espacios no importan.
+
+Ejemplos que funcionan para "BüBa Brown Sugar" (id: brown-sugar):
+  brown-sugar.png
+  BüBa Brown Sugar.jpg
+  Brown Sugar.webp
+
+Formatos: png, jpg, jpeg, webp, avif.
+Recomendado: cuadradas o apaisadas, de al menos 600px de ancho,
+en formato webp o jpg para que la página cargue rápido.
+
+Si un producto no tiene foto, se muestra el placeholder de color de siempre.

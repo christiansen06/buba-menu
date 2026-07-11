@@ -4,6 +4,32 @@ const CartContext = createContext();
 
 const initialState = { items: [] };
 
+// ----- Persistencia del carrito -----
+// Se guarda en el teléfono para no perder el pedido si se cierra la página.
+// Vence a las 12 horas: los precios se actualizan seguido y un carrito viejo
+// quedaría con precios desactualizados.
+const CART_KEY = 'buba-cart';
+const CART_TTL_MS = 12 * 60 * 60 * 1000;
+
+function loadSavedCart() {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    if (!raw) return initialState;
+    const saved = JSON.parse(raw);
+    if (!Array.isArray(saved.items) || typeof saved.savedAt !== 'number') return initialState;
+    if (Date.now() - saved.savedAt > CART_TTL_MS) {
+      localStorage.removeItem(CART_KEY);
+      return initialState;
+    }
+    const items = saved.items.filter(
+        (i) => i && typeof i.id === 'string' && typeof i.label === 'string' && typeof i.quantity === 'number'
+    );
+    return { items };
+  } catch {
+    return initialState;
+  }
+}
+
 function cartReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
@@ -55,8 +81,20 @@ function cartReducer(state, action) {
 }
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, initialState, loadSavedCart);
   const [editingItem, setEditingItem] = useState(null);
+
+  useEffect(() => {
+    try {
+      if (state.items.length === 0) {
+        localStorage.removeItem(CART_KEY);
+      } else {
+        localStorage.setItem(CART_KEY, JSON.stringify({ items: state.items, savedAt: Date.now() }));
+      }
+    } catch {
+      // ignore (modo incógnito / storage lleno)
+    }
+  }, [state.items]);
 
   // ----- Tema (modo noche) -----
   const [theme, setTheme] = useState(() => {

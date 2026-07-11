@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { parsePrice } from '../data/menu';
+import { getProductImage } from '../utils/productImages.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -35,10 +36,16 @@ function ProductCard({ item, category }) {
         setTimeout(() => setJustAdded(false), 1400);
     };
 
+    const photo = getProductImage(item, category.id);
+
     return (
         <article className="product-card">
             <div className="product-badge-wrapper">
-                <div className={`product-image product-image-${category.accent}`} />
+                {photo ? (
+                    <img className="product-image product-photo" src={photo} alt={item.name} loading="lazy" />
+                ) : (
+                    <div className={`product-image product-image-${category.accent}`} />
+                )}
             </div>
 
             <div className="product-content">

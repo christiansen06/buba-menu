@@ -9,7 +9,14 @@ function Cart() {
     const [open, setOpen] = useState(false);
     const [checkout, setCheckout] = useState(false);
     const [sent, setSent] = useState(false);
-    const [name, setName] = useState('');
+    // El nombre queda guardado en el teléfono para no reescribirlo en cada pedido
+    const [name, setName] = useState(() => {
+        try {
+            return localStorage.getItem('buba-name') || '';
+        } catch {
+            return '';
+        }
+    });
     const [note, setNote] = useState('');
     const [nameError, setNameError] = useState(false);
     const [bump, setBump] = useState(false);
@@ -57,13 +64,17 @@ function Cart() {
             return;
         }
         setNameError(false);
+        try {
+            localStorage.setItem('buba-name', name.trim());
+        } catch {
+            // ignore
+        }
         sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems });
         setSent(true);
     };
 
     const handleNewOrder = () => {
         clearCart();
-        setName('');
         setNote('');
         setCheckout(false);
         setSent(false);

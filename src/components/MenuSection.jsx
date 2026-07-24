@@ -7,6 +7,7 @@ import LicuadoBuilder from './LicuadoBuilder';
 import WaffleBuilder from './WaffleBuilder';
 import ProductCard from './ProductCard';
 import PromoSection from './PromoSection';
+import { getProductImage } from '../utils/productImages.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -41,9 +42,15 @@ function FeaturedCard({ item }) {
         setTimeout(() => setJustAdded(false), 1400);
     };
 
+    const photo = getProductImage(item, item.categoryId);
+
     return (
         <article className="featured-card">
-            <div className={`featured-image product-image-${item.accent || 'cyan'}`} />
+            {photo ? (
+                <img className="featured-image product-photo" src={photo} alt={item.name} loading="lazy" />
+            ) : (
+                <div className={`featured-image product-image-${item.accent || 'cyan'}`} />
+            )}
 
             <div className="featured-content">
                 <div>

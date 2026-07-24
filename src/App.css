@@ -3420,3 +3420,25 @@ a {
   border-color: rgba(255, 255, 255, 0.2);
   color: #9fb9ba;
 }
+
+/* =============================================
+   19. FOTOS DE PRODUCTOS
+   ============================================= */
+img.product-photo {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  background: #f2fdfd;
+}
+
+img.featured-image.product-photo {
+  height: 140px;
+}
+
+img.product-image.product-photo {
+  height: 130px;
+}
+
+[data-theme="dark"] img.product-photo {
+  background: #16282a;
+}

@@ -3,14 +3,19 @@ FOTOS DE PRODUCTOS
 
 Soltá acá las imágenes descargadas de Canva y aparecen solas en el menú.
 
-El nombre del archivo tiene que coincidir con el producto — sirve el id,
-el nombre completo o el campo "image" de src/data/menu.js.
+El nombre del archivo tiene que coincidir con el producto — sirve el id
+o el nombre completo, tal como figuran en src/data/menu.js.
 Mayúsculas, tildes y espacios no importan.
 
 Ejemplos que funcionan para "BüBa Brown Sugar" (id: brown-sugar):
   brown-sugar.png
   BüBa Brown Sugar.jpg
-  Brown Sugar.webp
+
+CADA FOTO ES DE UN SOLO PRODUCTO
+Los nombres genéricos de sabor NO alcanzan: "Oreo.webp" no le pone foto
+al Postre Oreo ni al Frappé Oreo, porque son productos distintos del
+BüBa Oreo. Si querés foto para esos, subí un archivo con el id de cada
+uno (por ejemplo: postre-oreo.webp, oreo-frappe.webp).
 
 Formatos: png, jpg, jpeg, webp, avif.
 Recomendado: cuadradas o apaisadas, de al menos 600px de ancho,

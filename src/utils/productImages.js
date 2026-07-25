@@ -5,11 +5,15 @@
 // Soltá las imágenes en la carpeta  src/assets/productos/
 // con el nombre del producto como nombre de archivo.
 //
-// Sirve el id, el nombre o el campo "image" del producto
+// Sirve el id o el nombre completo del producto
 // (mayúsculas, tildes y espacios no importan). Ejemplos:
 //   brown-sugar.png          → BüBa Brown Sugar
 //   BüBa Matcha.jpg          → BüBa Matcha
 //   waffle clasico.webp      → Waffle Clásico
+//
+// IMPORTANTE: cada foto se usa en UN solo producto. No alcanza con
+// el sabor genérico ("Oreo.webp" no le pone foto al Postre Oreo);
+// hay que usar el id o el nombre completo de cada producto.
 //
 // Formatos aceptados: png, jpg, jpeg, webp, avif.
 // Si un producto no tiene foto, la tarjeta muestra el
@@ -37,10 +41,15 @@ Object.entries(files).forEach(([path, url]) => {
 });
 
 export function getProductImage(item, categoryId) {
+    // Cada producto usa SOLO su propia foto.
+    // No se matchea por el campo "image" (el sabor genérico: "Oreo", "Matcha"),
+    // porque lo comparten productos de categorías distintas y un Postre Oreo
+    // terminaba mostrando la foto del BüBa Oreo. El id y el nombre son únicos
+    // por producto, así que son los únicos que se usan.
     const keys = [
         categoryId && item.id ? `${categoryId}-${item.id}` : null,
+        categoryId && item.name ? `${categoryId}-${item.name}` : null,
         item.id,
-        item.image,
         item.name,
     ].filter(Boolean);
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import StepProgress from './StepProgress';
+import { getProductImage } from '../utils/productImages.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -228,10 +229,19 @@ function WaffleBuilder({ category }) {
             {/* PRESETS */}
             {mode === 'preset' && !isEditing && (
                 <div className="preset-list">
-                    {category.presets.map((preset) => (
+                    {category.presets.map((preset) => {
+                        // Ojo: los presets reusan ids de sabor ("frutilla", "oreo") que ya
+                        // existen en Bubble Tea. Buscamos SOLO por nombre completo ("Waffle
+                        // Oreo") para no terminar mostrando por error la foto del bubble tea.
+                        const presetPhoto = getProductImage({ name: preset.name }, category.id);
+                        return (
                         <article className="preset-card" key={preset.id}>
                             <div className="preset-top">
-                                <div className="preset-image product-image-pink" />
+                                {presetPhoto ? (
+                                    <img className="preset-image product-photo" src={presetPhoto} alt={preset.name} loading="lazy" />
+                                ) : (
+                                    <div className="preset-image product-image-pink" />
+                                )}
                                 <div className="preset-info">
                                     <h4>{preset.name}</h4>
                                     <p>{preset.description}</p>
@@ -244,7 +254,8 @@ function WaffleBuilder({ category }) {
                                 Agregar 🛒
                             </button>
                         </article>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 

@@ -17,6 +17,18 @@ al Postre Oreo ni al Frappé Oreo, porque son productos distintos del
 BüBa Oreo. Si querés foto para esos, subí un archivo con el id de cada
 uno (por ejemplo: postre-oreo.webp, oreo-frappe.webp).
 
+WAFFLES: usá el nombre completo, no el sabor solo
+Los waffles "Frutilla" y "Oreo" repiten el mismo id que el Bubble Tea
+("frutilla", "oreo"), así que un archivo llamado solo "frutilla.webp"
+le pondría al waffle la foto del bubble tea por error. Para los waffles
+armables, el sistema busca SIEMPRE por el nombre completo del preset,
+nunca por el sabor solo. Nombrá los archivos así:
+  Waffle Frutilla.webp
+  Waffle Oreo.webp
+  Waffle Nutella.webp
+  Waffle Argentina.webp
+  Waffle Fit.webp
+
 Formatos: png, jpg, jpeg, webp, avif.
 Recomendado: cuadradas o apaisadas, de al menos 600px de ancho,
 en formato webp o jpg para que la página cargue rápido.

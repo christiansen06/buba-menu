@@ -373,7 +373,6 @@ export const menuCategories = [
         id: 'frutilla',
         name: 'Waffle Frutilla',
         description: 'Crema chantilly, frutillas y salsa de chocolate',
-        image: 'Frutilla',
         config: {
           rellenos: [{ id: 'crema', type: 'crema', label: 'Crema' }],
           toppings: ['frutilla'],
@@ -385,7 +384,6 @@ export const menuCategories = [
         id: 'oreo',
         name: 'Waffle Oreo',
         description: 'Helado americana, Oreos y salsa de chocolate',
-        image: 'Oreo',
         config: {
           rellenos: [{ id: 'helado-americana-p', type: 'helado', flavor: 'americana', label: 'Helado Americana' }],
           toppings: ['oreo'],
@@ -397,12 +395,36 @@ export const menuCategories = [
         id: 'nutella',
         name: 'Waffle Nutella',
         description: 'Nutella, banana y salsa de chocolate',
-        image: 'Nutella',
         config: {
           rellenos: [{ id: 'nutella', type: 'nutella', label: 'Nutella' }],
           toppings: ['banana'],
           salsas: ['chocolate'],
           extraNutella: true,
+        },
+      },
+      {
+        id: 'argentina',
+        name: 'Waffle Argentina',
+        description: 'Helado Crema del cielo, Crema Chantilly, Ferrero Rocher y salsa de caramelo',
+        config: {
+          rellenos: [
+            { id: 'helado-cielo-p', type: 'helado', flavor: 'cielo', label: 'Helado Crema del Cielo' },
+            { id: 'crema', type: 'crema', label: 'Crema Chantilly' },
+          ],
+          toppings: ['ferrero'],
+          salsas: ['caramelo'],
+          extraNutella: false,
+        },
+      },
+      {
+        id: 'fit',
+        name: 'Waffle Fit',
+        description: 'Mantequilla de Mani, Banana y salsa de chocolate',
+        config: {
+          rellenos: [{ id: 'mani', type: 'mani', label: 'Mantequilla de mani' }],
+          toppings: ['banana'],
+          salsas: ['chocolate'],
+          extraNutella: false,
         },
       },
     ],
@@ -419,6 +441,7 @@ export const menuCategories = [
       { id: 'americana', label: 'Americana' },
       { id: 'menta', label: 'Menta Granizada' },
       { id: 'ddl', label: 'Dulce de Leche' },
+      { id: 'cielo', label: 'Crema del Cielo' },
     ],
     toppings: [
       { id: 'banana', label: 'Banana', group: 'Frutas' },
@@ -427,7 +450,8 @@ export const menuCategories = [
       { id: 'oreo', label: 'Oreo', group: 'Galletitas' },
       { id: 'chocolinas', label: 'Chocolinas', group: 'Galletitas' },
       { id: 'pepito', label: 'Pepito', group: 'Galletitas' },
-      { id: 'coffler', label: 'Coffler', group: 'Galletitas' },
+      { id: 'coffler', label: 'Cofler', group: 'Galletitas' },
+      { id: 'ferrero', label: 'Ferrero Rocher', group: 'Galletitas' },
     ],
     salsas: [
       { id: 'chocolate', label: 'Chocolate' },
@@ -494,6 +518,7 @@ export const menuCategories = [
       { id: 'americana', label: 'Americana' },
       { id: 'menta', label: 'Menta Granizada' },
       { id: 'ddl', label: 'Dulce de Leche' },
+      { id: 'cielo', label: 'Crema del Cielo' },
     ],
     sauces: [
       { id: 'chocolate', label: 'Chocolate' },

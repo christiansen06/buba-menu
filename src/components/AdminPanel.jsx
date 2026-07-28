@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { menuCategories } from '../data/menu';
+import { INSUMOS_POR_GRUPO } from '../data/insumos.js';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
@@ -11,7 +12,8 @@ import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
  * puede entrar ni cambiar nada sin la contraseña real.
  */
 function AdminPanel({ onClose }) {
-    const { agotados, marcar, recargar } = useDisponibilidad();
+    const { agotados, insumosAgotados, marcar, marcarInsumo, recargar } = useDisponibilidad();
+    const [vista, setVista] = useState('insumos');   // insumos | productos
     const [sesion, setSesion] = useState(null);
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
@@ -41,6 +43,14 @@ function AdminPanel({ onClose }) {
     const toggle = async (categoriaId, productoId, nombre, hayStock) => {
         setGuardando(`${categoriaId}:${productoId}`);
         const { error } = await marcar(categoriaId, productoId, !hayStock);
+        setGuardando(null);
+        if (error) setError(`No se pudo guardar ${nombre}: ${error}`);
+        else setError('');
+    };
+
+    const toggleInsumo = async (insumoId, nombre, hayStock) => {
+        setGuardando(`insumo:${insumoId}`);
+        const { error } = await marcarInsumo(insumoId, !hayStock);
         setGuardando(null);
         if (error) setError(`No se pudo guardar ${nombre}: ${error}`);
         else setError('');
@@ -82,11 +92,59 @@ function AdminPanel({ onClose }) {
                     </form>
                 ) : (
                     <>
+                        <div className="admin-tabs">
+                            <button
+                                className={`admin-tab ${vista === 'insumos' ? 'activa' : ''}`}
+                                onClick={() => setVista('insumos')}
+                                type="button"
+                            >
+                                Materia prima
+                            </button>
+                            <button
+                                className={`admin-tab ${vista === 'productos' ? 'activa' : ''}`}
+                                onClick={() => setVista('productos')}
+                                type="button"
+                            >
+                                Productos
+                            </button>
+                        </div>
+
                         <p className="admin-ayuda">
-                            Tocá un producto para marcarlo sin stock. El cambio lo ven todos los clientes al instante.
+                            {vista === 'insumos'
+                                ? 'Si se acaba un insumo, se apaga solo en todos los productos que lo usan.'
+                                : 'Para apagar un producto puntual, aunque tengas la materia prima.'}
                         </p>
                         {error && <p className="field-error">{error}</p>}
 
+                        {vista === 'insumos' && (
+                            <div className="admin-lista">
+                                {Object.entries(INSUMOS_POR_GRUPO).map(([grupo, items]) => (
+                                    <div key={grupo} className="admin-categoria">
+                                        <p className="admin-categoria-nombre">{grupo}</p>
+                                        {items.map((ins) => {
+                                            const clave = `insumo:${ins.id}`;
+                                            const hayStock = !insumosAgotados.has(ins.id);
+                                            return (
+                                                <button
+                                                    key={ins.id}
+                                                    className={`admin-item ${hayStock ? '' : 'sin-stock'}`}
+                                                    onClick={() => toggleInsumo(ins.id, ins.label, hayStock)}
+                                                    disabled={guardando === clave}
+                                                    type="button"
+                                                >
+                                                    <span>{ins.label}</span>
+                                                    <span className="admin-estado">
+                                                        {guardando === clave ? '…' : hayStock ? 'Hay' : 'Sin stock'}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {vista === 'productos' && (
                         <div className="admin-lista">
                             {menuCategories.map((cat) => {
                                 const productos = cat.items?.length ? cat.items : (cat.presets || []);
@@ -116,6 +174,7 @@ function AdminPanel({ onClose }) {
                                 );
                             })}
                         </div>
+                        )}
 
                         <button className="admin-salir" onClick={salir} type="button">Cerrar sesión</button>
                     </>

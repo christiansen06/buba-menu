@@ -8,7 +8,7 @@ import AdminPanel from './AdminPanel';
 // Segundos que hay que mantener apretado el logo para abrir el panel del dueño.
 // Es sólo para que ningún cliente lo encuentre de casualidad: la seguridad
 // real es la contraseña, que valida Supabase.
-const SEGUNDOS_PANEL = 10;
+const SEGUNDOS_PANEL = 5;
 
 function Hero() {
     const [adminAbierto, setAdminAbierto] = useState(false);

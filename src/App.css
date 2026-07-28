@@ -3785,3 +3785,37 @@ img.product-image.product-photo {
 [data-theme="dark"] .admin-salir {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* =============================================
+   29. PANEL — pestañas y chips sin stock
+   ============================================= */
+.admin-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 0.55rem;
+  border: 1px solid hsl(var(--buba-cyan-h) 79.9% 61% / 0.3);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-tab.activa {
+  background: hsl(var(--buba-cyan-h) 88% 54.1%);
+  border-color: hsl(var(--buba-cyan-h) 88% 54.1%);
+  color: hsl(var(--buba-cyan-h) 55.8% 15%);
+}
+
+.builder-chip.chip-sin-stock {
+  opacity: 0.45;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}

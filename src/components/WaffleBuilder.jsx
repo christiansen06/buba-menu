@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import StepProgress from './StepProgress';
 import { getProductImage } from '../utils/productImages.js';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -79,6 +80,7 @@ function OptionTile({ emoji, img, name, selected, disabled, onClick, tag }) {
 
 function WaffleBuilder({ category }) {
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
+    const { opcionAgotada } = useDisponibilidad();
 
     const [mode, setMode] = useState('preset');
     const [selectedRellenos, setSelectedRellenos] = useState([]);
@@ -316,16 +318,17 @@ function WaffleBuilder({ category }) {
                                 />
                                 {category.rellenos.filter((r) => r.id !== 'helado').map((opt) => {
                                     const selected = !!selectedRellenos.find((r) => r.type === opt.id);
-                                    const disabled = !selected && selectedRellenos.length >= MAX_RELLENOS;
+                                    const sinStock = opcionAgotada(category.id, 'rellenos', opt.id);
+                                    const disabled = sinStock || (!selected && selectedRellenos.length >= MAX_RELLENOS);
                                     return (
                                         <OptionTile
                                             key={opt.id}
                                             emoji={emojiFor(opt.id)}
                                             name={opt.label}
-                                            tag={opt.forcesMixto ? '✨' : ''}
+                                            tag={sinStock ? 'sin stock' : (opt.forcesMixto ? '✨' : '')}
                                             selected={selected}
                                             disabled={disabled}
-                                            onClick={() => toggleSimpleRelleno(opt)}
+                                            onClick={() => !sinStock && toggleSimpleRelleno(opt)}
                                         />
                                     );
                                 })}
@@ -335,11 +338,19 @@ function WaffleBuilder({ category }) {
                                 <div className="helado-picker">
                                     <p className="builder-counter">Elegí el sabor del helado:</p>
                                     <div className="builder-chips">
-                                        {category.heladoFlavors.map((flavor) => (
-                                            <button key={flavor.id} className="builder-chip builder-chip-pink" onClick={() => addHeladoFlavor(flavor)}>
-                                                {flavor.label}
-                                            </button>
-                                        ))}
+                                        {category.heladoFlavors.map((flavor) => {
+                                            const sinStock = opcionAgotada(category.id, 'heladoFlavors', flavor.id);
+                                            return (
+                                                <button
+                                                    key={flavor.id}
+                                                    className={`builder-chip builder-chip-pink ${sinStock ? 'chip-sin-stock' : ''}`}
+                                                    onClick={() => !sinStock && addHeladoFlavor(flavor)}
+                                                    disabled={sinStock}
+                                                >
+                                                    {flavor.label}{sinStock ? ' · sin stock' : ''}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -361,15 +372,17 @@ function WaffleBuilder({ category }) {
                                     <div className="option-tiles">
                                         {items.map((t) => {
                                             const selected = selectedToppings.includes(t.id);
-                                            const disabled = !selected && selectedToppings.length >= MAX_TOPPINGS;
+                                            const sinStock = opcionAgotada(category.id, 'toppings', t.id);
+                                            const disabled = sinStock || (!selected && selectedToppings.length >= MAX_TOPPINGS);
                                             return (
                                                 <OptionTile
                                                     key={t.id}
                                                     emoji={emojiFor(t.id)}
                                                     name={t.label}
+                                                    tag={sinStock ? 'sin stock' : ''}
                                                     selected={selected}
                                                     disabled={disabled}
-                                                    onClick={() => toggleTopping(t.id)}
+                                                    onClick={() => !sinStock && toggleTopping(t.id)}
                                                 />
                                             );
                                         })}
@@ -391,8 +404,11 @@ function WaffleBuilder({ category }) {
                             <div className="option-tiles">
                                 {category.salsas.map((s) => {
                                     const selected = selectedSalsas.includes(s.id);
-                                    const disabled = !selected && selectedSalsas.length >= MAX_SALSAS;
-                                    const tag = (s.id === 'nutella' && selected && hasNutellaRelleno) ? '(doble)' : (s.forcesMixto ? '✨' : '');
+                                    const sinStock = opcionAgotada(category.id, 'salsas', s.id);
+                                    const disabled = sinStock || (!selected && selectedSalsas.length >= MAX_SALSAS);
+                                    const tag = sinStock
+                                        ? 'sin stock'
+                                        : (s.id === 'nutella' && selected && hasNutellaRelleno) ? '(doble)' : (s.forcesMixto ? '✨' : '');
                                     return (
                                         <OptionTile
                                             key={s.id}
@@ -401,7 +417,7 @@ function WaffleBuilder({ category }) {
                                             tag={tag}
                                             selected={selected}
                                             disabled={disabled}
-                                            onClick={() => toggleSalsa(s.id)}
+                                            onClick={() => !sinStock && toggleSalsa(s.id)}
                                         />
                                     );
                                 })}

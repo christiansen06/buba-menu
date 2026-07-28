@@ -363,10 +363,11 @@ export const menuCategories = [
     name: 'Waffles',
     icon: '🧇',
     accent: 'pink',
-    description: 'Elegí uno listo o armá el tuyo. Simple o mixto según lo que elijas',
+    description: 'Elegí uno listo o armá el tuyo. Desde $8.000 con un solo relleno',
     type: 'builder',
     builderType: 'waffle',
-    price: { simple: 9000, mixto: 10000 },
+    // basico: 1 relleno solo (sin toppings ni salsas). Nutella no aplica: fuerza Mixto.
+    price: { basico: 8000, simple: 9000, mixto: 10000 },
     nutellaSaucePrice: 500,
     presets: [
       {
@@ -416,17 +417,7 @@ export const menuCategories = [
           extraNutella: false,
         },
       },
-      {
-        id: 'fit',
-        name: 'Waffle Fit',
-        description: 'Mantequilla de Mani, Banana y salsa de chocolate',
-        config: {
-          rellenos: [{ id: 'mani', type: 'mani', label: 'Mantequilla de mani' }],
-          toppings: ['banana'],
-          salsas: ['chocolate'],
-          extraNutella: false,
-        },
-      },
+      
     ],
     rellenos: [
       { id: 'helado', label: 'Helado', hasFlavors: true },

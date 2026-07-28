@@ -4,8 +4,20 @@ import { useCart } from '../context/CartContext';
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
+/**
+ * Selector por unidades (contador +/-). Lo usan Medialunas y Pastelería,
+ * así que TODOS los textos salen de la categoría — nada de "Medialuna"
+ * escrito a mano, porque si no la Pastelería sale rotulada como medialunas.
+ */
 function MedialunasSelector({ category }) {
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
+
+    const categoryLabel = category.name;
+    const categoryIcon = category.icon || '🛒';
+    // "Medialuna de Manteca" → "Manteca" (solo si el producto repite el nombre
+    // de la categoría en singular). En Pastelería no aplica y queda igual.
+    const shortLabel = (label) =>
+        label.replace(new RegExp(`^${categoryLabel.replace(/s$/i, '')} de `, 'i'), '');
 
     const initialCounts = useMemo(
         () => Object.fromEntries(category.products.map((p) => [p.id, 0])),
@@ -15,7 +27,10 @@ function MedialunasSelector({ category }) {
     const [counts, setCounts] = useState(initialCounts);
     const [toast, setToast] = useState(null);
 
-    const isEditing = editingItem?.builderType === 'medialunas';
+    // Ojo: Medialunas y Pastelería comparten builderType, así que hay que
+    // comparar también la categoría o al editar se abrirían las dos a la vez.
+    const isEditing =
+        editingItem?.builderType === 'medialunas' && editingItem?.categoryId === category.id;
 
     useEffect(() => {
         if (isEditing && editingItem.config) {
@@ -58,14 +73,14 @@ function MedialunasSelector({ category }) {
     const handleSave = () => {
         const parts = category.products
             .filter((p) => counts[p.id] > 0)
-            .map((p) => `${p.label.replace('Medialuna de ', '')} ×${counts[p.id]}`);
-        const label = `Medialunas: ${parts.join(', ')}`;
+            .map((p) => `${shortLabel(p.label)} ×${counts[p.id]}`);
+        const label = `${categoryLabel}: ${parts.join(', ')}`;
         const config = { counts: { ...counts } };
 
         if (isEditing) {
             updateItem(editingItem.id, { label, unitPrice: total, config });
             clearEdit();
-            showToast('¡Pedido actualizado! 🥐');
+            showToast(`¡Pedido actualizado! ${categoryIcon}`);
         } else {
             addItem({
                 categoryId: category.id,
@@ -75,7 +90,7 @@ function MedialunasSelector({ category }) {
                 unitPrice: total,
                 config,
             });
-            showToast('¡Agregado al pedido! 🥐');
+            showToast(`¡Agregado al pedido! ${categoryIcon}`);
         }
         setCounts(initialCounts);
     };
@@ -91,7 +106,7 @@ function MedialunasSelector({ category }) {
 
             {isEditing && (
                 <div className="builder-edit-banner">
-                    <span>✏️ Editando tus medialunas</span>
+                    <span>✏️ Editando tu pedido de {categoryLabel}</span>
                     <button className="builder-edit-cancel" onClick={handleCancelEdit}>Cancelar</button>
                 </div>
             )}

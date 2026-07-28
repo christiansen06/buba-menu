@@ -30,13 +30,33 @@ function computeIsMixto(rellenos, toppings, salsas) {
     );
 }
 
+/**
+ * Básico: exactamente 1 relleno, sin toppings ni salsas.
+ * Nutella queda afuera porque fuerza Mixto (es más cara).
+ * Opción pensada para clientes con presupuesto más acotado.
+ */
+function computeIsBasico(rellenos, toppings, salsas) {
+    if (computeIsMixto(rellenos, toppings, salsas)) return false;
+    return rellenos.length === 1 && toppings.length === 0 && salsas.length === 0;
+}
+
+/** Nivel actual del waffle: 'basico' | 'simple' | 'mixto'. */
+function computeTier(rellenos, toppings, salsas) {
+    if (computeIsMixto(rellenos, toppings, salsas)) return 'mixto';
+    if (computeIsBasico(rellenos, toppings, salsas)) return 'basico';
+    return 'simple';
+}
+
+const TIER_LABEL = { basico: 'Básico', simple: 'Simple', mixto: 'Mixto' };
+
 function computeWafflePrice(category, rellenos, toppings, salsas) {
     const hasNutellaRelleno = rellenos.some((r) => r.type === 'nutella');
     const hasNutellaSalsa = salsas.includes('nutella');
     const doubleNutella = hasNutellaRelleno && hasNutellaSalsa;
-    const isMixto = computeIsMixto(rellenos, toppings, salsas);
+    const tier = computeTier(rellenos, toppings, salsas);
 
-    let p = category.price[isMixto ? 'mixto' : 'simple'];
+    // Si no hay precio de básico configurado, cae a simple (compatibilidad).
+    let p = category.price[tier] ?? category.price.simple;
     if (doubleNutella) p += category.nutellaSaucePrice ?? 500;
     return p;
 }
@@ -73,6 +93,8 @@ function WaffleBuilder({ category }) {
     const hasNutellaSalsa = selectedSalsas.includes('nutella');
     const doubleNutella = hasNutellaRelleno && hasNutellaSalsa;
     const isMixto = computeIsMixto(selectedRellenos, selectedToppings, selectedSalsas);
+    const tier = computeTier(selectedRellenos, selectedToppings, selectedSalsas);
+    const isBasico = tier === 'basico';
     const price = computeWafflePrice(category, selectedRellenos, selectedToppings, selectedSalsas);
 
     const showUpsell = !isMixto;
@@ -148,7 +170,7 @@ function WaffleBuilder({ category }) {
         const sal = selectedSalsas.length
             ? selectedSalsas.map((id) => (id === 'nutella' && doubleNutella ? 'Nutella (doble)' : salsaLabel(id))).join(', ')
             : 'sin salsa';
-        const label = `Waffle ${isMixto ? 'Mixto' : 'Simple'} · ${rell} · ${tops} · ${sal}`;
+        const label = `Waffle ${TIER_LABEL[tier]} · ${rell} · ${tops} · ${sal}`;
         const config = { rellenos: selectedRellenos, toppings: selectedToppings, salsas: selectedSalsas };
 
         if (isEditing) {
@@ -183,8 +205,8 @@ function WaffleBuilder({ category }) {
         const sal = cfg.salsas.length
             ? cfg.salsas.map((id) => (id === 'nutella' && hasNR ? 'Nutella (doble)' : salsaLabel(id))).join(', ')
             : 'sin salsa';
-        const isMixtoPreset = computeIsMixto(cfg.rellenos, cfg.toppings, cfg.salsas);
-        const label = `${preset.name} (Waffle ${isMixtoPreset ? 'Mixto' : 'Simple'} · ${rell} · ${tops} · ${sal})`;
+        const presetTier = computeTier(cfg.rellenos, cfg.toppings, cfg.salsas);
+        const label = `${preset.name} (Waffle ${TIER_LABEL[presetTier]} · ${rell} · ${tops} · ${sal})`;
 
         addItem({
             categoryId: category.id,
@@ -388,7 +410,12 @@ function WaffleBuilder({ category }) {
                     </div>
 
                     {/* Banners de tier — debajo de todo, reflejan el estado actual */}
-                    {showUpsell && (
+                    {isBasico && category.price.basico != null && (
+                        <div className="waffle-tier-banner upsell">
+                            💰 Tu waffle es <strong>Básico</strong> (solo relleno). Agregá un topping o una salsa y pasa a <strong>Simple</strong> por {formatPrice(category.price.simple - category.price.basico)} más
+                        </div>
+                    )}
+                    {showUpsell && !isBasico && (
                         <div className="waffle-tier-banner upsell">
                             💡 Elegí un 2° relleno, topping o salsa y tu waffle pasa a ser <strong>Mixto</strong> automáticamente por solo {formatPrice(category.price.mixto - category.price.simple)} más
                         </div>
@@ -401,7 +428,7 @@ function WaffleBuilder({ category }) {
                     )}
 
                     <div className="waffle-price-row">
-                        <span>Total ({isMixto ? 'Mixto' : 'Simple'})</span>
+                        <span>Total ({TIER_LABEL[tier]})</span>
                         <strong>{formatPrice(price)}</strong>
                     </div>
 

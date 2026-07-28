@@ -1,8 +1,26 @@
-import logo from '../assets/logo-buba-optimized.png';
-import tiger from '../assets/tigre-buba-optimized.png';
+import { useState, useRef } from 'react';
+import logo from '../assets/logo-buba.webp';
+import tiger from '../assets/tigre-buba.webp';
 import { menuCategories } from '../data/menu';
+import EstadoLocal from './EstadoLocal';
+import AdminPanel from './AdminPanel';
+
+// Segundos que hay que mantener apretado el logo para abrir el panel del dueño.
+// Es sólo para que ningún cliente lo encuentre de casualidad: la seguridad
+// real es la contraseña, que valida Supabase.
+const SEGUNDOS_PANEL = 10;
 
 function Hero() {
+    const [adminAbierto, setAdminAbierto] = useState(false);
+    const timerRef = useRef(null);
+
+    const empezarPulsacion = () => {
+        clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => setAdminAbierto(true), SEGUNDOS_PANEL * 1000);
+    };
+
+    const cancelarPulsacion = () => clearTimeout(timerRef.current);
+
     const handleCategoryClick = (e, id) => {
         e.preventDefault();
         const el = document.getElementById(id);
@@ -31,33 +49,27 @@ function Hero() {
 
             <div className="hero-shell">
                 <div className="hero-logo-wrap">
-                    <div className="hero-logo-ring">
-                        <img src={logo} alt="BüBa" className="hero-logo-img" />
+                    <div
+                        className="hero-logo-ring"
+                        onPointerDown={empezarPulsacion}
+                        onPointerUp={cancelarPulsacion}
+                        onPointerLeave={cancelarPulsacion}
+                        onPointerCancel={cancelarPulsacion}
+                        onContextMenu={(e) => e.preventDefault()}
+                    >
+                        <img src={logo} alt="BüBa" className="hero-logo-img" draggable="false" />
                     </div>
                 </div>
 
                 <div className="hero-content">
-                    <div className="hero-pills-row">
-                        <span className="hero-pill">🧋 Bubble Tea</span>
-                        <span className="hero-pill">☕ Café</span>
-                        <span className="hero-pill">🧇 Waffles</span>
-                    </div>
                     <p className="hero-slogan">
                         Viví la experiencia <em>BüBa</em>
                     </p>
-                    <p className="hero-sub">
-                        El sabor más divertido de Mar del Plata
-                    </p>
+
+                    <EstadoLocal variant="compacto" />
                 </div>
 
-                <div className="hero-action-row">
-                    <img src={tiger} alt="" className="hero-tiger" aria-hidden="true" />
-                    <button className="hero-scroll-btn" onClick={handleScrollClick}>
-                        <span className="hero-scroll-text">Ver el menú</span>
-                        <span className="hero-scroll-arrow">↓</span>
-                    </button>
-                </div>
-
+                {/* La grilla va ANTES del tigre: es lo que la gente vino a buscar. */}
                 <nav className="hero-nav" aria-label="Categorías del menú">
                     <p className="hero-nav-label">¿Qué vas a pedir hoy?</p>
                     <div className="hero-nav-grid">
@@ -74,7 +86,17 @@ function Hero() {
                         ))}
                     </div>
                 </nav>
+
+                <div className="hero-action-row">
+                    <img src={tiger} alt="" className="hero-tiger" aria-hidden="true" />
+                    <button className="hero-scroll-btn" onClick={handleScrollClick}>
+                        <span className="hero-scroll-text">Ver todo el menú</span>
+                        <span className="hero-scroll-arrow">↓</span>
+                    </button>
+                </div>
             </div>
+
+            {adminAbierto && <AdminPanel onClose={() => setAdminAbierto(false)} />}
         </header>
     );
 }

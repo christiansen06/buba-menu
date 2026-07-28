@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { sendOrderToWhatsApp } from '../utils/whatsapp.js';
 import { formatPrice } from '../utils/format.js';
+import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
 import PaymentInfo from './PaymentInfo.jsx';
 
 function Cart() {
@@ -57,6 +58,11 @@ function Cart() {
     };
 
     const goToCheckout = () => setCheckout(true);
+
+    // Estado del local al momento de pagar. Si está cerrado no bloqueamos el
+    // envío (el cliente puede querer dejarlo pedido igual), pero avisamos
+    // para que no se quede esperando una respuesta que no va a llegar.
+    const estado = getEstadoLocal();
 
     const handleSend = () => {
         if (!name.trim()) {
@@ -122,6 +128,16 @@ function Cart() {
                                 </div>
 
                                 <div className="cart-checkout-body">
+                                    {!estado.abierto && (
+                                        <div className="aviso-cerrado" role="status">
+                                            <span className="aviso-cerrado-icono" aria-hidden="true">🌙</span>
+                                            <div>
+                                                <strong>Ahora estamos cerrados</strong>
+                                                <p>{getTextoEstado(estado)}. Podés mandarlo igual, pero te vamos a responder cuando abramos.</p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <label className="checkout-field">
                                         <span>¿A nombre de quién? <em className="req">*</em></span>
                                         <input

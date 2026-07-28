@@ -9,6 +9,7 @@ import InstagramSection from './components/InstagramSection';
 import Cart from './components/Cart';
 import StickyNav from './components/StickyNav';
 import { CartProvider } from './context/CartContext';
+import { DisponibilidadProvider } from './context/DisponibilidadContext.jsx';
 
 function App() {
     const [view, setView] = useState(
@@ -32,14 +33,16 @@ function App() {
     }
 
     return (
-        <CartProvider>
-            <StickyNav />
-            <Hero />
-            <MenuSection />
-            <InstagramSection />
-            <LocationSection />
-            <Cart />
-        </CartProvider>
+        <DisponibilidadProvider>
+            <CartProvider>
+                <StickyNav />
+                <Hero />
+                <MenuSection />
+                <InstagramSection />
+                <LocationSection />
+                <Cart />
+            </CartProvider>
+        </DisponibilidadProvider>
     );
 }
 

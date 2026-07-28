@@ -8,12 +8,14 @@ import WaffleBuilder from './WaffleBuilder';
 import ProductCard from './ProductCard';
 import PromoSection from './PromoSection';
 import { getProductImage } from '../utils/productImages.js';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
 function FeaturedCard({ item }) {
     const { addItem } = useCart();
+    const { estaAgotado } = useDisponibilidad();
     const [justAdded, setJustAdded] = useState(false);
 
     const sizes = [
@@ -28,7 +30,7 @@ function FeaturedCard({ item }) {
     const selected = sizes.find((s) => s.key === selectedKey) || sizes[0];
 
     const handleAdd = () => {
-        if (!selected) return;
+        if (!selected || estaAgotado(item.categoryId, item.id, item)) return;
         const sizeLabel = multiSize ? ` (${selected.label})` : '';
         addItem({
             categoryId: item.categoryId,
@@ -43,14 +45,16 @@ function FeaturedCard({ item }) {
     };
 
     const photo = getProductImage(item, item.categoryId);
+    const agotado = estaAgotado(item.categoryId, item.id, item);
 
     return (
-        <article className="featured-card">
+        <article className={`featured-card ${agotado ? 'agotado' : ''}`}>
             {photo ? (
                 <img className="featured-image product-photo" src={photo} alt={item.name} loading="lazy" />
             ) : (
                 <div className={`featured-image product-image-${item.accent || 'cyan'}`} />
             )}
+            {agotado && <span className="agotado-tag">Sin stock</span>}
 
             <div className="featured-content">
                 <div>
@@ -81,8 +85,13 @@ function FeaturedCard({ item }) {
                                 <span>{selected.price == null ? 'Consultar' : formatPrice(selected.price)}</span>
                             </div>
                         )}
-                        <button className={`product-add-btn ${justAdded ? 'added' : ''}`} onClick={handleAdd} type="button">
-                            {justAdded ? 'Agregado ✓' : 'Agregar 🛒'}
+                        <button
+                            className={`product-add-btn ${justAdded ? 'added' : ''}`}
+                            onClick={handleAdd}
+                            type="button"
+                            disabled={agotado}
+                        >
+                            {agotado ? 'Sin stock' : justAdded ? 'Agregado ✓' : 'Agregar 🛒'}
                         </button>
                     </>
                 )}

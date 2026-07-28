@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { parsePrice } from '../data/menu';
 import { getProductImage } from '../utils/productImages.js';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -9,6 +10,11 @@ const formatPrice = (n) =>
 function ProductCard({ item, category }) {
     const { addItem } = useCart();
     const [justAdded, setJustAdded] = useState(false);
+
+    // Agotado si lo marcaste desde el panel, o si el producto dice
+    // disponible: false en menu.js. Si no dice nada, hay stock.
+    const { estaAgotado } = useDisponibilidad();
+    const agotado = estaAgotado(category.id, item.id, item);
 
     const sizes = [
         { key: 'medium', label: 'Mediano', raw: item.sizes?.medium },
@@ -22,7 +28,7 @@ function ProductCard({ item, category }) {
     const selected = sizes.find((s) => s.key === selectedKey) || sizes[0];
 
     const handleAdd = () => {
-        if (!selected) return;
+        if (!selected || agotado) return;
         const sizeLabel = multiSize ? ` (${selected.label})` : '';
         addItem({
             categoryId: category.id,
@@ -39,13 +45,14 @@ function ProductCard({ item, category }) {
     const photo = getProductImage(item, category.id);
 
     return (
-        <article className="product-card">
+        <article className={`product-card ${agotado ? 'agotado' : ''}`}>
             <div className="product-badge-wrapper">
                 {photo ? (
                     <img className="product-image product-photo" src={photo} alt={item.name} loading="lazy" />
                 ) : (
                     <div className={`product-image product-image-${category.accent}`} />
                 )}
+                {agotado && <span className="agotado-tag">Sin stock</span>}
             </div>
 
             <div className="product-content">
@@ -76,8 +83,13 @@ function ProductCard({ item, category }) {
                     </div>
                 )}
 
-                <button className={`product-add-btn ${justAdded ? 'added' : ''}`} onClick={handleAdd} type="button">
-                    {justAdded ? 'Agregado ✓' : 'Agregar 🛒'}
+                <button
+                    className={`product-add-btn ${justAdded ? 'added' : ''}`}
+                    onClick={handleAdd}
+                    type="button"
+                    disabled={agotado}
+                >
+                    {agotado ? 'Sin stock' : justAdded ? 'Agregado ✓' : 'Agregar 🛒'}
                 </button>
             </div>
         </article>

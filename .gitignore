@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Claves de Supabase — nunca se suben al repo.
+# En Vercel se cargan desde Project Settings → Environment Variables.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

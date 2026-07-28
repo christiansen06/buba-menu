@@ -1,6 +1,9 @@
+import { HORARIOS } from '../utils/horarios.js';
+import EstadoLocal from './EstadoLocal';
+
 function LocationSection() {
     return (
-        <footer className="location-section">
+        <footer className="location-section" id="ubicacion">
             <div className="location-card">
                 <div className="location-pearl location-pearl-1" />
                 <div className="location-pearl location-pearl-2" />
@@ -8,6 +11,17 @@ function LocationSection() {
                 <span className="section-kicker location-kicker">📍 Encontranos en</span>
                 <h2>Bolívar 2120</h2>
                 <p>Mar del Plata, Argentina</p>
+
+                <EstadoLocal variant="completo" />
+
+                <ul className="horarios-lista">
+                    {HORARIOS.map((h) => (
+                        <li key={h.label}>
+                            <span>{h.label}</span>
+                            <strong>{h.abre} a {h.cierra}</strong>
+                        </li>
+                    ))}
+                </ul>
 
                 <div className="footer-actions">
                     <a

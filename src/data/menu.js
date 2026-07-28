@@ -111,7 +111,7 @@ export const menuCategories = [
     id: 'cafe',
     name: 'Café',
     icon: '☕',
-    accent: 'pink',
+    accent: 'cyan',
     description: 'Café recién preparado. Espresso, lattes y especialidades',
     items: [
       {
@@ -264,7 +264,7 @@ export const menuCategories = [
     id: 'frappuccinos',
     name: 'Frappuccinos',
     icon: '🥤',
-    accent: 'pink',
+    accent: 'cyan',
     description: 'Bebidas cremosas congeladas. Ideales para refrescarse',
     items: [
       {
@@ -417,7 +417,17 @@ export const menuCategories = [
           extraNutella: false,
         },
       },
-      
+      {
+        id: 'fit',
+        name: 'Waffle Fit',
+        description: 'Mantequilla de Mani, Banana y salsa de chocolate',
+        config: {
+          rellenos: [{ id: 'mani', type: 'mani', label: 'Mantequilla de mani' }],
+          toppings: ['banana'],
+          salsas: ['chocolate'],
+          extraNutella: false,
+        },
+      },
     ],
     rellenos: [
       { id: 'helado', label: 'Helado', hasFlavors: true },
@@ -459,7 +469,7 @@ export const menuCategories = [
     id: 'postres',
     name: 'Postres',
     icon: '🍰',
-    accent: 'cyan',
+    accent: 'pink',
     description: 'Postres artesanales. Caseros y deliciosos',
     items: [
       {
@@ -529,7 +539,7 @@ export const menuCategories = [
     id: 'medialunas',
     name: 'Medialunas',
     icon: '🥐',
-    accent: 'cyan',
+    accent: 'lilac',
     description: 'Medialunas recién horneadas. Crujientes y deliciosas',
     type: 'builder',
     builderType: 'medialunas',
@@ -544,7 +554,7 @@ export const menuCategories = [
     id: 'tostados',
     name: 'Tostados',
     icon: '🥪',
-    accent: 'pink',
+    accent: 'lilac',
     description: 'Tostados de pan de miga con jamón y queso. Recién hechos',
     items: [
       {

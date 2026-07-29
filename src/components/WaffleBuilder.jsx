@@ -105,6 +105,21 @@ function WaffleBuilder({ category }) {
         selectedRellenos.length === 0 ? 1 :
             selectedToppings.length === 0 ? 2 : 3;
 
+    /**
+     * En qué estado va cada paso. Antes los tres se pintaban como "activo"
+     * al mismo tiempo y quedaba un muro de opciones donde la gente se perdía.
+     * Ahora sólo el paso en curso se destaca; los ya resueltos se atenúan y
+     * los que todavía no se pueden tocar quedan apagados.
+     * Ojo: toppings y salsas son opcionales, así que el paso se marca hecho
+     * pero nunca se oculta — el cliente puede volver cuando quiera.
+     */
+    const claseStep = (n) => {
+        if (n > 1 && selectedRellenos.length === 0) return 'disabled';
+        if (currentWaffleStep === n) return 'active';
+        if (currentWaffleStep > n) return 'done';
+        return '';
+    };
+
     useEffect(() => {
         if (isEditing && editingItem.config) {
             setMode('build');
@@ -295,10 +310,10 @@ function WaffleBuilder({ category }) {
                     <StepProgress current={currentWaffleStep} total={3} />
 
                     {/* RELLENOS */}
-                    <div className="builder-step active">
+                    <div className={`builder-step ${claseStep(1)}`}>
                         <div className="builder-step-header">
                             <div className="builder-step-title">
-                                <span className="builder-step-number">1</span>
+                                <span className="builder-step-number">{currentWaffleStep > 1 ? '✓' : '1'}</span>
                                 <span>Relleno {selectedRellenos.length}/{MAX_RELLENOS}</span>
                             </div>
                         </div>
@@ -364,10 +379,10 @@ function WaffleBuilder({ category }) {
                     </div>
 
                     {/* TOPPINGS — siempre hasta 2 disponibles */}
-                    <div className={`builder-step ${!canSave ? 'disabled' : 'active'}`}>
+                    <div className={`builder-step ${claseStep(2)}`}>
                         <div className="builder-step-header">
                             <div className="builder-step-title">
-                                <span className="builder-step-number">2</span>
+                                <span className="builder-step-number">{currentWaffleStep > 2 ? '✓' : '2'}</span>
                                 <span>Toppings {selectedToppings.length}/{MAX_TOPPINGS} <span className="opcional-tag">opcional</span></span>
                             </div>
                         </div>
@@ -399,7 +414,7 @@ function WaffleBuilder({ category }) {
                     </div>
 
                     {/* SALSAS — siempre hasta 2 disponibles */}
-                    <div className={`builder-step ${!canSave ? 'disabled' : 'active'}`}>
+                    <div className={`builder-step ${claseStep(3)}`}>
                         <div className="builder-step-header">
                             <div className="builder-step-title">
                                 <span className="builder-step-number">3</span>
@@ -449,19 +464,26 @@ function WaffleBuilder({ category }) {
                         </div>
                     )}
 
-                    <div className="waffle-price-row">
-                        <span>Total ({TIER_LABEL[tier]})</span>
-                        <strong>{formatPrice(price)}</strong>
-                    </div>
+                    {/*
+                      Precio y botón quedan pegados abajo mientras se arma.
+                      Antes había que scrollear hasta el fondo para saber
+                      cuánto iba y para poder terminar el waffle.
+                    */}
+                    <div className="builder-sticky-action">
+                        <div className="waffle-price-row">
+                            <span>Total ({TIER_LABEL[tier]})</span>
+                            <strong>{formatPrice(price)}</strong>
+                        </div>
 
-                    <button
-                        className="builder-add-btn"
-                        onClick={handleSave}
-                        disabled={!canSave}
-                        style={{ opacity: canSave ? 1 : 0.4, cursor: canSave ? 'pointer' : 'not-allowed' }}
-                    >
-                        {!canSave ? 'Elegí al menos un relleno' : isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
-                    </button>
+                        <button
+                            className="builder-add-btn"
+                            onClick={handleSave}
+                            disabled={!canSave}
+                            style={{ opacity: canSave ? 1 : 0.4, cursor: canSave ? 'pointer' : 'not-allowed' }}
+                        >
+                            {!canSave ? 'Elegí al menos un relleno' : isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

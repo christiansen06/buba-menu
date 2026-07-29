@@ -1510,14 +1510,43 @@ a {
   border-radius: 999px;
   background: linear-gradient(135deg, hsl(var(--buba-pink-h) 77.3% 70.6%) 0%, hsl(var(--buba-pink-h) 77% 71%) 100%);
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 850;
-  padding: 0.75rem 1.2rem;
+  /* Más grande que antes: se leía como un ícono decorativo y la gente
+     no se daba cuenta de que ahí se seguía el pedido. */
+  padding: 0.9rem 1.35rem;
+  min-height: 54px;
   cursor: pointer;
   box-shadow: 0 8px 24px hsl(var(--buba-pink-h) 100% 79.6% / 0.45);
   z-index: 50;
   transition: all 180ms ease;
   animation: fabIn 0.25s ease;
+}
+
+.cart-fab-icono {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.cart-fab-info {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* El total va discreto a propósito: sirve para que el cliente se ubique
+   mientras arma, sin que el número le grite en la cara. */
+.cart-fab-total {
+  font-size: 0.85rem;
+  font-weight: 800;
+  opacity: 0.95;
+  white-space: nowrap;
+}
+
+.cart-fab-aviso {
+  font-size: 0.92rem;
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 @keyframes fabIn {
@@ -2834,8 +2863,17 @@ a {
   100% { transform: scale(1) rotate(0deg); }
 }
 
+/* Late dos veces (0,9 s) y el cartel "Agregado ✓" queda hasta 1,5 s.
+   Con un solo latido de 0,4 s la gente ni se enteraba. */
 .cart-fab-bump {
-  animation: cartBump 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: cartBump 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) 2 both;
+}
+
+/* Quien pidió menos movimiento igual ve el cartel, pero sin el latido. */
+@media (prefers-reduced-motion: reduce) {
+  .cart-fab-bump {
+    animation: none;
+  }
 }
 
 /* =============================================
@@ -3882,4 +3920,69 @@ img.product-image.product-photo {
   opacity: 0.4;
   text-decoration: line-through;
   cursor: not-allowed;
+}
+
+/* =============================================
+   26. ARMABLES — barra de acción siempre visible
+   ============================================= */
+
+/*
+  Precio y botón quedan pegados abajo mientras se arma un waffle o una
+  docena de medialunas. Antes había que scrollear hasta el fondo para
+  ver cuánto iba y para poder terminar: ahí es donde la gente se perdía.
+*/
+.builder-sticky-action {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: grid;
+  gap: 0.55rem;
+  /*
+    El hueco de abajo deja libre la franja donde flotan el carrito 🛒 y el
+    botón de tema 🌙. Sin esto el dedo apuntaba a "Agregar al pedido" y
+    terminaba abriendo el carrito. No se puede reservar espacio a la
+    derecha porque el carrito se ensancha al mostrar el total.
+    Es padding, no fondo: el contenido de atrás se sigue viendo y tocando.
+  */
+  padding: 0.5rem 0 calc(8rem + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+/* El hueco de abajo no intercepta toques: pasan al contenido y al carrito. */
+.builder-sticky-action > * {
+  pointer-events: auto;
+}
+
+.builder-sticky-action .waffle-price-row,
+.builder-sticky-action .medialunas-total-row {
+  margin: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  padding: 0.6rem 0.95rem;
+  box-shadow: 0 6px 20px rgba(37, 37, 37, 0.1);
+}
+
+.builder-sticky-action .builder-add-btn {
+  margin-top: 0;
+  box-shadow: 0 8px 24px hsl(var(--buba-pink-h) 100% 79.6% / 0.4);
+}
+
+/* Los pasos ya resueltos pasan a segundo plano, pero siguen accesibles:
+   en los waffles, toppings y salsas son opcionales y se puede volver. */
+.builder-step.done .builder-step-body {
+  opacity: 0.72;
+  transition: opacity 150ms ease;
+}
+
+.builder-step.done:hover .builder-step-body,
+.builder-step.done:focus-within .builder-step-body {
+  opacity: 1;
+}
+
+/* Modo noche */
+[data-theme="dark"] .builder-sticky-action .waffle-price-row,
+[data-theme="dark"] .builder-sticky-action .medialunas-total-row {
+  background: rgba(22, 40, 42, 0.94);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }

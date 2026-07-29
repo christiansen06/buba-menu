@@ -24,10 +24,13 @@ function Cart() {
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
 
+    // Al agregar algo, el carrito late y se expande mostrando "Agregado ✓".
+    // Antes duraba 400 ms: medio parpadeo que nadie llegaba a ver, menos
+    // alguien con las manos ocupadas. 1,5 s alcanza para registrarlo sin molestar.
     useEffect(() => {
         if (count > prevCount.current) {
             setBump(true);
-            const t = setTimeout(() => setBump(false), 400);
+            const t = setTimeout(() => setBump(false), 1500);
             prevCount.current = count;
             return () => clearTimeout(t);
         }
@@ -104,9 +107,27 @@ function Cart() {
             </button>
 
             {/* Botón del carrito */}
-            <button className={`cart-fab ${bump ? 'cart-fab-bump' : ''}`} onClick={handleOpen}>
-                🛒
-                {items.length > 0 && <span className="cart-fab-count">{count}</span>}
+            <button
+                className={`cart-fab ${bump ? 'cart-fab-bump' : ''} ${items.length > 0 ? 'cart-fab-lleno' : ''}`}
+                onClick={handleOpen}
+                aria-label={
+                    items.length > 0
+                        ? `Ver mi pedido: ${count} ${count === 1 ? 'producto' : 'productos'}, ${formatPrice(total)}`
+                        : 'Ver mi pedido'
+                }
+            >
+                <span className="cart-fab-icono" aria-hidden="true">🛒</span>
+
+                {items.length > 0 && (
+                    bump ? (
+                        <span className="cart-fab-aviso">Agregado ✓ · Ver pedido</span>
+                    ) : (
+                        <span className="cart-fab-info">
+                            <span className="cart-fab-count">{count}</span>
+                            <span className="cart-fab-total">{formatPrice(total)}</span>
+                        </span>
+                    )
+                )}
             </button>
 
             {open && (

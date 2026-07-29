@@ -24,8 +24,13 @@ function LocationSection() {
                 </ul>
 
                 <div className="footer-actions">
+                    {/*
+                      Link al pin exacto del local. Antes era una búsqueda de texto
+                      ("?q=Bolivar+2120+Mar+del+Plata") y Google la resolvía como
+                      quería: mandaba a otra dirección. Este es el lugar real.
+                    */}
                     <a
-                        href="https://maps.google.com/?q=Bolivar+2120+Mar+del+Plata"
+                        href="https://maps.app.goo.gl/asAo2pGXjNXoEwgu6"
                         target="_blank"
                         rel="noreferrer"
                         className="action-button"

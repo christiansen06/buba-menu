@@ -179,19 +179,23 @@ function MedialunasSelector({ category }) {
                 })}
             </div>
 
-            <div className="medialunas-total-row">
-                <span className="medialunas-total-label">Total</span>
-                <span className="medialunas-total-price">{formatPrice(total)}</span>
-            </div>
+            {/* Total y botón siempre a la vista: la lista es larga y el
+                total quedaba enterrado al final. */}
+            <div className="builder-sticky-action">
+                <div className="medialunas-total-row">
+                    <span className="medialunas-total-label">Total</span>
+                    <span className="medialunas-total-price">{formatPrice(total)}</span>
+                </div>
 
-            <button
-                className="builder-add-btn"
-                onClick={handleSave}
-                disabled={totalUnits === 0}
-                style={{ opacity: totalUnits === 0 ? 0.4 : 1, cursor: totalUnits === 0 ? 'not-allowed' : 'pointer' }}
-            >
-                {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
-            </button>
+                <button
+                    className="builder-add-btn"
+                    onClick={handleSave}
+                    disabled={totalUnits === 0}
+                    style={{ opacity: totalUnits === 0 ? 0.4 : 1, cursor: totalUnits === 0 ? 'not-allowed' : 'pointer' }}
+                >
+                    {isEditing ? 'Guardar cambios ✓' : 'Agregar al pedido 🛒'}
+                </button>
+            </div>
         </div>
     );
 }

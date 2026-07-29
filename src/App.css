@@ -2161,12 +2161,14 @@ a {
   transform: scale(1.08);
 }
 
-/* Posición: arriba del FAB del carrito */
+/* Posición: arriba a la izquierda, justo debajo del menú deslizante
+   (que mide 56px). Antes estaba abajo a la derecha, donde competía con
+   el carrito y con el botón "Agregar al pedido" de los armables. */
 .theme-toggle-fab {
   position: fixed;
-  bottom: 5rem;
-  right: 1.45rem;
-  z-index: 49;
+  top: calc(56px + 0.75rem);
+  left: 1.25rem;
+  z-index: 39;
   box-shadow: 0 4px 14px rgba(37, 37, 37, 0.12);
 }
 
@@ -3938,13 +3940,13 @@ img.product-image.product-photo {
   display: grid;
   gap: 0.55rem;
   /*
-    El hueco de abajo deja libre la franja donde flotan el carrito 🛒 y el
-    botón de tema 🌙. Sin esto el dedo apuntaba a "Agregar al pedido" y
-    terminaba abriendo el carrito. No se puede reservar espacio a la
-    derecha porque el carrito se ensancha al mostrar el total.
+    El hueco de abajo deja libre la franja donde flota el carrito 🛒. Sin
+    esto el dedo apuntaba a "Agregar al pedido" y terminaba abriendo el
+    carrito. No se puede reservar espacio a la derecha porque el carrito
+    se ensancha al mostrar el total.
     Es padding, no fondo: el contenido de atrás se sigue viendo y tocando.
   */
-  padding: 0.5rem 0 calc(8rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.5rem 0 calc(5.5rem + env(safe-area-inset-bottom, 0px));
   pointer-events: none;
 }
 

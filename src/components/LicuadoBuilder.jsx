@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 import StepProgress from './StepProgress';
 
 const formatPrice = (n) =>
@@ -14,6 +15,7 @@ const TOTAL_STEPS = 4;
 
 function LicuadoBuilder({ category }) {
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
+    const { opcionAgotada } = useDisponibilidad();
 
     const [step, setStep] = useState(1);
     const [selectedType, setSelectedType] = useState(null);
@@ -170,12 +172,13 @@ function LicuadoBuilder({ category }) {
                         <div className="builder-chips">
                             {category.fruits.map((fruit) => {
                                 const isSelected = selectedFruits.find((f) => f.id === fruit.id);
-                                const isDisabled = !isSelected && selectedFruits.length >= maxFruits;
+                                const sinStock = opcionAgotada(category.id, 'fruits', fruit.id);
+                                const isDisabled = sinStock || (!isSelected && selectedFruits.length >= maxFruits);
                                 return (
                                     <button key={fruit.id}
-                                            className={`builder-chip builder-chip-cyan ${isSelected ? 'selected' : ''} ${isDisabled ? 'chip-disabled' : ''}`}
+                                            className={`builder-chip builder-chip-cyan ${isSelected ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''} ${isDisabled && !sinStock ? 'chip-disabled' : ''}`}
                                             onClick={() => !isDisabled && handleFruitToggle(fruit)} disabled={isDisabled}>
-                                        {fruit.label}
+                                        {fruit.label}{sinStock ? ' · sin stock' : ''}
                                     </button>
                                 );
                             })}
@@ -202,13 +205,17 @@ function LicuadoBuilder({ category }) {
                 {step === 3 && (
                     <div className="builder-step-body">
                         <div className="builder-chips">
-                            {category.bases.map((base) => (
-                                <button key={base.id}
-                                        className={`builder-chip builder-chip-cyan ${selectedBase?.id === base.id ? 'selected' : ''}`}
-                                        onClick={() => handleBaseSelect(base)}>
-                                    {base.label}
-                                </button>
-                            ))}
+                            {category.bases.map((base) => {
+                                const sinStock = opcionAgotada(category.id, 'bases', base.id);
+                                return (
+                                    <button key={base.id}
+                                            className={`builder-chip builder-chip-cyan ${selectedBase?.id === base.id ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''}`}
+                                            onClick={() => !sinStock && handleBaseSelect(base)}
+                                            disabled={sinStock}>
+                                        {base.label}{sinStock ? ' · sin stock' : ''}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

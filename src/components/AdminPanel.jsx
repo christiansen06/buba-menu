@@ -147,23 +147,32 @@ function AdminPanel({ onClose }) {
                         {vista === 'productos' && (
                         <div className="admin-lista">
                             {menuCategories.map((cat) => {
-                                const productos = cat.items?.length ? cat.items : (cat.presets || []);
+                                // Cada categoría guarda sus productos con un nombre distinto:
+                                // items (carta común), presets (waffles armados) y products
+                                // (Medialunas y Pastelería, que se venden por unidad).
+                                const productos = cat.items?.length
+                                    ? cat.items
+                                    : cat.presets?.length
+                                        ? cat.presets
+                                        : (cat.products || []);
                                 if (!productos.length) return null;
                                 return (
                                     <div key={cat.id} className="admin-categoria">
                                         <p className="admin-categoria-nombre">{cat.icon} {cat.name}</p>
                                         {productos.map((p) => {
                                             const clave = `${cat.id}:${p.id}`;
+                                            // items usan name; products (medialunas, pastelería) usan label.
+                                            const nombre = p.name || p.label;
                                             const hayStock = !(agotados.has(clave) || p.disponible === false);
                                             return (
                                                 <button
                                                     key={p.id}
                                                     className={`admin-item ${hayStock ? '' : 'sin-stock'}`}
-                                                    onClick={() => toggle(cat.id, p.id, p.name, hayStock)}
+                                                    onClick={() => toggle(cat.id, p.id, nombre, hayStock)}
                                                     disabled={guardando === clave}
                                                     type="button"
                                                 >
-                                                    <span>{p.name}</span>
+                                                    <span>{nombre}</span>
                                                     <span className="admin-estado">
                                                         {guardando === clave ? '…' : hayStock ? 'Hay' : 'Sin stock'}
                                                     </span>

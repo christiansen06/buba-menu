@@ -592,7 +592,7 @@ export const menuCategories = [
     accent: 'pink',
     type: 'builder',
     builderType: 'medialunas',
-    description: 'Cookies, budines y scones de Sisu Pastelería',
+    description: 'Cookies, budines y scones de Zizu Pastelería',
     products: [
       {
         id: 'cookie-doble-choco',

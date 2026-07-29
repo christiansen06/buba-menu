@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 import StepProgress from './StepProgress';
 
 const formatPrice = (n) =>
@@ -9,6 +10,7 @@ const TOTAL_STEPS = 4;
 
 function IceCreamBuilder({ category }) {
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
+    const { opcionAgotada } = useDisponibilidad();
 
     const [step, setStep] = useState(1);
     const [selectedSize, setSelectedSize] = useState(null);
@@ -173,12 +175,13 @@ function IceCreamBuilder({ category }) {
                         <div className="builder-chips">
                             {category.flavors.map((flavor) => {
                                 const isSelected = selectedFlavors.find((f) => f.id === flavor.id);
-                                const isDisabled = !isSelected && selectedFlavors.length >= maxFlavors;
+                                const sinStock = opcionAgotada(category.id, 'flavors', flavor.id);
+                                const isDisabled = sinStock || (!isSelected && selectedFlavors.length >= maxFlavors);
                                 return (
                                     <button key={flavor.id}
-                                            className={`builder-chip builder-chip-pink ${isSelected ? 'selected' : ''} ${isDisabled ? 'chip-disabled' : ''}`}
+                                            className={`builder-chip builder-chip-pink ${isSelected ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''} ${isDisabled && !sinStock ? 'chip-disabled' : ''}`}
                                             onClick={() => !isDisabled && handleFlavorToggle(flavor)} disabled={isDisabled}>
-                                        {flavor.label}
+                                        {flavor.label}{sinStock ? ' · sin stock' : ''}
                                     </button>
                                 );
                             })}
@@ -206,13 +209,17 @@ function IceCreamBuilder({ category }) {
                     <div className="builder-step-body">
                         <p className="builder-included-label">Incluidas en el precio ✓ · Elegí 1 salsa</p>
                         <div className="builder-chips">
-                            {category.sauces.map((sauce) => (
-                                <button key={sauce.id}
-                                        className={`builder-chip builder-chip-pink ${selectedSauces.find((s) => s.id === sauce.id) ? 'selected' : ''}`}
-                                        onClick={() => handleSauceToggle(sauce)}>
-                                    {sauce.label}
-                                </button>
-                            ))}
+                            {category.sauces.map((sauce) => {
+                                const sinStock = opcionAgotada(category.id, 'sauces', sauce.id);
+                                return (
+                                    <button key={sauce.id}
+                                            className={`builder-chip builder-chip-pink ${selectedSauces.find((s) => s.id === sauce.id) ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''}`}
+                                            onClick={() => !sinStock && handleSauceToggle(sauce)}
+                                            disabled={sinStock}>
+                                        {sauce.label}{sinStock ? ' · sin stock' : ''}
+                                    </button>
+                                );
+                            })}
                         </div>
                         <button className="builder-skip-btn" onClick={() => setSelectedSauces([])}>Sin salsa</button>
 
@@ -244,15 +251,19 @@ function IceCreamBuilder({ category }) {
                     {step === 4 && (
                         <div className="builder-step-body">
                             <div className="builder-cup-options">
-                                {category.cupTypes.map((cup) => (
-                                    <button key={cup.id}
-                                            className={`builder-cup-card ${selectedCup?.id === cup.id ? 'selected' : ''}`}
-                                            onClick={() => setSelectedCup(cup)}>
-                                        <span className="cup-icon">{cup.id === 'barquillo' ? '🍦' : '🥤'}</span>
-                                        <span className="cup-label">{cup.label}</span>
-                                        <span className="cup-desc">{cup.description}</span>
-                                    </button>
-                                ))}
+                                {category.cupTypes.map((cup) => {
+                                    const sinStock = opcionAgotada(category.id, 'cupTypes', cup.id);
+                                    return (
+                                        <button key={cup.id}
+                                                className={`builder-cup-card ${selectedCup?.id === cup.id ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''}`}
+                                                onClick={() => !sinStock && setSelectedCup(cup)}
+                                                disabled={sinStock}>
+                                            <span className="cup-icon">{cup.id === 'barquillo' ? '🍦' : '🥤'}</span>
+                                            <span className="cup-label">{cup.label}</span>
+                                            <span className="cup-desc">{sinStock ? 'Sin stock' : cup.description}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                             {selectedCup && (
                                 <button className="builder-add-btn" onClick={handleSave}>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -11,6 +12,7 @@ const formatPrice = (n) =>
  */
 function MedialunasSelector({ category }) {
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
+    const { estaAgotado } = useDisponibilidad();
 
     const categoryLabel = category.name;
     const categoryIcon = category.icon || '🛒';
@@ -57,7 +59,11 @@ function MedialunasSelector({ category }) {
         setCounts((p) => ({ ...p, [id]: num }));
     };
 
+    const sinStock = (product) => estaAgotado(category.id, product.id, product);
+
     const getSubtotal = (product) => {
+        // Si se agotó mientras el cliente elegía, no se cobra ni se suma.
+        if (sinStock(product)) return 0;
         const qty = counts[product.id];
         if (qty === 0) return 0;
         let subtotal = product.pricePerUnit * qty;
@@ -68,14 +74,21 @@ function MedialunasSelector({ category }) {
     };
 
     const total = category.products.reduce((sum, p) => sum + getSubtotal(p), 0);
-    const totalUnits = Object.values(counts).reduce((sum, v) => sum + v, 0);
+    const totalUnits = category.products.reduce(
+        (sum, p) => sum + (sinStock(p) ? 0 : counts[p.id] || 0),
+        0
+    );
 
     const handleSave = () => {
         const parts = category.products
-            .filter((p) => counts[p.id] > 0)
+            .filter((p) => counts[p.id] > 0 && !sinStock(p))
             .map((p) => `${shortLabel(p.label)} ×${counts[p.id]}`);
         const label = `${categoryLabel}: ${parts.join(', ')}`;
-        const config = { counts: { ...counts } };
+        const config = {
+            counts: Object.fromEntries(
+                category.products.map((p) => [p.id, sinStock(p) ? 0 : counts[p.id] || 0])
+            ),
+        };
 
         if (isEditing) {
             updateItem(editingItem.id, { label, unitPrice: total, config });
@@ -113,28 +126,30 @@ function MedialunasSelector({ category }) {
 
             <div className="medialunas-table">
                 {category.products.map((product) => {
-                    const qty = counts[product.id];
+                    const agotado = sinStock(product);
+                    const qty = agotado ? 0 : counts[product.id];
                     const subtotal = getSubtotal(product);
-                    const hasDiscount = product.discountAt && product.discountAmount && qty >= product.discountAt;
+                    const hasDiscount = !agotado && product.discountAt && product.discountAmount && qty >= product.discountAt;
                     return (
                         <div key={product.id}>
-                            <div className="medialuna-row">
+                            <div className={`medialuna-row ${agotado ? 'agotado' : ''}`}>
                                 <div className="medialuna-info">
                                     <strong>{product.label}</strong>
-                                    <span>{formatPrice(product.pricePerUnit)} c/u</span>
+                                    <span>{agotado ? 'Sin stock por hoy' : `${formatPrice(product.pricePerUnit)} c/u`}</span>
                                 </div>
                                 <div className="medialuna-counter">
-                                    <button className="counter-btn" onClick={() => decrement(product.id)} disabled={qty === 0}>−</button>
+                                    <button className="counter-btn" onClick={() => decrement(product.id)} disabled={agotado || qty === 0}>−</button>
                                     <input
                                         type="number"
                                         className="counter-input"
                                         value={qty}
                                         min="0"
                                         inputMode="numeric"
+                                        disabled={agotado}
                                         onChange={(e) => handleInputChange(product.id, e.target.value)}
                                         onFocus={(e) => e.target.select()}
                                     />
-                                    <button className="counter-btn" onClick={() => increment(product.id)}>+</button>
+                                    <button className="counter-btn" onClick={() => increment(product.id)} disabled={agotado}>+</button>
                                 </div>
                                 <span className="medialuna-subtotal">{qty > 0 ? formatPrice(subtotal) : '—'}</span>
                             </div>

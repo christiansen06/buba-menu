@@ -62,7 +62,11 @@ export const INSUMOS = [
     { id: 'coffler', label: 'Cofler', grupo: 'Galletitas' },
     { id: 'ferrero', label: 'Ferrero Rocher', grupo: 'Galletitas' },
 
-    // --- Bases de licuado ---
+    // --- Bases líquidas ---
+    // Ojo con la leche: no es sólo la base del licuado. Es la misma leche
+    // de los bubble teas, los cafés con leche, los lattes y los frappés.
+    // Si se acaba, se cae media carta (todo menos el café negro y el
+    // americano frío). Está bien que sea así: es lo que pasa en el local.
     { id: 'leche', label: 'Leche', grupo: 'Bases' },
     { id: 'jugo', label: 'Jugo de naranja', grupo: 'Bases' },
 
@@ -157,15 +161,41 @@ export const USOS = {
  * así que tiene su propio stock y no se cae si se acaban las Oreos del día.
  */
 export const EN_CARTA = {
+    // Los siete bubble teas son con leche, así que todos dependen de ella.
     'bubble-tea': {
-        frutilla: ['pulpa-frutilla'],   // el BüBa Frutilla lleva la pulpa
-        oreo: ['oreo'],                 // lleva galletitas molidas
-        chocolate: ['salsa-chocolate'],
+        'brown-sugar': ['leche'],
+        matcha: ['leche'],
+        frutilla: ['leche', 'pulpa-frutilla'],   // el BüBa Frutilla lleva la pulpa
+        thai: ['leche'],
+        oreo: ['leche', 'oreo'],                 // lleva galletitas molidas
+        taro: ['leche'],
+        chocolate: ['leche', 'salsa-chocolate'],
     },
+
+    // El café negro es lo único que sobrevive sin leche.
+    cafe: {
+        'cafe-cortado': ['leche'],
+        lagrima: ['leche'],
+        cappuccino: ['leche'],
+        'cafe-leche': ['leche'],
+        submarino: ['leche'],
+    },
+
+    // El americano es agua y espresso; el resto lleva leche.
+    'iced-coffee': {
+        latte: ['leche'],
+        'dark-moca': ['leche'],
+        'caramel-latte': ['leche'],
+        'matcha-latte': ['leche'],
+    },
+
+    // Todos los frappés se licúan con leche.
     frappuccinos: {
-        ddl: ['ddl-pote'],
-        'frutilla-frappe': ['frutilla-congelada'],
-        'oreo-frappe': ['oreo'],
+        'chocolate-moca': ['leche'],
+        ddl: ['leche', 'ddl-pote'],
+        'frutilla-frappe': ['leche', 'frutilla-congelada'],
+        'oreo-frappe': ['leche', 'oreo'],
+        'matcha-frappe': ['leche'],
     },
 };
 

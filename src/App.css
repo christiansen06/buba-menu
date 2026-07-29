@@ -3819,3 +3819,36 @@ img.product-image.product-photo {
   text-decoration: line-through;
   cursor: not-allowed;
 }
+
+/* ============================================
+   30. SIN STOCK — vasitos y filas por unidad
+   ============================================ */
+
+/* Vasito de barquillo agotado (armador de helados) */
+.builder-cup-card.chip-sin-stock {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.builder-cup-card.chip-sin-stock .cup-label {
+  text-decoration: line-through;
+}
+
+/* Fila agotada en Medialunas / Pastelería */
+.medialuna-row.agotado {
+  opacity: 0.5;
+}
+
+.medialuna-row.agotado .medialuna-info strong {
+  text-decoration: line-through;
+}
+
+.medialuna-row.agotado .medialuna-info span {
+  color: hsl(var(--buba-pink-h) 70% 62%);
+  font-weight: 700;
+}
+
+.medialuna-row.agotado .counter-btn,
+.medialuna-row.agotado .counter-input {
+  cursor: not-allowed;
+}

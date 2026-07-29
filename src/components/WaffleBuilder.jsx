@@ -184,6 +184,10 @@ function WaffleBuilder({ category }) {
                 categoryId: category.id,
                 categoryName: category.name,
                 builderType: 'waffle',
+                // "armado" = lo armó el cliente desde cero. Los que salen de
+                // un preset guardan el id del preset, así se pueden separar.
+                productId: 'armado',
+                variante: tier,
                 label,
                 unitPrice: price,
                 config,
@@ -214,6 +218,8 @@ function WaffleBuilder({ category }) {
             categoryId: category.id,
             categoryName: category.name,
             builderType: 'waffle',
+            productId: preset.id,
+            variante: presetTier,
             label,
             unitPrice: computeWafflePrice(category, cfg.rellenos, cfg.toppings, cfg.salsas),
             config: cfg,

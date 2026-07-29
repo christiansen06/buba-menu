@@ -628,9 +628,64 @@ export const menuCategories = [
   },
 ];
 
-// ===== AGREGAR EN src/data/menu.js =====
-// Array nuevo, separado de menuCategories.
-// Exportalo junto a menuCategories al final del archivo.
+// =====================================================================
+// PROMOCIONES
+// =====================================================================
+// Antes cada opción era texto suelto ('Negro', 'Oreo'). Eso hacía dos
+// daños: la promo no se enteraba de que un producto estaba agotado, y
+// al vender no quedaba registro de QUÉ se llevó realmente el cliente.
+//
+// Ahora cada opción apunta al producto de verdad (categoría + id), así:
+//   - si falta el stock, la opción se tacha sola;
+//   - si falta un componente fijo, la promo entera se apaga;
+//   - cada venta deja anotado el desglose, así un cappuccino vendido
+//     dentro de un combo cuenta igual que uno vendido suelto.
+//
+// Formato de un slot (lo que elige el cliente):
+//   label     → título que se ve ("Café")
+//   cat       → categoría de donde salen las opciones
+//   opciones  → ids de producto. Con { producto, label } se acorta el
+//               texto del chip sin perder el vínculo con el producto.
+//   combos    → opciones que son más de un producto a la vez
+//               (ej: "1 de cada una" = manteca + jamón y queso)
+//
+// fijos → lo que la promo incluye siempre y el cliente no elige.
+// =====================================================================
+
+const CAFE_CHICO = {
+  label: 'Café',
+  cat: 'cafe',
+  opciones: [
+    { producto: 'cafe-negro', label: 'Negro' },
+    { producto: 'cafe-cortado', label: 'Cortado' },
+    { producto: 'lagrima', label: 'Lágrima' },
+  ],
+};
+
+const BUBBLE_GRANDE = {
+  label: 'Bubble Tea',
+  cat: 'bubble-tea',
+  opciones: [
+    { producto: 'brown-sugar', label: 'Brown Sugar' },
+    { producto: 'matcha', label: 'Matcha' },
+    { producto: 'frutilla', label: 'Frutilla' },
+    { producto: 'thai', label: 'Thai' },
+    { producto: 'oreo', label: 'Oreo' },
+    { producto: 'taro', label: 'Taro' },
+    { producto: 'chocolate', label: 'Chocolate' },
+  ],
+};
+
+const WAFFLE_SIMPLE = {
+  label: 'Waffle',
+  cat: 'waffles',
+  opciones: [
+    { producto: 'frutilla', label: 'Frutilla' },
+    { producto: 'oreo', label: 'Oreo' },
+    { producto: 'nutella', label: 'Nutella' },
+  ],
+};
+
 export const promociones = [
   {
     id: 'promo-cafe-medialunas',
@@ -638,8 +693,18 @@ export const promociones = [
     description: 'Café grande + 2 medialunas a elección',
     price: 6500,
     slots: [
-      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
-      { label: 'Medialunas', options: ['Manteca', 'Jamón y Queso', '1 de cada una'] },
+      CAFE_CHICO,
+      {
+        label: 'Medialunas',
+        cat: 'medialunas',
+        opciones: [
+          { producto: 'manteca', label: 'Manteca' },
+          { producto: 'jyq', label: 'Jamón y Queso' },
+        ],
+        combos: [
+          { id: 'mixta', label: '1 de cada una', productos: ['manteca', 'jyq'] },
+        ],
+      },
     ],
   },
   {
@@ -647,29 +712,22 @@ export const promociones = [
     name: 'Café + Tostado',
     description: 'Café grande + 1 tostado completo',
     price: 11000,
-    slots: [
-      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
-    ],
+    slots: [CAFE_CHICO],
+    fijos: [{ cat: 'tostados', producto: 'tostado-entero' }],
   },
   {
     id: 'promo-cafe-waffle',
     name: 'Café + Waffle',
     description: 'Café grande + 1 waffle simple',
     price: 12000,
-    slots: [
-      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
-      { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },
-    ],
+    slots: [CAFE_CHICO, WAFFLE_SIMPLE],
   },
   {
     id: 'promo-bubble-waffle',
     name: 'Bubble Tea + Waffle',
     description: 'Bubble Tea grande + 1 waffle simple',
     price: 18000,
-    slots: [
-      { label: 'Bubble Tea', options: ['Brown Sugar', 'Matcha', 'Frutilla', 'Thai', 'Oreo', 'Taro', 'Chocolate'] },
-      { label: 'Waffle', options: ['Frutilla', 'Oreo', 'Nutella'] },
-    ],
+    slots: [BUBBLE_GRANDE, WAFFLE_SIMPLE],
   },
   {
     id: 'promo-cafe-cookie-medialuna',
@@ -677,9 +735,24 @@ export const promociones = [
     description: 'Café grande + 1 cookie + 1 medialuna',
     price: 11000,
     slots: [
-      { label: 'Café', options: ['Negro', 'Cortado', 'Lágrima'] },
-      { label: 'Cookie', options: ['Doble Chocolate', 'Red Velvet', 'Chips de Chocolate'] },
-      { label: 'Medialuna', options: ['Manteca', 'Jamón y Queso'] },
+      CAFE_CHICO,
+      {
+        label: 'Cookie',
+        cat: 'pasteleria',
+        opciones: [
+          { producto: 'cookie-doble-choco', label: 'Doble Chocolate' },
+          { producto: 'cookie-red-velvet', label: 'Red Velvet' },
+          { producto: 'cookie-chips', label: 'Chips de Chocolate' },
+        ],
+      },
+      {
+        label: 'Medialuna',
+        cat: 'medialunas',
+        opciones: [
+          { producto: 'manteca', label: 'Manteca' },
+          { producto: 'jyq', label: 'Jamón y Queso' },
+        ],
+      },
     ],
   },
   {
@@ -688,8 +761,15 @@ export const promociones = [
     description: 'Bubble Tea grande + 1 postre',
     price: 16000,
     slots: [
-      { label: 'Bubble Tea', options: ['Brown Sugar', 'Matcha', 'Frutilla', 'Thai', 'Oreo', 'Taro', 'Chocolate'] },
-      { label: 'Postre', options: ['Chocotorta', 'Postre Oreo'] },
+      BUBBLE_GRANDE,
+      {
+        label: 'Postre',
+        cat: 'postres',
+        opciones: [
+          { producto: 'chocotorta', label: 'Chocotorta' },
+          { producto: 'postre-oreo', label: 'Postre Oreo' },
+        ],
+      },
     ],
   },
   {
@@ -698,10 +778,70 @@ export const promociones = [
     description: 'Capuccino + 1 porción de budín',
     price: 6500,
     slots: [
-      { label: 'Budín', options: ['Chips de Chocolate', 'Limón'] },
+      {
+        label: 'Budín',
+        cat: 'pasteleria',
+        opciones: [
+          { producto: 'budin-chips', label: 'Chips de Chocolate' },
+          { producto: 'budin-limon', label: 'Limón' },
+        ],
+      },
     ],
+    fijos: [{ cat: 'cafe', producto: 'cappuccino' }],
   },
 ];
+
+/**
+ * Busca un producto por categoría e id, sin importar si la categoría lo
+ * guarda en items, presets o products. Devuelve null si no existe, lo que
+ * sirve para detectar promos que quedaron apuntando a algo borrado.
+ */
+export const buscarProducto = (categoriaId, productoId) => {
+  const cat = menuCategories.find((c) => c.id === categoriaId);
+  if (!cat) return null;
+  const lista = cat.items?.length
+    ? cat.items
+    : cat.presets?.length
+      ? cat.presets
+      : (cat.products || []);
+  const p = lista.find((x) => x.id === productoId);
+  if (!p) return null;
+  return { ...p, nombre: p.name || p.label, categoriaId, categoriaNombre: cat.name };
+};
+
+/** Normaliza las opciones de un slot a una forma única y fácil de recorrer. */
+export const opcionesDeSlot = (slot) => {
+  const armar = (productoId) => {
+    const p = buscarProducto(slot.cat, productoId);
+    return { cat: slot.cat, producto: productoId, nombre: p?.nombre || productoId };
+  };
+
+  const simples = (slot.opciones || []).map((o) => {
+    const id = typeof o === 'string' ? o : o.producto;
+    const p = buscarProducto(slot.cat, id);
+    return {
+      id,
+      label: (typeof o === 'object' && o.label) || p?.nombre || id,
+      productos: [armar(id)],
+    };
+  });
+
+  const combos = (slot.combos || []).map((c) => ({
+    id: c.id,
+    label: c.label,
+    productos: c.productos.map(armar),
+  }));
+
+  return [...simples, ...combos];
+};
+
+/** Los componentes fijos de una promo, ya resueltos con su nombre. */
+export const fijosDePromo = (promo) =>
+  (promo.fijos || []).map((f) => ({
+    cat: f.cat,
+    producto: f.producto,
+    nombre: buscarProducto(f.cat, f.producto)?.nombre || f.producto,
+  }));
 
 /**
  * UTILIDADES PARA MENÚ

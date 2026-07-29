@@ -34,6 +34,10 @@ function ProductCard({ item, category }) {
             categoryId: category.id,
             categoryName: category.name,
             builderType: null,
+            // productId y variante son los que se guardan en la base:
+            // sin ellos el pedido queda sólo como texto y no se puede contar.
+            productId: item.id,
+            variante: selected.key,
             label: `${item.name}${sizeLabel}`,
             unitPrice: selected.price,
             mergeKey: `${category.id}:${item.id}:${selected.key}`,

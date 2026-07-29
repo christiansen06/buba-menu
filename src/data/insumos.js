@@ -26,6 +26,8 @@
 // en realidad se pueden seguir vendiendo.
 // ---------------------------------------------------------------------
 
+import { menuCategories } from './menu.js';
+
 export const INSUMOS = [
     // --- Untables y cremas ---
     { id: 'ddl-pote', label: 'Dulce de leche (pote)', grupo: 'Untables' },
@@ -204,9 +206,40 @@ export function insumoDe(categoriaId, campo, opcionId) {
     return USOS[categoriaId]?.[campo]?.[opcionId] || null;
 }
 
+/**
+ * Los waffles ya armados (Oreo, Frutilla, Nutella, Argentina, Fit) no hace
+ * falta listarlos a mano: cada uno ya declara en menu.js sus rellenos,
+ * toppings y salsas. Leemos esa receta y sacamos los insumos de ahí.
+ *
+ * La ventaja es que si mañana cambiás la receta de un waffle, el stock se
+ * acomoda solo — no hay una segunda lista que se pueda quedar vieja.
+ */
+function insumosDePresetWaffle(presetId) {
+    const waffles = menuCategories.find((c) => c.id === 'waffles');
+    const preset = waffles?.presets?.find((p) => p.id === presetId);
+    if (!preset?.config) return [];
+
+    const U = USOS.waffles;
+    const out = new Set();
+    const sumar = (id) => { if (id) out.add(id); };
+
+    (preset.config.rellenos || []).forEach((r) => {
+        // El relleno "helado" no tiene insumo propio: lo tiene cada sabor.
+        if (r.type === 'helado') sumar(U.heladoFlavors[r.flavor]);
+        else sumar(U.rellenos[r.type]);
+    });
+    (preset.config.toppings || []).forEach((t) => sumar(U.toppings[t]));
+    (preset.config.salsas || []).forEach((s) => sumar(U.salsas[s]));
+    if (preset.config.extraNutella) sumar('nutella');
+
+    return [...out];
+}
+
 /** Insumos que necesita un producto de la carta (array, puede estar vacío). */
 export function insumosDeProducto(categoriaId, productoId) {
-    return EN_CARTA[categoriaId]?.[productoId] || [];
+    const explicitos = EN_CARTA[categoriaId]?.[productoId] || [];
+    if (categoriaId !== 'waffles') return explicitos;
+    return [...new Set([...explicitos, ...insumosDePresetWaffle(productoId)])];
 }
 
 export const INSUMOS_POR_GRUPO = INSUMOS.reduce((acc, i) => {

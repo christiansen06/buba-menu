@@ -36,6 +36,8 @@ function FeaturedCard({ item }) {
             categoryId: item.categoryId,
             categoryName: item.categoryName,
             builderType: null,
+            productId: item.id,
+            variante: selected.key,
             label: `${item.name}${sizeLabel}`,
             unitPrice: selected.price,
             mergeKey: `${item.categoryId}:${item.id}:${selected.key}`,

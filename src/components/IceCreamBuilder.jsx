@@ -90,6 +90,8 @@ function IceCreamBuilder({ category }) {
                 categoryId: category.id,
                 categoryName: category.name,
                 builderType: 'icecream',
+                productId: 'armado',
+                variante: `${selectedSize.id} bochas`,
                 label,
                 unitPrice: selectedSize.price,
                 config,

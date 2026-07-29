@@ -11,8 +11,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const key = import.meta.env.VITE_SUPABASE_KEY;
+// El ?. es a propósito: import.meta.env sólo existe cuando la app corre
+// con Vite. Sin él, este archivo explota si se lo importa desde un script
+// suelto de Node (por ejemplo para probar cosas fuera del navegador).
+const url = import.meta.env?.VITE_SUPABASE_URL;
+const key = import.meta.env?.VITE_SUPABASE_KEY;
 
 /** true si hay credenciales cargadas. Si no, la app anda igual, sin base. */
 export const hayBase = Boolean(url && key);

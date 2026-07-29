@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { sendOrderToWhatsApp } from '../utils/whatsapp.js';
+import { registrarPedido } from '../utils/pedidos.js';
 import { formatPrice } from '../utils/format.js';
 import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
 import PaymentInfo from './PaymentInfo.jsx';
@@ -75,7 +76,15 @@ function Cart() {
         } catch {
             // ignore
         }
+        // Primero WhatsApp: window.open tiene que salir dentro del mismo clic
+        // del usuario o el navegador lo bloquea como si fuera un popup.
         sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems });
+
+        // Después anotamos la venta, sin esperar la respuesta. Si la base
+        // está caída el cliente ni se entera: su pedido ya salió.
+        // Ojo: no van ni el nombre ni la aclaración, sólo los productos.
+        void registrarPedido({ items, total });
+
         setSent(true);
     };
 

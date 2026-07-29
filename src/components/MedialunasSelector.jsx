@@ -84,10 +84,24 @@ function MedialunasSelector({ category }) {
             .filter((p) => counts[p.id] > 0 && !sinStock(p))
             .map((p) => `${shortLabel(p.label)} ×${counts[p.id]}`);
         const label = `${categoryLabel}: ${parts.join(', ')}`;
+
+        // Esta línea del carrito puede tener varios productos distintos
+        // (3 de manteca + 2 de jamón y queso). "componentes" los separa
+        // para que cada uno cuente por su cuenta en las métricas.
+        const componentes = category.products
+            .filter((p) => !sinStock(p) && counts[p.id] > 0)
+            .map((p) => ({
+                cat: category.id,
+                producto: p.id,
+                nombre: p.label,
+                cantidad: counts[p.id],
+            }));
+
         const config = {
             counts: Object.fromEntries(
                 category.products.map((p) => [p.id, sinStock(p) ? 0 : counts[p.id] || 0])
             ),
+            componentes,
         };
 
         if (isEditing) {
@@ -99,6 +113,8 @@ function MedialunasSelector({ category }) {
                 categoryId: category.id,
                 categoryName: category.name,
                 builderType: 'medialunas',
+                // Sin producto único: el desglose real va en config.componentes.
+                productId: null,
                 label,
                 unitPrice: total,
                 config,

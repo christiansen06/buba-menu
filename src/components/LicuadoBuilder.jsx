@@ -88,6 +88,8 @@ function LicuadoBuilder({ category }) {
                 categoryId: category.id,
                 categoryName: category.name,
                 builderType: 'licuado',
+                productId: 'armado',
+                variante: selectedType.id,
                 label,
                 unitPrice: category.price[selectedType.id],
                 config,

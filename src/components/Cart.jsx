@@ -21,6 +21,9 @@ function Cart() {
     });
     const [note, setNote] = useState('');
     const [nameError, setNameError] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState(null); // 'transferencia' | 'efectivo'
+    const [paymentError, setPaymentError] = useState(false);
+    const pagoRef = useRef(null);
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
 
@@ -36,6 +39,14 @@ function Cart() {
         }
         prevCount.current = count;
     }, [count]);
+
+    // El alias aparece más abajo del pliegue, y el botón de enviar está fijo
+    // al pie: sin esto el cliente podía mandar el pedido sin haberlo visto.
+    useEffect(() => {
+        if (paymentMethod === 'transferencia' && pagoRef.current) {
+            pagoRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, [paymentMethod]);
 
     const handleEdit = (item) => {
         startEdit(item);
@@ -69,11 +80,14 @@ function Cart() {
     const estado = getEstadoLocal();
 
     const handleSend = () => {
-        if (!name.trim()) {
-            setNameError(true);
-            return;
-        }
-        setNameError(false);
+        // Los dos errores se marcan juntos: si no, el cliente corrige uno,
+        // vuelve a tocar enviar y recién ahí se entera del otro.
+        const faltaNombre = !name.trim();
+        const faltaPago = !paymentMethod;
+        setNameError(faltaNombre);
+        setPaymentError(faltaPago);
+        if (faltaNombre || faltaPago) return;
+
         try {
             localStorage.setItem('buba-name', name.trim());
         } catch {
@@ -81,7 +95,7 @@ function Cart() {
         }
         // Primero WhatsApp: window.open tiene que salir dentro del mismo clic
         // del usuario o el navegador lo bloquea como si fuera un popup.
-        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems });
+        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod });
 
         // Después anotamos la venta, sin esperar la respuesta. Si la base
         // está caída el cliente ni se entera: su pedido ya salió.
@@ -94,6 +108,8 @@ function Cart() {
     const handleNewOrder = () => {
         clearCart();
         setNote('');
+        setPaymentMethod(null);
+        setPaymentError(false);
         setCheckout(false);
         setSent(false);
         setOpen(false);
@@ -142,9 +158,15 @@ function Cart() {
                                 <h3>¡Pedido enviado!</h3>
                                 <p>
                                     Tu pedido a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
-                                    Ahora elegí cómo pagarlo 👇
+                                    {paymentMethod === 'efectivo'
+                                        ? ' Lo pagás en el mostrador 💵'
+                                        : ' Acá tenés de nuevo los datos para transferir 👇'}
                                 </p>
-                                <PaymentInfo total={total} hasConsultarItems={hasConsultarItems} />
+                                {/* Respaldo para quien sí vuelve al menú: los datos ya los vio
+                                    en el checkout y también le quedaron en el chat de WhatsApp. */}
+                                {paymentMethod !== 'efectivo' && (
+                                    <PaymentInfo total={total} hasConsultarItems={hasConsultarItems} />
+                                )}
                                 <button className="builder-add-btn" onClick={handleNewOrder}>Hacer un nuevo pedido</button>
                                 <button className="cart-clear-btn" onClick={handleClose}>Cerrar</button>
                             </div>
@@ -192,6 +214,43 @@ function Cart() {
                                             onChange={(e) => setNote(e.target.value)}
                                         />
                                     </label>
+
+                                    {/*
+                                      El método de pago se elige ACÁ, antes de enviar. Al tocar
+                                      "Enviar" se abre WhatsApp y el cliente sale del menú: si el
+                                      alias apareciera recién después, no lo ve nunca.
+                                    */}
+                                    <div className="checkout-field">
+                                        <span>¿Cómo vas a pagar? <em className="req">*</em></span>
+                                        <div className="payment-method-group">
+                                            {[
+                                                { id: 'transferencia', icono: '💳', label: 'Transferencia' },
+                                                { id: 'efectivo', icono: '💵', label: 'Efectivo en el local' },
+                                            ].map((m) => (
+                                                <button
+                                                    key={m.id}
+                                                    type="button"
+                                                    className={`payment-method-option ${paymentMethod === m.id ? 'selected' : ''}`}
+                                                    aria-pressed={paymentMethod === m.id}
+                                                    onClick={() => { setPaymentMethod(m.id); setPaymentError(false); }}
+                                                >
+                                                    <span className="payment-method-icon" aria-hidden="true">{m.icono}</span>
+                                                    <span>{m.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {paymentError && <span className="field-error">Elegí cómo vas a pagar</span>}
+                                    </div>
+
+                                    {paymentMethod === 'transferencia' && (
+                                        <div ref={pagoRef}>
+                                            <PaymentInfo
+                                                total={total}
+                                                hasConsultarItems={hasConsultarItems}
+                                                variant="checkout"
+                                            />
+                                        </div>
+                                    )}
 
                                     <div className="checkout-summary">
                                         <div className="cart-total-row">

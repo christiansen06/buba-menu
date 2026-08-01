@@ -3,10 +3,22 @@ import { PAYMENT_CONFIG } from '../config/payment.js';
 import { copyToClipboard } from '../utils/clipboard.js';
 import { formatPrice } from '../utils/format.js';
 
-function PaymentInfo({ total, hasConsultarItems }) {
+/**
+ * Datos para transferir.
+ *
+ * variant="checkout"     → dentro del checkout, ANTES de saltar a WhatsApp.
+ *                          Sin título ni botón de efectivo: el método ya se
+ *                          eligió arriba. Es la última pantalla que ve el
+ *                          cliente antes de irse, así que acá tiene que
+ *                          poder copiar el alias.
+ * variant="confirmacion" → pantalla de "¡Pedido enviado!", como respaldo
+ *                          para quien sí vuelve al menú.
+ */
+function PaymentInfo({ total, hasConsultarItems, variant = 'confirmacion' }) {
     const [copied, setCopied] = useState(null); // null | 'alias' | 'monto'
     const [cash, setCash] = useState(false);
     const timerRef = useRef(null);
+    const enCheckout = variant === 'checkout';
 
     useEffect(() => () => clearTimeout(timerRef.current), []);
 
@@ -18,7 +30,7 @@ function PaymentInfo({ total, hasConsultarItems }) {
         timerRef.current = setTimeout(() => setCopied(null), 2000);
     };
 
-    if (cash) {
+    if (cash && !enCheckout) {
         return (
             <div className="payment-info">
                 <p className="payment-cash-done">Listo — lo pagás en el mostrador 💵</p>
@@ -30,8 +42,8 @@ function PaymentInfo({ total, hasConsultarItems }) {
     }
 
     return (
-        <div className="payment-info">
-            <h4 className="payment-info-title">¿Cómo lo pagás? 💳</h4>
+        <div className={`payment-info ${enCheckout ? 'payment-info-checkout' : ''}`}>
+            {!enCheckout && <h4 className="payment-info-title">¿Cómo lo pagás? 💳</h4>}
 
             <div className="payment-copy-row">
                 <div className="payment-copy-info">
@@ -68,12 +80,16 @@ function PaymentInfo({ total, hasConsultarItems }) {
             )}
 
             <p className="payment-hint">
-                Después de transferir, mostranos el comprobante en el mostrador y listo 😉
+                {enCheckout
+                    ? 'Copiá el alias antes de enviar: al abrirse WhatsApp salís del menú. También te van a quedar los datos en el mensaje 😉'
+                    : 'Después de transferir, mostranos el comprobante en el mostrador y listo 😉'}
             </p>
 
-            <button className="cart-clear-btn payment-cash-btn" onClick={() => setCash(true)}>
-                Pago en efectivo 💵
-            </button>
+            {!enCheckout && (
+                <button className="cart-clear-btn payment-cash-btn" onClick={() => setCash(true)}>
+                    Pago en efectivo 💵
+                </button>
+            )}
         </div>
     );
 }

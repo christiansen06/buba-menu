@@ -3,6 +3,7 @@
 // =============================================
 
 import { formatPrice } from './format.js';
+import { PAYMENT_CONFIG } from '../config/payment.js';
 
 export const BUBA_WHATSAPP = '5492236833119';
 
@@ -57,7 +58,7 @@ function splitLabel(label) {
     return { title: parts[0], detail: parts.slice(1) };
 }
 
-export function buildOrderMessage({ items, total, name, note, hasConsultarItems }) {
+export function buildOrderMessage({ items, total, name, note, hasConsultarItems, paymentMethod }) {
     const L = [];
 
     L.push('🧋 *NUEVO PEDIDO — BüBa*');
@@ -114,6 +115,25 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems 
     if (note && note.trim()) {
         L.push('');
         L.push(`📝 *Aclaración:* ${note.trim()}`);
+    }
+
+    // Los datos de pago viajan DENTRO del mensaje a propósito.
+    // Al tocar "enviar" el cliente sale de la app y queda parado en este
+    // chat: si el alias no está acá, tiene que ir a buscarlo a un cartel.
+    // De paso, al local le queda claro si esperar una transferencia.
+    if (paymentMethod === 'transferencia') {
+        L.push('');
+        L.push('💳 *Pago:* Transferencia');
+        L.push(`*Alias:* ${PAYMENT_CONFIG.alias}`);
+        L.push(`*Titular:* ${PAYMENT_CONFIG.aliasHolder}`);
+        L.push(`*Monto:* ${formatPrice(total)}`);
+        if (hasConsultarItems) {
+            L.push('_Ojo: hay ítems a cotizar, esperá el monto final antes de transferir_');
+        }
+        L.push('_Verificar la transferencia antes de entregar_');
+    } else if (paymentMethod === 'efectivo') {
+        L.push('');
+        L.push('💵 *Pago:* Efectivo en el local');
     }
 
     L.push('');

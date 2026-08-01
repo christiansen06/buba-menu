@@ -3988,3 +3988,67 @@ img.product-image.product-photo {
   background: rgba(22, 40, 42, 0.94);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
+
+/* =============================================
+   27. CHECKOUT — elegir cómo se paga
+   ============================================= */
+
+.payment-method-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.payment-method-option {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.3rem;
+  min-height: 76px;
+  border: 1.5px solid rgba(37, 37, 37, 0.15);
+  border-radius: 16px;
+  background: hsl(var(--buba-cyan-h) 100% 98.8%);
+  color: #686868;
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-family: inherit;
+  text-align: center;
+  padding: 0.6rem 0.5rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.payment-method-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.payment-method-option:hover {
+  border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.6);
+}
+
+.payment-method-option.selected {
+  border-color: hsl(var(--buba-pink-h) 77.3% 70.6%);
+  background: hsl(var(--buba-pink-h) 100% 79.6% / 0.12);
+  color: #252525;
+  box-shadow: 0 4px 14px hsl(var(--buba-pink-h) 100% 79.6% / 0.25);
+}
+
+/* Variante compacta: va dentro del checkout, justo antes de enviar */
+.payment-info-checkout {
+  margin-top: 0;
+  max-width: none;
+}
+
+/* Modo noche */
+[data-theme="dark"] .payment-method-option {
+  background: hsl(var(--buba-cyan-h) 31.2% 12.5% / 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #9fb9ba;
+}
+
+[data-theme="dark"] .payment-method-option.selected {
+  background: hsl(var(--buba-pink-h) 100% 79.6% / 0.16);
+  border-color: hsl(var(--buba-pink-h) 77.3% 70.6%);
+  color: #eafdfd;
+}

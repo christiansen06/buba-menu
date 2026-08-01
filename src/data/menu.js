@@ -214,7 +214,7 @@ export const menuCategories = [
         description: 'Café frío con leche.',
         image: 'Latte',
         badge: 'Más vendido',
-        featured: true,
+        featured: false,
         sizes: {
           medium: '$7.500',
           large: '$8.000',
@@ -374,6 +374,7 @@ export const menuCategories = [
         id: 'frutilla',
         name: 'Waffle Frutilla',
         description: 'Crema chantilly, frutillas y salsa de chocolate',
+        featured: true,
         config: {
           rellenos: [{ id: 'crema', type: 'crema', label: 'Crema' }],
           toppings: ['frutilla'],
@@ -856,12 +857,26 @@ export const getProductsByCategory = (categoryId) => {
 export const getFeaturedProducts = () => {
   const featured = [];
   menuCategories.forEach((category) => {
-    // Solo procesar categorías con items (no builders)
     if (category.items && Array.isArray(category.items)) {
       const categoryFeatured = category.items
         .filter((item) => item.featured)
         .map((item) => ({ ...item, categoryId: category.id, categoryName: category.name }));
       featured.push(...categoryFeatured);
+    }
+
+    // Los armables (waffles) no tienen "items" sino "presets": combinaciones
+    // ya listas. Van marcadas con isPreset porque la tarjeta las trata
+    // distinto — el precio se calcula según la combinación, no viene fijo.
+    if (category.presets && Array.isArray(category.presets)) {
+      const presetsFeatured = category.presets
+        .filter((preset) => preset.featured)
+        .map((preset) => ({
+          ...preset,
+          categoryId: category.id,
+          categoryName: category.name,
+          isPreset: true,
+        }));
+      featured.push(...presetsFeatured);
     }
   });
   return featured;

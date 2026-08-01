@@ -3,6 +3,16 @@ import { useCart } from '../context/CartContext';
 import StepProgress from './StepProgress';
 import { getProductImage } from '../utils/productImages.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
+import {
+    MAX_RELLENOS,
+    MAX_TOPPINGS,
+    MAX_SALSAS,
+    TIER_LABEL,
+    computeIsMixto,
+    computeTier,
+    computeWafflePrice,
+    buildPresetCartItem,
+} from '../utils/waffle.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -13,54 +23,6 @@ const OPTION_EMOJI = {
     chocolate: '🍫', caramelo: '🍮', pistacho: '🥜',
 };
 const emojiFor = (id) => OPTION_EMOJI[id] || '🧇';
-
-const MAX_RELLENOS = 2;
-const MAX_TOPPINGS = 3; // hasta 3 toppings, mixto desde 2
-const MAX_SALSAS = 2;
-
-/** Mixto si hay 2+ en cualquier categoría, o Nutella (relleno o salsa). */
-function computeIsMixto(rellenos, toppings, salsas) {
-    const hasNutellaRelleno = rellenos.some((r) => r.type === 'nutella');
-    const hasNutellaSalsa = salsas.includes('nutella');
-    return (
-        rellenos.length >= 2 ||
-        toppings.length >= 2 ||
-        salsas.length >= 2 ||
-        hasNutellaRelleno ||
-        hasNutellaSalsa
-    );
-}
-
-/**
- * Básico: exactamente 1 relleno, sin toppings ni salsas.
- * Nutella queda afuera porque fuerza Mixto (es más cara).
- * Opción pensada para clientes con presupuesto más acotado.
- */
-function computeIsBasico(rellenos, toppings, salsas) {
-    if (computeIsMixto(rellenos, toppings, salsas)) return false;
-    return rellenos.length === 1 && toppings.length === 0 && salsas.length === 0;
-}
-
-/** Nivel actual del waffle: 'basico' | 'simple' | 'mixto'. */
-function computeTier(rellenos, toppings, salsas) {
-    if (computeIsMixto(rellenos, toppings, salsas)) return 'mixto';
-    if (computeIsBasico(rellenos, toppings, salsas)) return 'basico';
-    return 'simple';
-}
-
-const TIER_LABEL = { basico: 'Básico', simple: 'Simple', mixto: 'Mixto' };
-
-function computeWafflePrice(category, rellenos, toppings, salsas) {
-    const hasNutellaRelleno = rellenos.some((r) => r.type === 'nutella');
-    const hasNutellaSalsa = salsas.includes('nutella');
-    const doubleNutella = hasNutellaRelleno && hasNutellaSalsa;
-    const tier = computeTier(rellenos, toppings, salsas);
-
-    // Si no hay precio de básico configurado, cae a simple (compatibilidad).
-    let p = category.price[tier] ?? category.price.simple;
-    if (doubleNutella) p += category.nutellaSaucePrice ?? 500;
-    return p;
-}
 
 function OptionTile({ emoji, img, name, selected, disabled, onClick, tag }) {
     return (
@@ -239,26 +201,9 @@ function WaffleBuilder({ category }) {
     };
 
     const addPreset = (preset) => {
-        const cfg = preset.config;
-        const rell = cfg.rellenos.length ? cfg.rellenos.map((r) => r.label).join(' + ') : 'sin relleno';
-        const tops = cfg.toppings.length ? cfg.toppings.map(toppingLabel).join(', ') : 'sin topping';
-        const hasNR = cfg.rellenos.some((r) => r.type === 'nutella');
-        const sal = cfg.salsas.length
-            ? cfg.salsas.map((id) => (id === 'nutella' && hasNR ? 'Nutella (doble)' : salsaLabel(id))).join(', ')
-            : 'sin salsa';
-        const presetTier = computeTier(cfg.rellenos, cfg.toppings, cfg.salsas);
-        const label = `${preset.name} (Waffle ${TIER_LABEL[presetTier]} · ${rell} · ${tops} · ${sal})`;
-
-        addItem({
-            categoryId: category.id,
-            categoryName: category.name,
-            builderType: 'waffle',
-            productId: preset.id,
-            variante: presetTier,
-            label,
-            unitPrice: computeWafflePrice(category, cfg.rellenos, cfg.toppings, cfg.salsas),
-            config: cfg,
-        });
+        // La misma función que usan los Destacados: un waffle entra al carrito
+        // igual venga de acá o de la tarjeta de arriba.
+        addItem(buildPresetCartItem(category, preset));
         showToast('¡Agregado al pedido! 🧇');
     };
 

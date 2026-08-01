@@ -9,6 +9,7 @@ import ProductCard from './ProductCard';
 import PromoSection from './PromoSection';
 import { getProductImage } from '../utils/productImages.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
+import { computePresetPrice, buildPresetCartItem } from '../utils/waffle.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -17,6 +18,13 @@ function FeaturedCard({ item }) {
     const { addItem } = useCart();
     const { estaAgotado } = useDisponibilidad();
     const [justAdded, setJustAdded] = useState(false);
+
+    // Un destacado puede ser un producto común o un waffle ya armado (preset).
+    // El waffle no tiene tamaños ni precio fijo: sale de su combinación.
+    const esPreset = !!item.isPreset;
+    const categoriaPreset = esPreset
+        ? menuCategories.find((c) => c.id === item.categoryId)
+        : null;
 
     const sizes = [
         { key: 'medium', label: 'Mediano', raw: item.sizes?.medium },
@@ -29,24 +37,39 @@ function FeaturedCard({ item }) {
     const [selectedKey, setSelectedKey] = useState(sizes[0]?.key || 'medium');
     const selected = sizes.find((s) => s.key === selectedKey) || sizes[0];
 
+    const precioPreset = categoriaPreset ? computePresetPrice(categoriaPreset, item) : null;
+
     const handleAdd = () => {
-        if (!selected || estaAgotado(item.categoryId, item.id, item)) return;
-        const sizeLabel = multiSize ? ` (${selected.label})` : '';
-        addItem({
-            categoryId: item.categoryId,
-            categoryName: item.categoryName,
-            builderType: null,
-            productId: item.id,
-            variante: selected.key,
-            label: `${item.name}${sizeLabel}`,
-            unitPrice: selected.price,
-            mergeKey: `${item.categoryId}:${item.id}:${selected.key}`,
-        });
+        if (estaAgotado(item.categoryId, item.id, item)) return;
+
+        if (esPreset) {
+            if (!categoriaPreset) return;
+            // Misma función que usa el armable: el waffle entra idéntico
+            // venga de acá o de la sección de Waffles.
+            addItem(buildPresetCartItem(categoriaPreset, item));
+        } else {
+            if (!selected) return;
+            const sizeLabel = multiSize ? ` (${selected.label})` : '';
+            addItem({
+                categoryId: item.categoryId,
+                categoryName: item.categoryName,
+                builderType: null,
+                productId: item.id,
+                variante: selected.key,
+                label: `${item.name}${sizeLabel}`,
+                unitPrice: selected.price,
+                mergeKey: `${item.categoryId}:${item.id}:${selected.key}`,
+            });
+        }
         setJustAdded(true);
         setTimeout(() => setJustAdded(false), 1400);
     };
 
-    const photo = getProductImage(item, item.categoryId);
+    // Los presets se buscan SÓLO por nombre completo: sus ids ("frutilla",
+    // "oreo") se repiten con los del Bubble Tea y traerían la foto equivocada.
+    const photo = esPreset
+        ? getProductImage({ name: item.name }, item.categoryId)
+        : getProductImage(item, item.categoryId);
     const agotado = estaAgotado(item.categoryId, item.id, item);
 
     return (
@@ -65,9 +88,9 @@ function FeaturedCard({ item }) {
                     <p>{item.description}</p>
                 </div>
 
-                {sizes.length > 0 && (
+                {(sizes.length > 0 || esPreset) && (
                     <>
-                        {multiSize && (
+                        {!esPreset && multiSize && (
                             <div className="size-options">
                                 {sizes.map((s) => (
                                     <button
@@ -82,9 +105,13 @@ function FeaturedCard({ item }) {
                                 ))}
                             </div>
                         )}
-                        {!multiSize && (
+                        {(esPreset || !multiSize) && (
                             <div className="featured-sizes">
-                                <span>{selected.price == null ? 'Consultar' : formatPrice(selected.price)}</span>
+                                <span>
+                                    {esPreset
+                                        ? formatPrice(precioPreset)
+                                        : selected.price == null ? 'Consultar' : formatPrice(selected.price)}
+                                </span>
                             </div>
                         )}
                         <button
@@ -131,8 +158,9 @@ function MenuSection() {
 
     return (
         <main id="menu" className="menu-section">
+            {/* Sin el "Menú digital" de arriba: el tigre del hero ya dice
+                "Ver todo el menú", y repetirlo sólo comía pantalla. */}
             <div className="section-heading">
-                <span className="section-kicker">Menu digital</span>
                 <h2>Elegidos de la casa</h2>
             </div>
 

@@ -101,24 +101,44 @@ function WaffleBuilder({ category }) {
 
     const showUpsell = !isMixto;
 
-    const currentWaffleStep =
-        selectedRellenos.length === 0 ? 1 :
-            selectedToppings.length === 0 ? 2 : 3;
-
     /**
-     * En qué estado va cada paso. Antes los tres se pintaban como "activo"
-     * al mismo tiempo y quedaba un muro de opciones donde la gente se perdía.
-     * Ahora sólo el paso en curso se destaca; los ya resueltos se atenúan y
-     * los que todavía no se pueden tocar quedan apagados.
-     * Ojo: toppings y salsas son opcionales, así que el paso se marca hecho
-     * pero nunca se oculta — el cliente puede volver cuando quiera.
+     * ¿Queda algo por elegir en cada paso?
+     *
+     * Un paso sigue ENCENDIDO mientras se le pueda sumar algo. Con 1 relleno
+     * de 2 el cliente todavía puede elegir otro, así que apagar el paso 1 ahí
+     * era mentirle. Se apaga (✓) recién cuando llegó al tope, o cuando no
+     * queda ninguna opción con stock para sumar.
+     *
+     * Los pasos 2 y 3 arrancan apagados hasta que haya al menos un relleno,
+     * que es lo único obligatorio del waffle.
      */
+    const quedaLibre = (campo, opciones, yaElegidos) =>
+        opciones.some(
+            (o) => !yaElegidos.includes(o.id) && !opcionAgotada(category.id, campo, o.id)
+        );
+
+    const pasoAbierto = {
+        // El helado se puede repetir (cambia el sabor); los demás rellenos no.
+        1: selectedRellenos.length < MAX_RELLENOS &&
+            category.rellenos.some(
+                (o) =>
+                    !opcionAgotada(category.id, 'rellenos', o.id) &&
+                    (o.id === 'helado' || !selectedRellenos.some((r) => r.type === o.id))
+            ),
+        2: selectedToppings.length < MAX_TOPPINGS &&
+            quedaLibre('toppings', category.toppings, selectedToppings),
+        3: selectedSalsas.length < MAX_SALSAS &&
+            quedaLibre('salsas', category.salsas, selectedSalsas),
+    };
+
     const claseStep = (n) => {
         if (n > 1 && selectedRellenos.length === 0) return 'disabled';
-        if (currentWaffleStep === n) return 'active';
-        if (currentWaffleStep > n) return 'done';
-        return '';
+        return pasoAbierto[n] ? 'active' : 'done';
     };
+
+    // La barra apunta al primer paso donde todavía se puede elegir algo, así
+    // no contradice a los cuadros: antes decía "Paso 2 de 3" con el 1 encendido.
+    const pasoMostrado = pasoAbierto[1] ? 1 : pasoAbierto[2] ? 2 : 3;
 
     useEffect(() => {
         if (isEditing && editingItem.config) {
@@ -307,13 +327,13 @@ function WaffleBuilder({ category }) {
             {/* ARMAR */}
             {(mode === 'build' || isEditing) && (
                 <div className="waffle-build">
-                    <StepProgress current={currentWaffleStep} total={3} />
+                    <StepProgress current={pasoMostrado} total={3} />
 
                     {/* RELLENOS */}
                     <div className={`builder-step ${claseStep(1)}`}>
                         <div className="builder-step-header">
                             <div className="builder-step-title">
-                                <span className="builder-step-number">{currentWaffleStep > 1 ? '✓' : '1'}</span>
+                                <span className="builder-step-number">{pasoAbierto[1] ? '1' : '✓'}</span>
                                 <span>Relleno {selectedRellenos.length}/{MAX_RELLENOS}</span>
                             </div>
                         </div>
@@ -382,7 +402,7 @@ function WaffleBuilder({ category }) {
                     <div className={`builder-step ${claseStep(2)}`}>
                         <div className="builder-step-header">
                             <div className="builder-step-title">
-                                <span className="builder-step-number">{currentWaffleStep > 2 ? '✓' : '2'}</span>
+                                <span className="builder-step-number">{selectedRellenos.length > 0 && !pasoAbierto[2] ? '✓' : '2'}</span>
                                 <span>Toppings {selectedToppings.length}/{MAX_TOPPINGS} <span className="opcional-tag">opcional</span></span>
                             </div>
                         </div>
@@ -417,7 +437,7 @@ function WaffleBuilder({ category }) {
                     <div className={`builder-step ${claseStep(3)}`}>
                         <div className="builder-step-header">
                             <div className="builder-step-title">
-                                <span className="builder-step-number">3</span>
+                                <span className="builder-step-number">{selectedRellenos.length > 0 && !pasoAbierto[3] ? '✓' : '3'}</span>
                                 <span>Salsas {selectedSalsas.length}/{MAX_SALSAS} <span className="opcional-tag">opcional</span></span>
                             </div>
                         </div>

@@ -18,6 +18,13 @@ export const menuCategories = [
     icon: '🧋',
     accent: 'cyan',
     description: 'Nuestros clásicos: té con leche, frutas y tapioca. El original de BüBa',
+    // Adicionales que se le pueden sumar a cualquier producto de la categoría.
+    // Están acá y no en el componente para poder agregar otros (o habilitarlos
+    // en otra categoría) tocando sólo datos.
+    // "insumo" los conecta con el stock: si se acaba, el extra deja de ofrecerse.
+    extras: [
+      { id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1000, insumo: 'perlas' },
+    ],
     items: [
       {
         id: 'brown-sugar',

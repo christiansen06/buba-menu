@@ -10,6 +10,8 @@ import PromoSection from './PromoSection';
 import { getProductImage } from '../utils/productImages.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 import { computePresetPrice, buildPresetCartItem } from '../utils/waffle.js';
+import ExtrasPicker from './ExtrasPicker.jsx';
+import { resumenExtras, precioConExtras } from '../utils/extras.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -22,9 +24,10 @@ function FeaturedCard({ item }) {
     // Un destacado puede ser un producto común o un waffle ya armado (preset).
     // El waffle no tiene tamaños ni precio fijo: sale de su combinación.
     const esPreset = !!item.isPreset;
-    const categoriaPreset = esPreset
-        ? menuCategories.find((c) => c.id === item.categoryId)
-        : null;
+    // La categoría hace falta para dos cosas: calcular el precio de un preset
+    // y saber si admite adicionales (perlas extra en los bubble teas).
+    const categoria = menuCategories.find((c) => c.id === item.categoryId);
+    const categoriaPreset = esPreset ? categoria : null;
 
     const sizes = [
         { key: 'medium', label: 'Mediano', raw: item.sizes?.medium },
@@ -38,6 +41,17 @@ function FeaturedCard({ item }) {
     const selected = sizes.find((s) => s.key === selectedKey) || sizes[0];
 
     const precioPreset = categoriaPreset ? computePresetPrice(categoriaPreset, item) : null;
+
+    // Los presets de waffle no llevan adicionales: la categoría waffles no
+    // declara "extras" y su combinación ya se arma en el propio armable.
+    const [extrasElegidos, setExtrasElegidos] = useState([]);
+    const extrasCategoria = esPreset ? null : categoria?.extras;
+    const extras = resumenExtras(extrasCategoria, extrasElegidos);
+
+    const toggleExtra = (id) =>
+        setExtrasElegidos((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
 
     const handleAdd = () => {
         if (estaAgotado(item.categoryId, item.id, item)) return;
@@ -56,9 +70,10 @@ function FeaturedCard({ item }) {
                 builderType: null,
                 productId: item.id,
                 variante: selected.key,
-                label: `${item.name}${sizeLabel}`,
-                unitPrice: selected.price,
-                mergeKey: `${item.categoryId}:${item.id}:${selected.key}`,
+                label: `${item.name}${sizeLabel}${extras.sufijoLabel}`,
+                unitPrice: precioConExtras(selected.price, extras.precioExtra),
+                mergeKey: `${item.categoryId}:${item.id}:${selected.key}${extras.sufijoMerge}`,
+                config: extras.config,
             });
         }
         setJustAdded(true);
@@ -114,6 +129,14 @@ function FeaturedCard({ item }) {
                                 </span>
                             </div>
                         )}
+                        {!agotado && !esPreset && (
+                            <ExtrasPicker
+                                extras={extrasCategoria}
+                                seleccionados={extrasElegidos}
+                                onToggle={toggleExtra}
+                            />
+                        )}
+
                         <button
                             className={`product-add-btn ${justAdded ? 'added' : ''}`}
                             onClick={handleAdd}

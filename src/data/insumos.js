@@ -72,6 +72,11 @@ export const INSUMOS = [
     { id: 'leche', label: 'Leche', grupo: 'Bases' },
     { id: 'jugo', label: 'Jugo de naranja', grupo: 'Bases' },
 
+    // Las perlas del EXTRA que se cobra aparte (ver "extras" en la categoría
+    // bubble-tea de menu.js). A propósito no está en EN_CARTA: si se acaban,
+    // se cae el adicional pero los bubble teas se siguen vendiendo.
+    { id: 'perlas', label: 'Perlas de tapioca (extra)', grupo: 'Bases' },
+
     // --- Otros ---
     { id: 'barquillo', label: 'Barquillo', grupo: 'Otros' },
 ];

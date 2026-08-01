@@ -4052,3 +4052,68 @@ img.product-image.product-photo {
   border-color: hsl(var(--buba-pink-h) 77.3% 70.6%);
   color: #eafdfd;
 }
+
+/* =============================================
+   28. ADICIONALES — perlas extra en los bubble teas
+   ============================================= */
+
+.extras-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+}
+
+.extra-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  border: 1.5px dashed hsl(var(--buba-cyan-h) 79.9% 61% / 0.5);
+  border-radius: 999px;
+  background: hsl(var(--buba-cyan-h) 100% 98.8%);
+  color: #4a6b6d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-family: inherit;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.extra-chip:hover {
+  border-color: hsl(var(--buba-cyan-h) 88% 54.1%);
+}
+
+/* Elegido: pasa a línea llena y color de marca, para que se note que suma. */
+.extra-chip.selected {
+  border-style: solid;
+  border-color: hsl(var(--buba-pink-h) 77.3% 70.6%);
+  background: hsl(var(--buba-pink-h) 100% 79.6% / 0.14);
+  color: #252525;
+  box-shadow: 0 3px 10px hsl(var(--buba-pink-h) 100% 79.6% / 0.25);
+}
+
+.extra-chip-price {
+  font-size: 0.74rem;
+  font-weight: 850;
+  color: hsl(var(--buba-pink-h) 65% 52%);
+  white-space: nowrap;
+}
+
+/* Modo noche */
+[data-theme="dark"] .extra-chip {
+  background: hsl(var(--buba-cyan-h) 31.2% 12.5% / 0.6);
+  border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.3);
+  color: #9fb9ba;
+}
+
+[data-theme="dark"] .extra-chip.selected {
+  background: hsl(var(--buba-pink-h) 100% 79.6% / 0.18);
+  border-color: hsl(var(--buba-pink-h) 77.3% 70.6%);
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .extra-chip-price {
+  color: hsl(var(--buba-pink-h) 85% 78%);
+}

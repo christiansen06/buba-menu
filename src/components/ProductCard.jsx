@@ -3,6 +3,8 @@ import { useCart } from '../context/CartContext';
 import { parsePrice } from '../data/menu';
 import { getProductImage } from '../utils/productImages.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
+import ExtrasPicker from './ExtrasPicker.jsx';
+import { resumenExtras, precioConExtras } from '../utils/extras.js';
 
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
@@ -27,6 +29,14 @@ function ProductCard({ item, category }) {
     const [selectedKey, setSelectedKey] = useState(sizes[0]?.key || 'medium');
     const selected = sizes.find((s) => s.key === selectedKey) || sizes[0];
 
+    const [extrasElegidos, setExtrasElegidos] = useState([]);
+    const extras = resumenExtras(category.extras, extrasElegidos);
+
+    const toggleExtra = (id) =>
+        setExtrasElegidos((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+
     const handleAdd = () => {
         if (!selected || agotado) return;
         const sizeLabel = multiSize ? ` (${selected.label})` : '';
@@ -38,9 +48,10 @@ function ProductCard({ item, category }) {
             // sin ellos el pedido queda sólo como texto y no se puede contar.
             productId: item.id,
             variante: selected.key,
-            label: `${item.name}${sizeLabel}`,
-            unitPrice: selected.price,
-            mergeKey: `${category.id}:${item.id}:${selected.key}`,
+            label: `${item.name}${sizeLabel}${extras.sufijoLabel}`,
+            unitPrice: precioConExtras(selected.price, extras.precioExtra),
+            mergeKey: `${category.id}:${item.id}:${selected.key}${extras.sufijoMerge}`,
+            config: extras.config,
         });
         setJustAdded(true);
         setTimeout(() => setJustAdded(false), 1400);
@@ -85,6 +96,14 @@ function ProductCard({ item, category }) {
                     <div className="single-price">
                         <strong>{selected.price == null ? 'Consultar' : formatPrice(selected.price)}</strong>
                     </div>
+                )}
+
+                {!agotado && (
+                    <ExtrasPicker
+                        extras={category.extras}
+                        seleccionados={extrasElegidos}
+                        onToggle={toggleExtra}
+                    />
                 )}
 
                 <button

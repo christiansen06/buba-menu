@@ -14,8 +14,13 @@ Ejemplos que funcionan para "BüBa Brown Sugar" (id: brown-sugar):
 CADA FOTO ES DE UN SOLO PRODUCTO
 Los nombres genéricos de sabor NO alcanzan: "Oreo.webp" no le pone foto
 al Postre Oreo ni al Frappé Oreo, porque son productos distintos del
-BüBa Oreo. Si querés foto para esos, subí un archivo con el id de cada
-uno (por ejemplo: postre-oreo.webp, oreo-frappe.webp).
+BüBa Oreo. Para esos va el id de cada uno: postre-oreo.webp,
+oreo-frappe.webp, chocotorta.webp.
+
+FORMATO QUE USAN TODAS LAS FOTOS DEL MENÚ
+WebP, 900x1125 (vertical 4:5), entre 50 y 80 KB.
+Las de Canva salen en PNG de 7 MB: hay que convertirlas antes de subirlas,
+o el menú tarda un montón en abrir con datos móviles en el local.
 
 WAFFLES: usá el nombre completo, no el sabor solo
 Los waffles "Frutilla" y "Oreo" repiten el mismo id que el Bubble Tea

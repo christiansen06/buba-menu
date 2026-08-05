@@ -40,13 +40,25 @@ Object.entries(files).forEach(([path, url]) => {
     imageMap[normalize(base)] = url;
 });
 
-export function getProductImage(item, categoryId) {
+/**
+ * @param sufijo  Variante opcional del producto (ej: 'caliente'). Si existe
+ *                una foto con ese sufijo la usa; si no, cae a la del producto.
+ *                Así, el día que haya fotos propias de los bubble teas
+ *                calientes, alcanza con soltar "brown-sugar-caliente.webp"
+ *                en la carpeta: no hay que tocar código.
+ */
+export function getProductImage(item, categoryId, sufijo = null) {
     // Cada producto usa SOLO su propia foto.
     // No se matchea por el campo "image" (el sabor genérico: "Oreo", "Matcha"),
     // porque lo comparten productos de categorías distintas y un Postre Oreo
     // terminaba mostrando la foto del BüBa Oreo. El id y el nombre son únicos
     // por producto, así que son los únicos que se usan.
     const keys = [
+        // Primero la foto específica de la variante, si es que existe.
+        sufijo && categoryId && item.id ? `${categoryId}-${item.id}-${sufijo}` : null,
+        sufijo && item.id ? `${item.id}-${sufijo}` : null,
+        sufijo && item.name ? `${item.name}-${sufijo}` : null,
+
         categoryId && item.id ? `${categoryId}-${item.id}` : null,
         categoryId && item.name ? `${categoryId}-${item.name}` : null,
         item.id,

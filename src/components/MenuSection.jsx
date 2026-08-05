@@ -5,7 +5,7 @@ import IceCreamBuilder from './IceCreamBuilder';
 import MedialunasSelector from './MedialunasSelector';
 import LicuadoBuilder from './LicuadoBuilder';
 import WaffleBuilder from './WaffleBuilder';
-import ProductCard from './ProductCard';
+import ProductosDeCategoria from './ProductosDeCategoria';
 import PromoSection from './PromoSection';
 import { getProductImage } from '../utils/productImages.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
@@ -162,13 +162,7 @@ function MenuSection() {
         if (category.builderType === 'waffle') return <WaffleBuilder category={category} />;
 
         if (category.items?.length > 0) {
-            return (
-                <div className="products-grid">
-                    {category.items.map((item) => (
-                        <ProductCard item={item} category={category} key={item.id} />
-                    ))}
-                </div>
-            );
+            return <ProductosDeCategoria category={category} />;
         }
 
         return (

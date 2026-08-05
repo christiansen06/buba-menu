@@ -9,21 +9,31 @@ import { resumenExtras, precioConExtras } from '../utils/extras.js';
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
-function ProductCard({ item, category }) {
+function ProductCard({ item, category, presentacion = null }) {
     const { addItem } = useCart();
     const [justAdded, setJustAdded] = useState(false);
 
     // Agotado si lo marcaste desde el panel, o si el producto dice
     // disponible: false en menu.js. Si no dice nada, hay stock.
+    // El stock es POR SABOR: si se acaba, se acaba en frío y en caliente.
     const { estaAgotado } = useDisponibilidad();
     const agotado = estaAgotado(category.id, item.id, item);
+
+    // El recargo de la presentación (ej: caliente +$1.000) se aplica a CADA
+    // tamaño y se muestra en los botones, no sólo al llegar al carrito: el
+    // cliente tiene que ver el precio real antes de agregar.
+    const recargo = presentacion?.priceDelta || 0;
 
     const sizes = [
         { key: 'medium', label: 'Mediano', raw: item.sizes?.medium },
         { key: 'large', label: 'Grande', raw: item.sizes?.large },
     ]
         .filter((s) => s.raw && s.raw !== 'N/A')
-        .map((s) => ({ ...s, price: parsePrice(s.raw) }));
+        .map((s) => {
+            const base = parsePrice(s.raw);
+            // Los "a consultar" (null) no reciben recargo: siguen a consultar.
+            return { ...s, price: base == null ? null : base + recargo };
+        });
 
     const multiSize = sizes.length > 1;
     const [selectedKey, setSelectedKey] = useState(sizes[0]?.key || 'medium');
@@ -40,24 +50,36 @@ function ProductCard({ item, category }) {
     const handleAdd = () => {
         if (!selected || agotado) return;
         const sizeLabel = multiSize ? ` (${selected.label})` : '';
+        const nombrePres = presentacion?.sufijoNombre ? ` ${presentacion.sufijoNombre}` : '';
+        const mergePres = presentacion ? `:${presentacion.id}` : '';
+
         addItem({
             categoryId: category.id,
             categoryName: category.name,
             builderType: null,
             // productId y variante son los que se guardan en la base:
             // sin ellos el pedido queda sólo como texto y no se puede contar.
+            // "variante" sigue siendo el TAMAÑO: la presentación va en config
+            // para no romper las métricas que ya existen.
             productId: item.id,
             variante: selected.key,
-            label: `${item.name}${sizeLabel}${extras.sufijoLabel}`,
+            label: `${item.name}${nombrePres}${sizeLabel}${extras.sufijoLabel}`,
             unitPrice: precioConExtras(selected.price, extras.precioExtra),
-            mergeKey: `${category.id}:${item.id}:${selected.key}${extras.sufijoMerge}`,
-            config: extras.config,
+            // La presentación entra en el mergeKey: un mismo sabor frío y
+            // caliente son dos líneas del carrito, no una con cantidad 2.
+            mergeKey: `${category.id}:${item.id}:${selected.key}${mergePres}${extras.sufijoMerge}`,
+            config:
+                presentacion || extras.config
+                    ? { ...(presentacion ? { presentacion: presentacion.id } : {}), ...(extras.config || {}) }
+                    : null,
         });
         setJustAdded(true);
         setTimeout(() => setJustAdded(false), 1400);
     };
 
-    const photo = getProductImage(item, category.id);
+    // Hoy los calientes usan la misma foto que los fríos. Si algún día se
+    // suben fotos propias ("brown-sugar-caliente.webp"), las toma sola.
+    const photo = getProductImage(item, category.id, presentacion?.id);
 
     return (
         <article className={`product-card ${agotado ? 'agotado' : ''}`}>

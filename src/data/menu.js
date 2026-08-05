@@ -25,6 +25,13 @@ export const menuCategories = [
     extras: [
       { id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1000, insumo: 'perlas' },
     ],
+    // Frío / caliente: los mismos sabores, con un recargo fijo en el caliente
+    // (sobre CADA tamaño). El frío va primero porque es el producto estrella.
+    // "sufijoNombre" es lo que se le suma al nombre en el carrito y en el pedido.
+    presentaciones: [
+      { id: 'frio', label: 'Fríos', emoji: '🧊', priceDelta: 0, porDefecto: true },
+      { id: 'caliente', label: 'Calientes', emoji: '🔥', priceDelta: 1000, sufijoNombre: 'Caliente' },
+    ],
     items: [
       {
         id: 'brown-sugar',

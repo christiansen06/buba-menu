@@ -25,15 +25,18 @@
 -- ---------------------------------------------------------------------
 create or replace view public.metrica_bubble_tea
 with (security_invoker = on) as
+-- Los coalesce de afuera son a propósito: un "sum ... filter" sin filas que
+-- cumplan devuelve NULL, no 0. Sin esto la columna "calientes" aparecería
+-- vacía hasta el primer pedido caliente y parecería que la vista no anda.
 select
   producto_id,
   min(nombre)                                                              as nombre,
   sum(cantidad)                                                            as unidades,
-  sum(cantidad) filter (where coalesce(detalle->>'presentacion', 'frio') = 'frio')     as frios,
-  sum(cantidad) filter (where detalle->>'presentacion' = 'caliente')                   as calientes,
+  coalesce(sum(cantidad) filter (where coalesce(detalle->>'presentacion', 'frio') = 'frio'), 0)  as frios,
+  coalesce(sum(cantidad) filter (where detalle->>'presentacion' = 'caliente'), 0)                as calientes,
   sum(cantidad * coalesce(precio_unitario, 0))                             as facturado,
-  sum(cantidad * coalesce(precio_unitario, 0))
-    filter (where detalle->>'presentacion' = 'caliente')                   as facturado_calientes,
+  coalesce(sum(cantidad * coalesce(precio_unitario, 0))
+    filter (where detalle->>'presentacion' = 'caliente'), 0)               as facturado_calientes,
   count(distinct pedido_id)                                                as pedidos
 from public.pedido_items
 where categoria_id = 'bubble-tea'

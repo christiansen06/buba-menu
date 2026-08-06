@@ -1,6 +1,19 @@
 -- =====================================================================
 -- PARTE 5 — Bubble teas fríos vs calientes, y las perlas extra
 --
+-- ⚠️  ESTE ARCHIVO QUEDÓ VIEJO. NO CORRERLO SUELTO.
+--
+--     Las dos vistas de acá abajo (metrica_bubble_tea y
+--     metrica_opciones_armables) las reemplaza la PARTE 6.
+--
+--     Correr esta parte 5 después de la 6 revierte el arreglo sin avisar:
+--     las vistas vuelven a leer de pedido_items y se pierden los bubble
+--     teas vendidos dentro de un combo (con ellos, el Taro pasa de cuarto
+--     a segundo en el ranking).
+--
+--     Si instalás todo de cero, corré las partes en orden y terminá con
+--     la 6. Si vas a modificar estas vistas, partí de la 6.
+--
 -- Correr esto en el editor SQL de Supabase, como las partes anteriores.
 -- Sólo agrega vistas de lectura: no toca ninguna tabla ni ningún dato.
 --

@@ -79,6 +79,7 @@ export const INSUMOS = [
 
     // --- Otros ---
     { id: 'barquillo', label: 'Barquillo', grupo: 'Otros' },
+    { id: 'flan', label: 'Flan', grupo: 'Otros' },
 ];
 
 /**
@@ -177,6 +178,10 @@ export const EN_CARTA = {
         oreo: ['leche', 'oreo'],                 // lleva galletitas molidas
         taro: ['leche'],
         chocolate: ['leche', 'salsa-chocolate'],
+        // El flan y el caramelo son lo que lo define: si falta cualquiera
+        // de los dos, no se puede hacer. Las perlas no van acá, igual que
+        // en el resto: se controlan aparte, sólo para el adicional.
+        flan: ['leche', 'flan', 'salsa-caramelo'],
     },
 
     // El café negro es lo único que sobrevive sin leche.

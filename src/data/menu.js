@@ -50,8 +50,8 @@ export const menuCategories = [
         name: 'BüBa Matcha',
         description: 'Matcha cremoso con tapioca.',
         image: 'Matcha',
-        badge: 'Nuevo',
-        featured: false,
+        badge: null,
+        featured: true,
         sizes: {
           medium: '$9.500',
           large: '$10.500',
@@ -87,7 +87,7 @@ export const menuCategories = [
         description: 'Bubble tea dulce con notas de Oreo.',
         image: 'Oreo',
         badge: 'Más vendido',
-        featured: true,
+        featured: false,
         sizes: {
           medium: '$9.000',
           large: '$10.000',
@@ -99,6 +99,18 @@ export const menuCategories = [
         description: 'Taro suave y cremoso.',
         image: 'Taro',
         badge: null,
+        featured: false,
+        sizes: {
+          medium: '$9.000',
+          large: '$10.000',
+        },
+      },
+      {
+        id: 'flan',
+        name: 'BüBa Flan',
+        description: 'Flan, caramelo, leche, perlas y azúcar caramelizada.',
+        image: 'Flan',
+        badge: 'Nuevo',
         featured: false,
         sizes: {
           medium: '$9.000',

@@ -393,7 +393,7 @@ export const menuCategories = [
     type: 'builder',
     builderType: 'waffle',
     // basico: 1 relleno solo (sin toppings ni salsas). Nutella no aplica: fuerza Mixto.
-    price: { basico: 8000, simple: 9000, mixto: 10000 },
+    price: { basico: 9000, simple: 10000, mixto: 11000 },
     nutellaSaucePrice: 500,
     presets: [
       {
@@ -746,14 +746,14 @@ export const promociones = [
     id: 'promo-cafe-waffle',
     name: 'Café + Waffle',
     description: 'Café grande + 1 waffle simple',
-    price: 12000,
+    price: 13000,
     slots: [CAFE_CHICO, WAFFLE_SIMPLE],
   },
   {
     id: 'promo-bubble-waffle',
     name: 'Bubble Tea + Waffle',
     description: 'Bubble Tea grande + 1 waffle simple',
-    price: 18000,
+    price: 19000,
     slots: [BUBBLE_GRANDE, WAFFLE_SIMPLE],
   },
   {

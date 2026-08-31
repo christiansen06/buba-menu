@@ -17,7 +17,7 @@ export const menuCategories = [
     name: 'Bubble Tea',
     icon: '🧋',
     accent: 'cyan',
-    description: 'Nuestros clásicos: té con leche, frutas y tapioca. El original de BüBa',
+    description: 'El original de BüBa. Té, frutas, chocolate y flan, siempre con perlas de tapioca',
     // Adicionales que se le pueden sumar a cualquier producto de la categoría.
     // Están acá y no en el componente para poder agregar otros (o habilitarlos
     // en otra categoría) tocando sólo datos.
@@ -36,7 +36,7 @@ export const menuCategories = [
       {
         id: 'brown-sugar',
         name: 'BüBa Brown Sugar',
-        description: 'Té negro, leche y brown sugar.',
+        description: 'Té negro, leche y brown sugar',
         image: 'Brown Sugar',
         badge: 'Recomendado',
         featured: true,
@@ -48,7 +48,7 @@ export const menuCategories = [
       {
         id: 'matcha',
         name: 'BüBa Matcha',
-        description: 'Matcha cremoso con tapioca.',
+        description: 'Matcha cremoso con tapioca',
         image: 'Matcha',
         badge: null,
         featured: true,
@@ -60,7 +60,7 @@ export const menuCategories = [
       {
         id: 'frutilla',
         name: 'BüBa Frutilla',
-        description: 'Bubble tea sabor frutilla.',
+        description: 'Bubble tea sabor frutilla',
         image: 'Frutilla',
         badge: null,
         featured: false,
@@ -72,7 +72,7 @@ export const menuCategories = [
       {
         id: 'thai',
         name: 'BüBa Thai',
-        description: 'Inspirado en el clásico té tailandés.',
+        description: 'Inspirado en el clásico té tailandés',
         image: 'Thai',
         badge: null,
         featured: false,
@@ -84,7 +84,7 @@ export const menuCategories = [
       {
         id: 'oreo',
         name: 'BüBa Oreo',
-        description: 'Bubble tea dulce con notas de Oreo.',
+        description: 'Bubble tea dulce con notas de Oreo',
         image: 'Oreo',
         badge: 'Más vendido',
         featured: false,
@@ -96,7 +96,7 @@ export const menuCategories = [
       {
         id: 'taro',
         name: 'BüBa Taro',
-        description: 'Taro suave y cremoso.',
+        description: 'Taro suave y cremoso',
         image: 'Taro',
         badge: null,
         featured: false,
@@ -108,7 +108,7 @@ export const menuCategories = [
       {
         id: 'flan',
         name: 'BüBa Flan',
-        description: 'Flan, caramelo, leche, perlas y azúcar caramelizada.',
+        description: 'Flan, caramelo, leche, perlas y azúcar caramelizada',
         image: 'Flan',
         badge: 'Nuevo',
         featured: false,
@@ -120,7 +120,7 @@ export const menuCategories = [
       {
         id: 'chocolate',
         name: 'BüBa Chocolate',
-        description: 'Chocolate y tapioca.',
+        description: 'Chocolate y tapioca',
         image: 'Chocolate',
         badge: null,
         featured: false,
@@ -138,12 +138,12 @@ export const menuCategories = [
     name: 'Café',
     icon: '☕',
     accent: 'cyan',
-    description: 'Café recién preparado. Espresso, lattes y especialidades',
+    description: 'Café de prensa francesa, recién preparado',
     items: [
       {
         id: 'cafe-negro',
-        name: 'Cafe Negro',
-        description: 'Espresso puro y intenso. 2 shots.',
+        name: 'Café Negro',
+        description: 'Café puro e intenso, hecho con prensa francesa. 2 shots',
         image: 'Espresso',
         badge: null,
         featured: false,
@@ -165,8 +165,8 @@ export const menuCategories = [
         },
       },{
         id: 'lagrima',
-        name: 'Lagrima',
-        description: 'Lágrima, leche vaporizada y espuma',
+        name: 'Lágrima',
+        description: 'Leche espumada con un toque de café',
         image: 'Lágrima',
         badge: null,
         featured: false,
@@ -178,7 +178,7 @@ export const menuCategories = [
       {
         id: 'cappuccino',
         name: 'Cappuccino',
-        description: 'Espresso, leche vaporizada y espuma',
+        description: '2 shots de café hecho con prensa y leche espumada',
         image: 'Cappuccino',
         badge: null,
         featured: false,
@@ -202,7 +202,7 @@ export const menuCategories = [
       {
         id: 'submarino',
         name: 'Submarino',
-        description: 'Leche caliente con una barra de chocolate para derretir. Tamaño grande.',
+        description: 'Leche caliente con una barra de chocolate para derretir. Tamaño grande',
         image: 'Submarino',
         badge: null,
         featured: false,
@@ -225,7 +225,7 @@ export const menuCategories = [
       {
         id: 'americano',
         name: 'Americano Frío',
-        description: 'Café frío clásico.',
+        description: 'Café frío clásico',
         image: 'Americano',
         badge: null,
         featured: false,
@@ -237,7 +237,7 @@ export const menuCategories = [
       {
         id: 'latte',
         name: 'Latte Frío',
-        description: 'Café frío con leche.',
+        description: 'Café frío con leche',
         image: 'Latte',
         badge: 'Más vendido',
         featured: false,
@@ -249,7 +249,7 @@ export const menuCategories = [
       {
         id: 'dark-moca',
         name: 'Dark Moca',
-        description: 'Café frío con cacao intenso.',
+        description: 'Café frío con cacao intenso',
         image: 'Moca',
         badge: null,
         featured: false,
@@ -261,7 +261,7 @@ export const menuCategories = [
       {
         id: 'caramel-latte',
         name: 'Caramel Latte Frío',
-        description: 'Latte frío con caramelo.',
+        description: 'Latte frío con caramelo',
         image: 'Caramel',
         badge: null,
         featured: false,
@@ -273,7 +273,7 @@ export const menuCategories = [
       {
         id: 'matcha-latte',
         name: 'Matcha Latte Frío',
-        description: 'Matcha frío con leche.',
+        description: 'Matcha frío con leche',
         image: 'Matcha',
         badge: 'Nuevo',
         featured: false,
@@ -296,7 +296,7 @@ export const menuCategories = [
       {
         id: 'chocolate-moca',
         name: 'Chocolate Moca',
-        description: 'Frappuccino de chocolate, café y crema.',
+        description: 'Frappuccino de chocolate, café y crema',
         image: 'Moca',
         badge: null,
         featured: false,
@@ -308,7 +308,7 @@ export const menuCategories = [
       {
         id: 'oreo-frappe',
         name: 'Frappé Oreo',
-        description: 'Frappé cremoso con Oreo y crema.',
+        description: 'Frappé cremoso con Oreo y crema',
         image: 'Oreo',
         badge: 'Más vendido',
         featured: true,
@@ -320,7 +320,7 @@ export const menuCategories = [
       {
         id: 'ddl',
         name: 'Frappé Dulce de Leche',
-        description: 'Frappé cremoso con Dulce de Leche y crema.',
+        description: 'Frappé cremoso con dulce de leche y crema',
         image: 'DDL',
         badge: 'Recomendado',
         featured: false,
@@ -332,7 +332,7 @@ export const menuCategories = [
       {
         id: 'frutilla-frappe',
         name: 'Frappé Frutilla',
-        description: 'Frappe cremoso con Frutilla y crema.',
+        description: 'Frappé cremoso con frutilla y crema',
         image: 'Frutilla',
         badge: null,
         featured: false,
@@ -344,7 +344,7 @@ export const menuCategories = [
       {
         id: 'matcha-frappe',
         name: 'Frappé Matcha',
-        description: 'Frappe de Matcha con crema.',
+        description: 'Frappé de matcha con crema',
         image: 'Matcha',
         badge: null,
         featured: false,
@@ -389,7 +389,7 @@ export const menuCategories = [
     name: 'Waffles',
     icon: '🧇',
     accent: 'pink',
-    description: 'Elegí uno listo o armá el tuyo. Desde $8.000 con un solo relleno',
+    description: 'Recién hecho y calentito. Elegí uno de los nuestros o armá el tuyo con relleno, toppings y salsa',
     type: 'builder',
     builderType: 'waffle',
     // basico: 1 relleno solo (sin toppings ni salsas). Nutella no aplica: fuerza Mixto.
@@ -433,7 +433,7 @@ export const menuCategories = [
       {
         id: 'argentina',
         name: 'Waffle Argentina',
-        description: 'Helado Crema del cielo, Crema Chantilly, Ferrero Rocher y salsa de caramelo',
+        description: 'Helado crema del cielo, crema chantilly, Ferrero Rocher y salsa de caramelo',
         config: {
           rellenos: [
             { id: 'helado-cielo-p', type: 'helado', flavor: 'cielo', label: 'Helado Crema del Cielo' },
@@ -447,9 +447,9 @@ export const menuCategories = [
       {
         id: 'fit',
         name: 'Waffle Fit',
-        description: 'Mantequilla de Mani, Banana y salsa de chocolate',
+        description: 'Mantequilla de maní, banana y salsa de chocolate',
         config: {
-          rellenos: [{ id: 'mani', type: 'mani', label: 'Mantequilla de mani' }],
+          rellenos: [{ id: 'mani', type: 'mani', label: 'Mantequilla de maní' }],
           toppings: ['banana'],
           salsas: ['chocolate'],
           extraNutella: false,
@@ -461,7 +461,7 @@ export const menuCategories = [
       { id: 'ddl', label: 'Dulce de Leche' },
       { id: 'crema', label: 'Crema' },
       { id: 'nutella', label: 'Nutella', forcesMixto: true },
-      { id: 'mani', label: 'Mantequilla de mani' },
+      { id: 'mani', label: 'Mantequilla de maní' },
     ],
     heladoFlavors: [
       { id: 'chocolate', label: 'Chocolate' },
@@ -502,7 +502,7 @@ export const menuCategories = [
       {
         id: 'chocotorta',
         name: 'Chocotorta',
-        description: 'Chocotorta clásica con Dulce de Leche y Queso Crema',
+        description: 'Chocotorta clásica con dulce de leche y queso crema',
         image: 'Chocotorta',
         badge: 'Más vendido',
         featured: true,
@@ -514,7 +514,7 @@ export const menuCategories = [
       {
         id: 'postre-oreo',
         name: 'Postre Oreo',
-        description: 'Oreo en su base, Dulce de Leche y Crema',
+        description: 'Oreo en su base, dulce de leche y crema',
         image: 'Oreo',
         badge: null,
         featured: false,
@@ -801,8 +801,8 @@ export const promociones = [
   },
   {
     id: 'promo-capuccino-budin',
-    name: 'Capuccino + Budín',
-    description: 'Capuccino + 1 porción de budín',
+    name: 'Cappuccino + Budín',
+    description: 'Cappuccino + 1 porción de budín',
     price: 6500,
     slots: [
       {

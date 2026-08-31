@@ -2758,14 +2758,20 @@ a {
 
 .preset-top {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-columns: 104px minmax(0, 1fr);
   gap: 0.85rem;
 }
 
+/*
+  El cuadro va VERTICAL, con la misma proporción que las fotos (4:5).
+  Antes era cuadrado (92x92) y "object-fit: cover" recortaba arriba y abajo
+  para llenarlo: se comía como un 10% de arriba, justo donde el waffle lleva
+  el relleno. Con 104x130 la foto entra entera y no se recorta nada.
+*/
 .preset-image {
-  width: 92px;
-  min-width: 92px;
-  height: 92px;
+  width: 104px;
+  min-width: 104px;
+  height: 130px;
   min-height: 0;
   border-radius: 22px;
   overflow: hidden;

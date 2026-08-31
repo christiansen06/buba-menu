@@ -32,7 +32,16 @@ function IceCreamBuilder({ category }) {
         if (isEditing && editingItem.config) {
             const cfg = editingItem.config;
             setSelectedSize(category.sizes.find((s) => s.id === cfg.sizeId) || null);
-            setSelectedFlavors(category.flavors.filter((f) => cfg.flavorIds.includes(f.id)));
+            // Ojo: acá antes había un filter sobre el catálogo, que colapsaba los
+            // repetidos: un helado de 3 chocolates volvía de la edición con 1.
+            setSelectedFlavors(
+                (cfg.flavorIds || [])
+                    .map((id, i) => {
+                        const f = category.flavors.find((x) => x.id === id);
+                        return f ? { uid: `${id}-${i}`, id: f.id, label: f.label } : null;
+                    })
+                    .filter(Boolean)
+            );
             setSelectedSauces(category.sauces.filter((s) => cfg.sauceIds.includes(s.id)));
             setSelectedCup(category.cupTypes.find((c) => c.id === cfg.cupId) || null);
             setStep(4);
@@ -58,12 +67,36 @@ function IceCreamBuilder({ category }) {
         setStep(2);
     };
 
-    const handleFlavorToggle = (flavor) => {
+    /**
+     * Cada toque SUMA una bocha de ese sabor.
+     *
+     * Antes esto era un interruptor: tocar un sabor ya elegido lo sacaba, así
+     * que pedir tres bochas de chocolate era imposible y en el mostrador había
+     * que inventar sabores para completar el pedido. Ahora se repite sin
+     * problema y se saca desde las píldoras de abajo.
+     *
+     * uid es sólo para distinguir bochas del mismo sabor entre sí (React las
+     * necesita para la key, y hace falta para poder borrar una sola).
+     */
+    const addFlavor = (flavor) => {
         setSelectedFlavors((prev) => {
-            if (prev.find((f) => f.id === flavor.id)) return prev.filter((f) => f.id !== flavor.id);
             if (prev.length >= maxFlavors) return prev;
-            return [...prev, flavor];
+            return [...prev, { uid: `${flavor.id}-${prev.length}-${Date.now()}`, id: flavor.id, label: flavor.label }];
         });
+    };
+
+    const removeFlavor = (uid) =>
+        setSelectedFlavors((prev) => prev.filter((f) => f.uid !== uid));
+
+    /** "Chocolate x3, Frutilla" — más corto y claro que repetir el nombre. */
+    const resumenSabores = (lista) => {
+        const cuenta = [];
+        lista.forEach((f) => {
+            const y = cuenta.find((c) => c.id === f.id);
+            if (y) y.n += 1;
+            else cuenta.push({ id: f.id, label: f.label, n: 1 });
+        });
+        return cuenta.map((c) => (c.n > 1 ? `${c.label} x${c.n}` : c.label)).join(', ');
     };
 
     const handleSauceToggle = (sauce) => {
@@ -73,7 +106,7 @@ function IceCreamBuilder({ category }) {
     const handleSave = () => {
         const saucesLabel = selectedSauces.length > 0 ? selectedSauces.map((s) => s.label).join(', ') : 'Sin salsa';
         const cupLabel = is3Bochas ? 'Vasito ecológico (incluido)' : effectiveCup?.label;
-        const label = `Helado · ${selectedSize.label} · ${selectedFlavors.map((f) => f.label).join(', ')} · ${saucesLabel} · ${cupLabel}`;
+        const label = `Helado · ${selectedSize.label} · ${resumenSabores(selectedFlavors)} · ${saucesLabel} · ${cupLabel}`;
         const config = {
             sizeId: selectedSize.id,
             flavorIds: selectedFlavors.map((f) => f.id),
@@ -169,26 +202,44 @@ function IceCreamBuilder({ category }) {
                         <span>Sabores</span>
                     </div>
                     {isStepComplete(2) && step > 2 && (
-                        <span className="builder-step-summary">{selectedFlavors.map((f) => f.label).join(', ')}</span>
+                        <span className="builder-step-summary">{resumenSabores(selectedFlavors)}</span>
                     )}
                 </div>
                 {step === 2 && (
                     <div className="builder-step-body">
+                        {/* Las bochas elegidas, en orden. Se quita de a una con la ✕:
+                            es la forma de sacar una sola cuando el sabor se repite. */}
+                        {selectedFlavors.length > 0 && (
+                            <div className="relleno-pills">
+                                {selectedFlavors.map((f) => (
+                                    <span className="relleno-pill" key={f.uid}>
+                                        {f.label}
+                                        <button className="relleno-pill-remove"
+                                                onClick={() => removeFlavor(f.uid)}
+                                                aria-label={`Quitar una bocha de ${f.label}`}>✕</button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
                         <div className="builder-chips">
                             {category.flavors.map((flavor) => {
-                                const isSelected = selectedFlavors.find((f) => f.id === flavor.id);
+                                const veces = selectedFlavors.filter((f) => f.id === flavor.id).length;
                                 const sinStock = opcionAgotada(category.id, 'flavors', flavor.id);
-                                const isDisabled = sinStock || (!isSelected && selectedFlavors.length >= maxFlavors);
+                                const isDisabled = sinStock || selectedFlavors.length >= maxFlavors;
                                 return (
                                     <button key={flavor.id}
-                                            className={`builder-chip builder-chip-pink ${isSelected ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''} ${isDisabled && !sinStock ? 'chip-disabled' : ''}`}
-                                            onClick={() => !isDisabled && handleFlavorToggle(flavor)} disabled={isDisabled}>
-                                        {flavor.label}{sinStock ? ' · sin stock' : ''}
+                                            className={`builder-chip builder-chip-pink ${veces > 0 ? 'selected' : ''} ${sinStock ? 'chip-sin-stock' : ''} ${isDisabled && !sinStock ? 'chip-disabled' : ''}`}
+                                            onClick={() => !isDisabled && addFlavor(flavor)} disabled={isDisabled}>
+                                        {flavor.label}{veces > 1 ? ` x${veces}` : ''}{sinStock ? ' · sin stock' : ''}
                                     </button>
                                 );
                             })}
                         </div>
-                        <p className="builder-counter">{selectedFlavors.length}/{maxFlavors} sabores seleccionados</p>
+                        <p className="builder-counter">
+                            {selectedFlavors.length}/{maxFlavors} bochas elegidas
+                            {selectedFlavors.length < maxFlavors && ' · podés repetir el mismo sabor'}
+                        </p>
                         {selectedFlavors.length === maxFlavors && (
                             <button className="builder-next-btn" onClick={() => setStep(3)}>Continuar →</button>
                         )}

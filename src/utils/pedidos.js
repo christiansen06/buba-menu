@@ -60,16 +60,22 @@ export function firmaPedido(items, total) {
  * Guarda el pedido. Devuelve { ok } — nunca tira error hacia afuera,
  * porque quien la llama está en el medio de mandar un WhatsApp.
  */
-export async function registrarPedido({ items, total }) {
+export async function registrarPedido({ items, total, medioPago = null }) {
     if (!hayBase) return { ok: false, motivo: 'sin-base' };
     if (!items || items.length === 0) return { ok: false, motivo: 'vacio' };
 
     try {
         // Una sola llamada: la función de Postgres mete la cabecera y las
         // líneas dentro de la misma transacción. O entran las dos o ninguna.
+        //
+        // medioPago es lo único "de la persona" que sí viaja, y no la
+        // identifica: es transferencia o efectivo. Sirve para cruzar las
+        // ventas contra el conteo de caja. Cualquier otro valor lo ignora
+        // la propia función.
         const { data, error } = await supabase.rpc('registrar_pedido', {
             p_total: Math.round(total || 0),
             p_items: itemsParaBase(items),
+            p_medio_pago: medioPago,
         });
         if (error) throw error;
         return { ok: true, id: data };

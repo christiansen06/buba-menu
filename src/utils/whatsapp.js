@@ -52,6 +52,18 @@ const CATEGORY_LABEL = {
     'pasteleria':   'Pastelería',
 };
 
+/**
+ * 🔥 o ❄️ al lado de cada bubble tea, para no tener que leer si dice
+ * "Caliente" en medio del nombre. Es sólo visual: no cambia el precio ni
+ * lo que se guarda en la base.
+ *
+ * Los pedidos viejos no traen presentación — eran todos fríos.
+ */
+function emojiPresentacion(item) {
+    if (item.categoryId !== 'bubble-tea') return '';
+    return item.config?.presentacion === 'caliente' ? ' 🔥' : ' ❄️';
+}
+
 function splitLabel(label) {
     const parts = label.split(' · ');
     if (parts.length <= 1) return { title: label, detail: [] };
@@ -93,13 +105,14 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
                 ? 'A consultar'
                 : formatPrice(item.unitPrice * item.quantity);
             const { title, detail } = splitLabel(item.label);
+            const pres = emojiPresentacion(item);
 
             if (detail.length > 0) {
-                L.push(`  • ${qty}${title}`);
+                L.push(`  • ${qty}${title}${pres}`);
                 detail.forEach((d) => L.push(`      ◦ ${d}`));
                 L.push(`      💵 ${price}`);
             } else {
-                L.push(`  • ${qty}${title}  —  ${price}`);
+                L.push(`  • ${qty}${title}${pres}  —  ${price}`);
             }
         });
 
@@ -143,8 +156,73 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
     return L.join('\n');
 }
 
+// Cuánto esperamos, en el celular, antes de dar por hecho que la app no abrió.
+const ESPERA_APP_MS = 1500;
+
+/** true en celular/tablet táctil. En escritorio la pestaña nueva es lo esperado. */
+function esTactil() {
+    return typeof window !== 'undefined'
+        && typeof window.matchMedia === 'function'
+        && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+}
+
+/**
+ * Abre WhatsApp con el pedido ya escrito.
+ *
+ * POR QUÉ NO USA window.open EN EL CELULAR
+ *
+ * Antes hacía window.open(wa.me, '_blank'). En iPhone/iPad eso abre una
+ * pestaña nueva, wa.me redirige al esquema whatsapp:// y iOS salta a la app
+ * — y la pestaña recién abierta queda SIN DOCUMENTO. Cuando el cliente
+ * vuelve al navegador aterriza en esa pestaña vacía, no en el menú: es la
+ * "pantalla en blanco" que venía reportándose. El menú seguía vivo en la
+ * pestaña de al lado, pero nadie lo sabía.
+ *
+ * Llamando al esquema de la app directamente no se crea ninguna pestaña: los
+ * esquemas propios no reemplazan el documento, así que el menú se queda tal
+ * cual, mostrando "¡Pedido enviado!" con el alias. Al volver, el cliente cae
+ * justo ahí.
+ *
+ * El respaldo a wa.me es para el que no tiene WhatsApp instalado: si a los
+ * 1,5 s la página sigue a la vista, es que la app no abrió. Va en la MISMA
+ * pestaña, así que tampoco queda nada colgado.
+ */
 export function sendOrderToWhatsApp(payload) {
-    const message = buildOrderMessage(payload);
-    const url = `https://wa.me/${BUBA_WHATSAPP}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    const texto = encodeURIComponent(buildOrderMessage(payload));
+    const web = `https://wa.me/${BUBA_WHATSAPP}?text=${texto}`;
+
+    if (!esTactil()) {
+        window.open(web, '_blank');
+        return;
+    }
+
+    let resuelto = false;
+
+    const soltar = () => {
+        document.removeEventListener('visibilitychange', alIrse);
+        window.removeEventListener('pagehide', alIrse);
+        window.removeEventListener('blur', alIrse);
+    };
+
+    // Que la página se oculte es la señal de que WhatsApp tomó el control.
+    function alIrse() {
+        if (resuelto) return;
+        resuelto = true;
+        clearTimeout(timer);
+        soltar();
+    }
+
+    const timer = setTimeout(() => {
+        if (resuelto) return;
+        resuelto = true;
+        soltar();
+        // Seguimos a la vista: la app no abrió. Respaldo, sin pestaña nueva.
+        window.location.href = web;
+    }, ESPERA_APP_MS);
+
+    document.addEventListener('visibilitychange', alIrse);
+    window.addEventListener('pagehide', alIrse);
+    window.addEventListener('blur', alIrse);
+
+    window.location.href = `whatsapp://send?phone=${BUBA_WHATSAPP}&text=${texto}`;
 }

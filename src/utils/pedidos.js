@@ -37,6 +37,26 @@ export function itemsParaBase(items) {
 }
 
 /**
+ * Huella de un carrito: mismo contenido → misma firma.
+ *
+ * Sirve para no anotar dos veces la misma venta. Cuando WhatsApp falla (pasa
+ * con señal floja: no puede resolver el número contra el servidor), lo normal
+ * es tocar "enviar" de nuevo — y hasta ahora cada intento anotaba un pedido
+ * nuevo. El 08/09 quedaron tres BüBa Oreo y dos Chocolate por dos ventas
+ * reales: $29.000 de más.
+ *
+ * Se ordena a propósito: el mismo pedido armado en otro orden es el mismo
+ * pedido. El precio entra en la firma para que un cambio de precio no se
+ * confunda con un reintento.
+ */
+export function firmaPedido(items, total) {
+    const partes = (items || [])
+        .map((it) => `${it.id}·${it.quantity || 1}·${it.unitPrice ?? 'x'}`)
+        .sort();
+    return `${Math.round(total || 0)}|${partes.join(',')}`;
+}
+
+/**
  * Guarda el pedido. Devuelve { ok } — nunca tira error hacia afuera,
  * porque quien la llama está en el medio de mandar un WhatsApp.
  */

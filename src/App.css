@@ -4129,3 +4129,76 @@ img.product-image.product-photo {
 [data-theme="dark"] .extra-chip-price {
   color: hsl(var(--buba-pink-h) 85% 78%);
 }
+
+/* =============================================
+   Respaldo de envío — "¿No se pudo enviar?"
+
+   Va al pie de la confirmación, discreto a propósito. WhatsApp muestra su
+   error DENTRO de su propia app (con señal floja no puede resolver el
+   número), así que desde el menú no hay forma de saber si el mensaje salió:
+   los botones tienen que estar siempre. Chicos y grises para que el cliente
+   que envió bien ni los registre, pero a mano para el que los necesita.
+   ============================================= */
+.cart-confirm-fallback {
+  width: 100%;
+  max-width: 360px;
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed rgba(37, 37, 37, 0.12);
+}
+
+.cart-confirm-fallback-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #8a8a8a;
+}
+
+.cart-confirm-fallback-acciones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cart-confirm-fallback-acciones button {
+  /* 40px de alto: se puede tocar sin problema, pero no compite con el
+     botón principal de "Hacer un nuevo pedido". */
+  min-height: 40px;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(37, 37, 37, 0.14);
+  background: transparent;
+  color: #686868;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.cart-confirm-fallback-acciones button:hover {
+  border-color: hsl(var(--buba-cyan-h) 68.5% 51.4%);
+  color: hsl(var(--buba-cyan-h) 78% 27%);
+}
+
+/* Modo noche */
+[data-theme="dark"] .cart-confirm-fallback {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .cart-confirm-fallback-label {
+  color: hsl(var(--buba-cyan-h) 56.2% 93.7% / 0.45);
+}
+
+[data-theme="dark"] .cart-confirm-fallback-acciones button {
+  border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.3);
+  color: #9fb9ba;
+}
+
+[data-theme="dark"] .cart-confirm-fallback-acciones button:hover {
+  border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.7);
+  color: #eafdfd;
+}

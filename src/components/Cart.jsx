@@ -1,10 +1,43 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
-import { sendOrderToWhatsApp } from '../utils/whatsapp.js';
-import { registrarPedido } from '../utils/pedidos.js';
+import { sendOrderToWhatsApp, buildOrderMessage } from '../utils/whatsapp.js';
+import { registrarPedido, firmaPedido } from '../utils/pedidos.js';
+import { copyToClipboard } from '../utils/clipboard.js';
 import { formatPrice } from '../utils/format.js';
 import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
 import PaymentInfo from './PaymentInfo.jsx';
+
+// Última venta anotada, para no anotarla de nuevo si se reintenta el envío.
+// Media hora alcanza de sobra: un reintento pasa en segundos.
+const ULTIMO_KEY = 'buba-ultimo-pedido';
+const ULTIMO_TTL_MS = 30 * 60 * 1000;
+
+function yaAnotado(firma) {
+    try {
+        const raw = localStorage.getItem(ULTIMO_KEY);
+        if (!raw) return false;
+        const ultimo = JSON.parse(raw);
+        return ultimo.firma === firma && Date.now() - ultimo.ts < ULTIMO_TTL_MS;
+    } catch {
+        return false;
+    }
+}
+
+function anotar(firma) {
+    try {
+        localStorage.setItem(ULTIMO_KEY, JSON.stringify({ firma, ts: Date.now() }));
+    } catch {
+        // ignore
+    }
+}
+
+function olvidarUltimo() {
+    try {
+        localStorage.removeItem(ULTIMO_KEY);
+    } catch {
+        // ignore
+    }
+}
 
 function Cart() {
     const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
@@ -24,8 +57,12 @@ function Cart() {
     const [paymentMethod, setPaymentMethod] = useState(null); // 'transferencia' | 'efectivo'
     const [paymentError, setPaymentError] = useState(false);
     const pagoRef = useRef(null);
+    const [copiado, setCopiado] = useState(false);
+    const copiadoRef = useRef(null);
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
+
+    useEffect(() => () => clearTimeout(copiadoRef.current), []);
 
     // Al agregar algo, el carrito late y se expande mostrando "Agregado ✓".
     // Antes duraba 400 ms: medio parpadeo que nadie llegaba a ver, menos
@@ -93,26 +130,58 @@ function Cart() {
         } catch {
             // ignore
         }
-        // Primero WhatsApp: window.open tiene que salir dentro del mismo clic
-        // del usuario o el navegador lo bloquea como si fuera un popup.
-        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod });
 
-        // Después anotamos la venta, sin esperar la respuesta. Si la base
-        // está caída el cliente ni se entera: su pedido ya salió.
+        // Anotamos ANTES de saltar a WhatsApp, sin esperar la respuesta. No
+        // hay await en el medio, así que el salto sigue estando dentro del
+        // clic del usuario y el navegador no lo bloquea; pero el pedido a la
+        // base arranca mientras la pestaña todavía está en primer plano, en
+        // vez de justo cuando el sistema la congela para abrir WhatsApp.
+        //
+        // Si esta misma venta ya se anotó, se saltea: es un reintento porque
+        // WhatsApp falló, no una venta nueva.
         // Ojo: no van ni el nombre ni la aclaración, sólo los productos.
-        void registrarPedido({ items, total });
+        const firma = firmaPedido(items, total);
+        if (!yaAnotado(firma)) {
+            anotar(firma);
+            void registrarPedido({ items, total });
+        }
 
+        enviarWhatsApp();
         setSent(true);
+    };
+
+    // Reintento manual: abre WhatsApp de nuevo SIN volver a anotar la venta.
+    const enviarWhatsApp = () => {
+        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod });
+    };
+
+    // Respaldo para cuando WhatsApp no llega a mandarse (con señal floja no
+    // puede resolver el número). Se copia el mensaje entero para pegarlo a mano.
+    const handleCopyOrder = async () => {
+        const texto = buildOrderMessage({
+            items, total, name: name.trim(), note, hasConsultarItems, paymentMethod,
+        });
+        if (await copyToClipboard(texto)) {
+            setCopiado(true);
+            clearTimeout(copiadoRef.current);
+            copiadoRef.current = setTimeout(() => setCopiado(false), 2000);
+        }
     };
 
     const handleNewOrder = () => {
         clearCart();
+        olvidarUltimo();
         setNote('');
         setPaymentMethod(null);
         setPaymentError(false);
         setCheckout(false);
         setSent(false);
         setOpen(false);
+    };
+
+    const handleClear = () => {
+        clearCart();
+        olvidarUltimo();
     };
 
     return (
@@ -168,6 +237,28 @@ function Cart() {
                                     <PaymentInfo total={total} hasConsultarItems={hasConsultarItems} />
                                 )}
                                 <button className="builder-add-btn" onClick={handleNewOrder}>Hacer un nuevo pedido</button>
+
+                                {/*
+                                  Respaldo por si WhatsApp no llegó a mandarse. Con señal floja
+                                  no puede resolver el número y muestra su propio cartel de error
+                                  — pero eso pasa DENTRO de WhatsApp, así que desde acá no hay
+                                  forma de distinguirlo de un envío exitoso. Por eso está siempre,
+                                  chico y al pie: el que envió bien lo ignora, y el que no, lo tiene
+                                  a mano sin tener que rearmar el pedido.
+
+                                  "Reintentar" no vuelve a anotar la venta: para eso está la firma
+                                  del carrito en localStorage.
+                                */}
+                                <div className="cart-confirm-fallback">
+                                    <span className="cart-confirm-fallback-label">¿No se pudo enviar?</span>
+                                    <div className="cart-confirm-fallback-acciones">
+                                        <button type="button" onClick={enviarWhatsApp}>Reintentar</button>
+                                        <button type="button" onClick={handleCopyOrder}>
+                                            {copiado ? 'Copiado ✓' : 'Copiar pedido'}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <button className="cart-clear-btn" onClick={handleClose}>Cerrar</button>
                             </div>
 
@@ -325,7 +416,7 @@ function Cart() {
                                         <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>
                                     )}
                                     <button className="builder-add-btn" onClick={goToCheckout}>Continuar →</button>
-                                    <button className="cart-clear-btn" onClick={clearCart}>Limpiar pedido</button>
+                                    <button className="cart-clear-btn" onClick={handleClear}>Limpiar pedido</button>
                                 </div>
                             </>
                         )}

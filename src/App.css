@@ -4202,3 +4202,33 @@ img.product-image.product-photo {
   border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.7);
   color: #eafdfd;
 }
+
+/* =============================================
+   Indicador de modo mostrador
+
+   Sólo se ve en el dispositivo del local o del food truck. Va abajo a la
+   izquierda: arriba está el toggle de tema y abajo a la derecha el carrito.
+   Discreto pero presente — si el modo se apaga solo (memoria del navegador
+   limpiada) la ausencia del cartel es el único aviso que hay.
+   ============================================= */
+.indicador-mostrador {
+  position: fixed;
+  left: 0.6rem;
+  bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: hsl(var(--buba-cyan-h) 34.4% 12.5% / 0.88);
+  color: hsl(var(--buba-cyan-h) 91.3% 95.5%);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="dark"] .indicador-mostrador {
+  background: hsl(var(--buba-cyan-h) 56.2% 93.7% / 0.9);
+  color: hsl(var(--buba-cyan-h) 34.4% 12.5%);
+}

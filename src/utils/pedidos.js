@@ -15,6 +15,7 @@
 // =============================================
 
 import { supabase, hayBase } from './supabase.js';
+import { getUnidad, getCanal } from '../config/unidad.js';
 
 /**
  * Traduce el carrito al formato que espera la función registrar_pedido.
@@ -64,6 +65,12 @@ export async function registrarPedido({ items, total, medioPago = null }) {
     if (!hayBase) return { ok: false, motivo: 'sin-base' };
     if (!items || items.length === 0) return { ok: false, motivo: 'vacio' };
 
+    // unidad y canal no los decide quien llama: salen del dispositivo y de
+    // la URL con la que se abrió el menú. Si se pasaran por parámetro habría
+    // dos fuentes de verdad para lo mismo.
+    const unidad = getUnidad();
+    const canal = getCanal();
+
     try {
         // Una sola llamada: la función de Postgres mete la cabecera y las
         // líneas dentro de la misma transacción. O entran las dos o ninguna.
@@ -76,6 +83,8 @@ export async function registrarPedido({ items, total, medioPago = null }) {
             p_total: Math.round(total || 0),
             p_items: itemsParaBase(items),
             p_medio_pago: medioPago,
+            p_unidad: unidad,
+            p_canal: canal,
         });
         if (error) throw error;
         return { ok: true, id: data };

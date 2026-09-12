@@ -1,0 +1,13 @@
+{
+  "name": "BüBa — Bubble Tea, Café y Waffles",
+  "short_name": "BüBa",
+  "description": "Menú digital de BüBa. Armá tu pedido y mandalo por WhatsApp. Bolívar 2120, Mar del Plata.",
+  "lang": "es-AR",
+  "start_url": "/",
+  "theme_color": "#4CE5EB",
+  "background_color": "#ffffff",
+  "icons": [
+    { "src": "/icon-192.webp", "sizes": "192x192", "type": "image/webp" },
+    { "src": "/icon-512.webp", "sizes": "512x512", "type": "image/webp" }
+  ]
+}

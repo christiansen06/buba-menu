@@ -10,7 +10,17 @@
       content="Menú digital de BüBa: bubble tea, café, licuados, waffles y helados. Armá tu pedido y mandalo por WhatsApp. Bolívar 2120, Mar del Plata."
     />
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      Iconos: el logo de BüBa, no el rayo violeta que venía en la plantilla.
+      Los dos tamaños chicos son para la pestaña del navegador; el de 180 lo usa
+      iOS cuando alguien agrega el menú a la pantalla de inicio (Safari lo exige
+      en PNG). Los del manifiesto van en WebP: el de 512 en PNG pesaba 382 KB y
+      en WebP pesa 45, y viaja al navegador de cada cliente.
+    -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#4CE5EB" />
 
     <!--

@@ -60,6 +60,22 @@ La unidad **no** se guarda en el celular de un cliente, a propósito: el QR del 
 truck lleva el parámetro siempre, y si se guardara, alguien que lo escaneó allá
 seguiría contando como food truck al abrir el menú en el local.
 
+### ⚠️ No agregar `start_url` al manifiesto
+
+`public/site.webmanifest` **no** declara `start_url`, y tiene que seguir así. Si se
+declara, iOS lo usa para el acceso directo de la pantalla de inicio y **descarta el
+`?mostrador=1`** de la dirección con la que lo agregaste: el ícono del iPad quedaría
+apuntando al menú de cliente. Sin `start_url`, el manifiesto toma la dirección de la
+página actual, que es lo que se necesita acá.
+
+Por el mismo motivo el manifiesto tampoco declara `display: standalone`: sin barra de
+direcciones no habría forma de volver a abrir el link con `?mostrador=1` si alguna vez
+se limpia la memoria del navegador del iPad.
+
+Y los iconos del manifiesto van en **PNG**, no en WebP: Safari no puede decodificar
+WebP para la pantalla de inicio y no muestra ningún ícono. El peso no importa —esos
+archivos se bajan sólo al instalar, no en cada visita.
+
 ---
 
 ## Base de datos

@@ -12,10 +12,14 @@
 
     <!--
       Iconos: el logo de BüBa, no el rayo violeta que venía en la plantilla.
-      Los dos tamaños chicos son para la pestaña del navegador; el de 180 lo usa
-      iOS cuando alguien agrega el menú a la pantalla de inicio (Safari lo exige
-      en PNG). Los del manifiesto van en WebP: el de 512 en PNG pesaba 382 KB y
-      en WebP pesa 45, y viaja al navegador de cada cliente.
+      Los chicos son para la pestaña; el de 180 lo usa iOS al agregar el menú a
+      la pantalla de inicio.
+
+      TODOS en PNG, a propósito. Se probó poner los del manifiesto en WebP para
+      ahorrar peso y Safari no los pudo usar: al no poder decodificarlos no
+      mostraba ningún icono en la pantalla de inicio. Y el ahorro tampoco valía
+      la pena — los iconos del manifiesto se bajan sólo al instalar, no en cada
+      visita. El único que se baja siempre es el favicon, y pesa 3 KB.
     -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />

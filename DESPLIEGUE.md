@@ -111,3 +111,14 @@ npm run build    # verifica que compile antes de pushear
 
 Sin `.env.local` la app funciona igual, sin base: el menú nunca depende de Supabase
 para mostrarse.
+
+## Web Analytics (Entrega 1)
+
+`src/main.jsx` monta `<Analytics />` de `@vercel/analytics`. Cuenta visitas al
+menú — nada más: sin cookies, sin nombre ni teléfono. Con eso, **conversión del
+QR = pedidos con `canal = 'qr'` / visitas**.
+
+El paquete solo no mide nada: hay que **prender el interruptor en Vercel**,
+proyecto `buba-mdq` → pestaña **Analytics** → *Enable*. Es gratis en el plan
+Hobby. Hasta que esté prendido, `get_web_analytics` responde
+`web_analytics_not_enabled` y el script del cliente no reporta.

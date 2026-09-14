@@ -4518,3 +4518,83 @@ img.product-image.product-photo {
 [data-theme="dark"] .panel-link { color: var(--buba-cyan); }
 [data-theme="dark"] .panel-pedido.cancelado { background: hsl(var(--buba-cyan-h) 20% 9%); }
 [data-theme="dark"] .panel-resumen { background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18); }
+
+/* --- pestañas y cierre de caja --- */
+
+.panel-tabs { margin-bottom: 0.9rem; }
+
+.caja { display: grid; gap: 0.9rem; }
+
+.caja-sistema {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 14px;
+  background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.12);
+}
+
+.caja-sistema-label { font-size: 0.85rem; font-weight: 700; opacity: 0.75; }
+.caja-sistema-valor strong { font-size: 1.2rem; }
+
+.caja-estado { margin: 0; }
+
+.caja-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.7rem;
+}
+
+.caja-campo > span { display: flex; flex-direction: column; gap: 0.1rem; }
+.caja-campo > span small { font-weight: 500; opacity: 0.7; }
+.caja-campo input { font-size: 1.25rem; font-weight: 700; min-height: 48px; }
+.caja-notas { grid-column: 1 / -1; }
+.caja-notas input { font-size: 1rem; font-weight: 500; }
+
+.caja-cuenta {
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 2px solid hsl(var(--buba-cyan-h) 79.9% 61% / 0.35);
+  display: grid;
+  gap: 0.45rem;
+}
+
+.caja-cuenta.vacia { opacity: 0.55; }
+
+.caja-cuenta-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1.05rem;
+}
+
+.caja-diferencia {
+  padding-top: 0.45rem;
+  border-top: 1px dashed hsl(var(--buba-cyan-h) 79.9% 61% / 0.4);
+  font-size: 1.15rem;
+}
+
+.caja-diferencia strong small { font-size: 0.8rem; font-weight: 600; opacity: 0.75; }
+.caja-diferencia.igual strong { color: hsl(var(--buba-cyan-h) 91.1% 31%); }
+.caja-diferencia.falta-en-sistema strong,
+.caja-diferencia.sobra-en-sistema strong { color: hsl(var(--buba-pink-h) 60% 38%); }
+
+.caja-lectura {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.caja-aviso {
+  margin: 0;
+  font-weight: 700;
+  color: hsl(var(--buba-cyan-h) 91.1% 31%);
+}
+
+.caja-guardar { width: 100%; }
+
+[data-theme="dark"] .caja-cuenta { background: hsl(var(--buba-cyan-h) 30% 12%); color: #eafdfd; }
+[data-theme="dark"] .caja-sistema { background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18); }

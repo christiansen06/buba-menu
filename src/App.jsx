@@ -8,6 +8,7 @@ import LocationSection from './components/LocationSection';
 import InstagramSection from './components/InstagramSection';
 import Cart from './components/Cart';
 import StickyNav from './components/StickyNav';
+import PanelPedidos from './components/PanelPedidos.jsx';
 import { CartProvider } from './context/CartContext';
 import { DisponibilidadProvider } from './context/DisponibilidadContext.jsx';
 import { esMostrador, getUnidad, UNIDAD_LABEL } from './config/unidad.js';
@@ -25,30 +26,36 @@ function IndicadorMostrador() {
     if (!esMostrador()) return null;
     return (
         <div className="indicador-mostrador" role="status">
-            {UNIDAD_LABEL[getUnidad()]} · Mostrador
+            <span>{UNIDAD_LABEL[getUnidad()]} · Mostrador</span>
+            {/* El único acceso visible al panel: sólo en el aparato del local. */}
+            <a className="indicador-mostrador-link" href="#pedidos">Pedidos</a>
         </div>
     );
 }
 
+/** Qué pantalla corresponde al hash. Todo lo que no es una vista propia es el menú. */
+function vistaDesdeHash(hash) {
+    if (hash === '#historia') return 'story';
+    if (hash === '#pedidos') return 'panel';
+    return 'home';
+}
+
 function App() {
-    const [view, setView] = useState(
-        () => window.location.hash === '#historia' ? 'story' : 'home'
-    );
+    const [hash, setHash] = useState(() => window.location.hash);
 
     useEffect(() => {
-        const handleHashChange = () => {
-            if (window.location.hash === '#historia') {
-                setView('story');
-            } else if (view === 'story') {
-                setView('home');
-            }
-        };
+        const handleHashChange = () => setHash(window.location.hash);
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
-    }, [view]);
+    }, []);
+
+    const view = vistaDesdeHash(hash);
 
     if (view === 'story') {
         return <StorySection />;
+    }
+    if (view === 'panel') {
+        return <PanelPedidos />;
     }
 
     return (

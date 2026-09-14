@@ -4224,11 +4224,297 @@ img.product-image.product-photo {
   font-weight: 750;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  pointer-events: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* El texto no se toca; el botón "Pedidos" sí. Es la única puerta al panel. */
+.indicador-mostrador > span { pointer-events: none; }
+
+.indicador-mostrador-link {
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  background: var(--buba-cyan);
+  color: hsl(var(--buba-cyan-h) 34.4% 12.5%);
+  font-weight: 800;
+  text-decoration: none;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
 }
 
 [data-theme="dark"] .indicador-mostrador {
   background: hsl(var(--buba-cyan-h) 56.2% 93.7% / 0.9);
   color: hsl(var(--buba-cyan-h) 34.4% 12.5%);
 }
+
+
+/* =============================================
+   Panel de pedidos (#pedidos) — Entrega 2
+
+   Es para el dueño y el personal, en el iPad del mostrador: prioridad a
+   leer rápido y a botones grandes (mínimo 44px de alto), no a la estética.
+   Colores: las variables de siempre, nada de hex nuevos.
+   ============================================= */
+
+.panel {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0.9rem 1rem calc(2rem + env(safe-area-inset-bottom, 0px));
+  min-height: 100vh;
+  color: var(--buba-text);
+}
+
+.panel-cab {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.panel-titulo {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.panel-unidad {
+  justify-self: end;
+  font-size: 0.78rem;
+  font-weight: 750;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.panel-link {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.2rem;
+  min-height: 44px;
+  color: hsl(var(--buba-cyan-h) 91.1% 31%);
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.panel-volver { justify-self: start; }
+
+.panel-ayuda {
+  margin: 0.4rem 0 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  opacity: 0.8;
+}
+
+.panel-login { max-width: 420px; margin: 1.5rem auto; }
+
+/* --- día y resumen --- */
+
+.panel-dia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.panel-dia-nombre {
+  font-weight: 800;
+  font-size: 1.02rem;
+  min-width: 12ch;
+  text-align: center;
+}
+
+.panel-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  padding: 0.75rem 0.95rem;
+  margin-bottom: 0.9rem;
+  border-radius: 14px;
+  background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.12);
+  font-size: 1rem;
+}
+
+.panel-resumen-total { font-weight: 900; font-size: 1.25rem; }
+.panel-resumen-cancelados { font-size: 0.85rem; opacity: 0.7; }
+.panel-resumen > .panel-btn-sec { margin-left: auto; }
+
+/* --- botones --- */
+
+.panel-btn-sec,
+.panel-btn-cancelar,
+.panel-btn-peligro,
+.panel-chip {
+  min-height: 44px;
+  padding: 0.5rem 0.95rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 2px solid hsl(var(--buba-cyan-h) 79.9% 61% / 0.35);
+  background: #fff;
+  color: var(--buba-text);
+}
+
+.panel-btn-sec:disabled,
+.panel-btn-cancelar:disabled,
+.panel-btn-peligro:disabled,
+.panel-chip:disabled { opacity: 0.45; cursor: default; }
+
+.panel-btn-cancelar,
+.panel-btn-peligro {
+  border-color: hsl(var(--buba-pink-h) 77.3% 70.6% / 0.7);
+  color: hsl(var(--buba-pink-h) 60% 38%);
+}
+
+.panel-btn-peligro {
+  background: hsl(var(--buba-pink-h) 77.3% 70.6%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.panel-chip { padding: 0.45rem 0.8rem; font-size: 0.9rem; }
+
+.panel-chip.activo {
+  background: var(--buba-cyan);
+  border-color: var(--buba-cyan);
+  color: hsl(var(--buba-cyan-h) 34.4% 12.5%);
+}
+
+.panel-acciones-fila {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
+
+.panel-acciones-fila > * { flex: 1; }
+
+/* --- cajas y formularios --- */
+
+.panel-caja {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 2px solid hsl(var(--buba-amber-h) 100% 67.1% / 0.6);
+}
+
+.panel-caja h3 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+
+.panel-pin-campo input {
+  font-size: 1.6rem;
+  letter-spacing: 0.6em;
+  text-align: center;
+  max-width: 10ch;
+}
+
+.panel-error { margin-bottom: 0.8rem; }
+.panel-vacio { text-align: center; padding: 2rem 0; }
+
+/* --- lista --- */
+
+.panel-lista { display: grid; gap: 0.7rem; }
+
+.panel-pedido {
+  padding: 0.85rem 0.95rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid hsl(var(--buba-cyan-h) 79.9% 61% / 0.25);
+  box-shadow: 0 2px 10px hsl(var(--buba-cyan-h) 79.9% 61% / 0.08);
+}
+
+.panel-pedido.cancelado {
+  background: hsl(var(--buba-cyan-h) 20% 96%);
+  border-style: dashed;
+  opacity: 0.8;
+}
+
+.panel-pedido-cab {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin-bottom: 0.35rem;
+}
+
+.panel-pedido-hora { font-weight: 900; font-size: 1.15rem; }
+.panel-pedido-canal { font-size: 0.85rem; font-weight: 700; opacity: 0.75; }
+.panel-pedido-total { margin-left: auto; font-weight: 900; font-size: 1.15rem; }
+
+.panel-pedido-items {
+  margin: 0 0 0.7rem;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.panel-pedido.cancelado .panel-pedido-items,
+.panel-pedido.cancelado .panel-pedido-total { text-decoration: line-through; }
+
+.panel-pedido-pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.panel-pedido-estado {
+  font-weight: 800;
+  color: hsl(var(--buba-pink-h) 60% 38%);
+}
+
+.panel-cobro { display: flex; flex-direction: column; gap: 0.35rem; }
+.panel-cobro-label { font-size: 0.8rem; font-weight: 700; opacity: 0.7; }
+.panel-cobro-label small { font-weight: 500; }
+.panel-cobro-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+/* --- modal --- */
+
+.panel-modal {
+  max-width: 460px;
+  width: calc(100% - 2rem);
+  padding: 1.1rem;
+  border-radius: 18px;
+  background: #fff;
+  color: var(--buba-text);
+}
+
+.panel-modal .panel-caja { margin: 0; border: none; padding: 0; }
+
+.panel-modal-resumen {
+  margin: 0.2rem 0 0.4rem;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.panel-pie {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.6rem;
+  opacity: 0.85;
+}
+
+/* --- modo oscuro --- */
+
+[data-theme="dark"] .panel-btn-sec,
+[data-theme="dark"] .panel-btn-cancelar,
+[data-theme="dark"] .panel-chip,
+[data-theme="dark"] .panel-caja,
+[data-theme="dark"] .panel-pedido,
+[data-theme="dark"] .panel-modal {
+  background: hsl(var(--buba-cyan-h) 30% 12%);
+  color: #eafdfd;
+}
+
+[data-theme="dark"] .panel { color: #eafdfd; }
+[data-theme="dark"] .panel-link { color: var(--buba-cyan); }
+[data-theme="dark"] .panel-pedido.cancelado { background: hsl(var(--buba-cyan-h) 20% 9%); }
+[data-theme="dark"] .panel-resumen { background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18); }

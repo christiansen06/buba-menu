@@ -12,6 +12,7 @@ import PanelPedidos from './components/PanelPedidos.jsx';
 import { CartProvider } from './context/CartContext';
 import { DisponibilidadProvider } from './context/DisponibilidadContext.jsx';
 import { esMostrador, getUnidad, UNIDAD_LABEL } from './config/unidad.js';
+import { EVENTO_COLA, iniciarColaDePedidos, pendientesEnCola } from './utils/pedidos.js';
 
 /**
  * Cartelito del dispositivo del local. Sólo aparece si el aparato está
@@ -23,14 +24,31 @@ import { esMostrador, getUnidad, UNIDAD_LABEL } from './config/unidad.js';
  * única forma de notarlo.
  */
 function IndicadorMostrador() {
+    const pendientes = usePendientesEnCola();
     if (!esMostrador()) return null;
     return (
         <div className="indicador-mostrador" role="status">
             <span>{UNIDAD_LABEL[getUnidad()]} · Mostrador</span>
+            {/* Pedidos anotados en este aparato que todavía no llegaron a la
+                base (sin señal). Se suben solos; el cartel es para que se sepa. */}
+            {pendientes > 0 && (
+                <span className="indicador-mostrador-cola">⏳ {pendientes} sin subir</span>
+            )}
             {/* El único acceso visible al panel: sólo en el aparato del local. */}
             <a className="indicador-mostrador-link" href="#pedidos">Pedidos</a>
         </div>
     );
+}
+
+/** Cantidad de pedidos esperando subir, al día con cada cambio de la cola. */
+function usePendientesEnCola() {
+    const [n, setN] = useState(() => pendientesEnCola());
+    useEffect(() => {
+        const alCambiar = (e) => setN(typeof e.detail === 'number' ? e.detail : pendientesEnCola());
+        window.addEventListener(EVENTO_COLA, alCambiar);
+        return () => window.removeEventListener(EVENTO_COLA, alCambiar);
+    }, []);
+    return n;
 }
 
 /** Qué pantalla corresponde al hash. Todo lo que no es una vista propia es el menú. */
@@ -48,6 +66,9 @@ function App() {
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
+
+    // Sube los pedidos que quedaron en el aparato sin llegar a la base.
+    useEffect(() => { iniciarColaDePedidos(); }, []);
 
     const view = vistaDesdeHash(hash);
 

@@ -4230,6 +4230,15 @@ img.product-image.product-photo {
   gap: 0.55rem;
 }
 
+.indicador-mostrador-cola {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--buba-amber);
+  color: #3a2a00;
+  font-weight: 800;
+  pointer-events: none;
+}
+
 /* El texto no se toca; el botón "Pedidos" sí. Es la única puerta al panel. */
 .indicador-mostrador > span { pointer-events: none; }
 

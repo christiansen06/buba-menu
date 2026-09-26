@@ -57,6 +57,122 @@ export function firmaPedido(items, total) {
     return `${Math.round(total || 0)}|${partes.join(',')}`;
 }
 
+// ---------------------------------------------------------------------
+// Cola de pedidos sin subir
+//
+// El 17/09 el iPad se quedó sin datos y hubo pedidos que llegaron por
+// WhatsApp pero no a la base. En el evento del food truck (8 al 12/10) la
+// señal puede fallar, así que ahora cada pedido se ANOTA PRIMERO EN EL
+// APARATO y después se sube. Si la subida falla —o el navegador congela la
+// pestaña al saltar a WhatsApp antes de que termine— queda en la cola y se
+// reintenta solo: al volver a abrir el menú, cuando vuelve la conexión y
+// cada 30 segundos.
+//
+// Reintentar nunca duplica: el id del pedido se genera acá y viaja en cada
+// intento; la base ignora un id que ya tiene (parte 18). Y la hora que viaja
+// es la del pedido, no la de la subida: un pedido de la noche del 8 que sube
+// el 9 a la mañana queda en el día 8.
+// ---------------------------------------------------------------------
+
+const COLA_KEY = 'buba-cola-pedidos';
+const COLA_MAX = 200;
+const REINTENTO_MS = 30000;
+export const EVENTO_COLA = 'buba-cola-pedidos';
+
+function leerCola() {
+    try {
+        const crudo = localStorage.getItem(COLA_KEY);
+        const cola = crudo ? JSON.parse(crudo) : [];
+        return Array.isArray(cola) ? cola : [];
+    } catch {
+        return [];
+    }
+}
+
+function guardarCola(cola) {
+    try {
+        localStorage.setItem(COLA_KEY, JSON.stringify(cola.slice(-COLA_MAX)));
+    } catch {
+        // Sin localStorage (navegación privada): se sigue sin cola, como antes.
+    }
+    try {
+        window.dispatchEvent(new CustomEvent(EVENTO_COLA, { detail: cola.length }));
+    } catch {
+        // ignore
+    }
+}
+
+/** Cuántos pedidos esperan subir en este aparato. */
+export const pendientesEnCola = () => leerCola().length;
+
+/** uuid v4. crypto.randomUUID no existe en iOS viejos; el respaldo sí. */
+function nuevoId() {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    const b = new Uint8Array(16);
+    crypto.getRandomValues(b);
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
+async function subir(pedido) {
+    const { error } = await supabase.rpc('registrar_pedido', pedido);
+    if (error) throw error;
+}
+
+let subiendo = false;
+
+/**
+ * Intenta subir todo lo que haya en la cola, en orden. Lo que sube se saca;
+ * lo que falla se queda para el próximo intento. Nunca tira error.
+ */
+export async function vaciarCola() {
+    if (!hayBase || subiendo) return;
+    const cola = leerCola();
+    if (cola.length === 0) return;
+
+    subiendo = true;
+    try {
+        const subidos = new Set();
+        for (const pedido of cola) {
+            try {
+                await subir(pedido);
+                subidos.add(pedido.p_id);
+            } catch (e) {
+                // Sin conexión, lo más probable es que fallen todos: se corta
+                // acá y se reintenta en el próximo turno.
+                console.warn('Pedido en cola sin subir todavía:', e?.message || e);
+                break;
+            }
+        }
+        if (subidos.size > 0) {
+            // Se relee: mientras se subía pudo entrar un pedido nuevo.
+            guardarCola(leerCola().filter((p) => !subidos.has(p.p_id)));
+        }
+    } finally {
+        subiendo = false;
+    }
+}
+
+let reintentosArmados = false;
+
+/** Engancha los reintentos automáticos. Se llama una vez al cargar la app. */
+export function iniciarColaDePedidos() {
+    if (reintentosArmados || typeof window === 'undefined') return;
+    reintentosArmados = true;
+    void vaciarCola();
+    window.addEventListener('online', () => { void vaciarCola(); });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void vaciarCola();
+    });
+    setInterval(() => {
+        if (leerCola().length > 0) void vaciarCola();
+    }, REINTENTO_MS);
+}
+
 /**
  * Guarda el pedido. Devuelve { ok } — nunca tira error hacia afuera,
  * porque quien la llama está en el medio de mandar un WhatsApp.
@@ -68,28 +184,26 @@ export async function registrarPedido({ items, total, medioPago = null }) {
     // unidad y canal no los decide quien llama: salen del dispositivo y de
     // la URL con la que se abrió el menú. Si se pasaran por parámetro habría
     // dos fuentes de verdad para lo mismo.
-    const unidad = getUnidad();
-    const canal = getCanal();
+    //
+    // medioPago es lo único "de la persona" que sí viaja, y no la identifica:
+    // es transferencia o efectivo. Cualquier otro valor lo ignora la base.
+    const pedido = {
+        p_id: nuevoId(),
+        p_creado_en: new Date().toISOString(),
+        p_total: Math.round(total || 0),
+        p_items: itemsParaBase(items),
+        p_medio_pago: medioPago,
+        p_unidad: getUnidad(),
+        p_canal: getCanal(),
+    };
 
-    try {
-        // Una sola llamada: la función de Postgres mete la cabecera y las
-        // líneas dentro de la misma transacción. O entran las dos o ninguna.
-        //
-        // medioPago es lo único "de la persona" que sí viaja, y no la
-        // identifica: es transferencia o efectivo. Sirve para cruzar las
-        // ventas contra el conteo de caja. Cualquier otro valor lo ignora
-        // la propia función.
-        const { data, error } = await supabase.rpc('registrar_pedido', {
-            p_total: Math.round(total || 0),
-            p_items: itemsParaBase(items),
-            p_medio_pago: medioPago,
-            p_unidad: unidad,
-            p_canal: canal,
-        });
-        if (error) throw error;
-        return { ok: true, id: data };
-    } catch (e) {
-        console.warn('No se pudo registrar el pedido:', e?.message || e);
-        return { ok: false, motivo: e?.message || 'error' };
-    }
+    // Primero al aparato, después a la base. Si se corta en el medio, la
+    // cola lo tiene.
+    guardarCola([...leerCola(), pedido]);
+
+    await vaciarCola();
+    const quedo = leerCola().some((p) => p.p_id === pedido.p_id);
+    return quedo
+        ? { ok: false, motivo: 'en-cola', id: pedido.p_id }
+        : { ok: true, id: pedido.p_id };
 }

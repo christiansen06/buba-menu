@@ -122,3 +122,28 @@ El paquete solo no mide nada: hay que **prender el interruptor en Vercel**,
 proyecto `buba-mdq` → pestaña **Analytics** → *Enable*. Es gratis en el plan
 Hobby. Hasta que esté prendido, `get_web_analytics` responde
 `web_analytics_not_enabled` y el script del cliente no reporta.
+
+## Food truck en simultáneo con el local (parte 18)
+
+Cada aparato trabaja **sólo con su unidad**:
+
+| | Local | Food truck |
+|---|---|---|
+| Stock (panel de stock, mantener apretado el logo) | el del local | el del truck — apagar algo acá no lo apaga en Bolívar |
+| Lista de "Pedidos" del mostrador | pedidos del local | pedidos del truck |
+| Encabezado del WhatsApp | 🧋 NUEVO PEDIDO — BüBa | 🚚 NUEVO PEDIDO — BüBa FOOD TRUCK |
+| Cartel de horario / "estamos cerrados" | sí (horario de Bolívar) | no |
+
+**Carta reducida en el truck:** no hace falta tocar código. En la tablet del truck,
+marcar "sin stock" lo que no se lleva.
+
+**Sin señal:** cada pedido se guarda primero en el aparato y después se sube. Si no hay
+conexión, el cartel de mostrador muestra **⏳ N sin subir** y se suben solos cuando vuelve
+la señal (al reabrir el menú, al reconectar y cada 30 s). No se duplican y entran con la
+hora real del pedido. **No borrar los datos del navegador de la tablet** mientras el cartel
+diga "sin subir": ahí están esos pedidos.
+
+**Configurar la tablet (una sola vez):** abrir
+`https://buba-mdq.vercel.app/?unidad=food_truck&mostrador=1`, agregarla a la pantalla de
+inicio **desde esa dirección**, entrar a Pedidos con el usuario del dueño y probar un pedido.
+Al terminar el evento: `/?mostrador=0` la devuelve a aparato común.

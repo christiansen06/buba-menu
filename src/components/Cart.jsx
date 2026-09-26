@@ -5,6 +5,7 @@ import { registrarPedido, firmaPedido } from '../utils/pedidos.js';
 import { copyToClipboard } from '../utils/clipboard.js';
 import { formatPrice } from '../utils/format.js';
 import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
+import { getUnidad } from '../config/unidad.js';
 import PaymentInfo from './PaymentInfo.jsx';
 
 // Última venta anotada, para no anotarla de nuevo si se reintenta el envío.
@@ -273,7 +274,7 @@ function Cart() {
                                 </div>
 
                                 <div className="cart-checkout-body">
-                                    {!estado.abierto && (
+                                    {!estado.abierto && getUnidad() === 'local' && (
                                         <div className="aviso-cerrado" role="status">
                                             <span className="aviso-cerrado-icono" aria-hidden="true">🌙</span>
                                             <div>

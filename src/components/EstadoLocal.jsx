@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
+import { getUnidad } from '../config/unidad.js';
 
 /**
  * Indicador de abierto / cerrado.
@@ -18,6 +19,10 @@ function EstadoLocal({ variant = 'compacto' }) {
         const id = setInterval(() => setEstado(getEstadoLocal()), 60000);
         return () => clearInterval(id);
     }, []);
+
+    // El horario es el de Bolívar. En el food truck (horario de evento) no se
+    // muestra: mejor ningún cartel que uno que diga "cerrado" estando abierto.
+    if (getUnidad() !== 'local') return null;
 
     const texto = getTextoEstado(estado);
     const porCerrar = estado.abierto && estado.minutosParaCerrar <= 30;

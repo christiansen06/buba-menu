@@ -4,6 +4,7 @@
 
 import { formatPrice } from './format.js';
 import { PAYMENT_CONFIG } from '../config/payment.js';
+import { getUnidad } from '../config/unidad.js';
 
 export const BUBA_WHATSAPP = '5492236833119';
 
@@ -73,7 +74,11 @@ function splitLabel(label) {
 export function buildOrderMessage({ items, total, name, note, hasConsultarItems, paymentMethod }) {
     const L = [];
 
-    L.push('🧋 *NUEVO PEDIDO — BüBa*');
+    // Durante el evento el local y el truck mandan al mismo WhatsApp: el
+    // encabezado es lo que dice de dónde viene cada pedido.
+    L.push(getUnidad() === 'food_truck'
+        ? '🚚 *NUEVO PEDIDO — BüBa FOOD TRUCK*'
+        : '🧋 *NUEVO PEDIDO — BüBa*');
     L.push('');
     L.push(`👤 *Nombre:* ${name}`);
     L.push('');

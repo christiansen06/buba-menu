@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { supabase, hayBase, claveProducto } from '../utils/supabase.js';
 import { insumoDe, insumosDeProducto } from '../data/insumos.js';
+import { getUnidad } from '../config/unidad.js';
 
 const DisponibilidadContext = createContext(null);
 
@@ -13,6 +14,11 @@ const DisponibilidadContext = createContext(null);
  *
  * También se puede marcar sin stock desde el código, poniendo
  * disponible: false en menu.js. Manda cualquiera de los dos.
+ *
+ * El stock es POR UNIDAD (parte 18): lo que se apaga en la tablet del food
+ * truck no se apaga en el local, y al revés. Cada aparato lee y escribe sólo
+ * el de su unidad. Así una carta reducida en el truck es sólo marcar sin
+ * stock lo que no se lleva.
  */
 export function DisponibilidadProvider({ children }) {
     const [agotados, setAgotados] = useState(() => new Set());
@@ -23,8 +29,8 @@ export function DisponibilidadProvider({ children }) {
         if (!hayBase) return;
         try {
             const [prod, ins] = await Promise.all([
-                supabase.from('disponibilidad').select('categoria_id, producto_id, disponible'),
-                supabase.from('insumos').select('id, disponible'),
+                supabase.from('disponibilidad').select('categoria_id, producto_id, disponible').eq('unidad', getUnidad()),
+                supabase.from('insumos').select('id, disponible').eq('unidad', getUnidad()),
             ]);
 
             if (prod.error) throw prod.error;
@@ -63,12 +69,13 @@ export function DisponibilidadProvider({ children }) {
             .from('disponibilidad')
             .upsert(
                 {
+                    unidad: getUnidad(),
                     categoria_id: categoriaId,
                     producto_id: productoId,
                     disponible,
                     actualizado_en: new Date().toISOString(),
                 },
-                { onConflict: 'categoria_id,producto_id' }
+                { onConflict: 'unidad,categoria_id,producto_id' }
             );
 
         if (error) return { error: error.message };
@@ -88,7 +95,10 @@ export function DisponibilidadProvider({ children }) {
 
         const { error } = await supabase
             .from('insumos')
-            .upsert({ id: insumoId, disponible, actualizado_en: new Date().toISOString() }, { onConflict: 'id' });
+            .upsert(
+                { unidad: getUnidad(), id: insumoId, disponible, actualizado_en: new Date().toISOString() },
+                { onConflict: 'unidad,id' }
+            );
 
         if (error) return { error: error.message };
 

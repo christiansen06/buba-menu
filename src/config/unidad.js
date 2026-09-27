@@ -28,15 +28,24 @@
 // en el local seguiría contando como food truck para siempre.
 //
 // La excepción es el dispositivo del personal (el que tiene mostrador=1):
-// ahí la unidad sí se guarda, porque se configura una vez y no cambia.
+// ahí la unidad sí se guarda, porque se configura una vez y no cambia, y
+// manda sobre el ?unidad= de un QR que se abra en ese aparato.
 //
 // CÓMO SE CONFIGURA
 //
-//   iPad del local        →  /?mostrador=1
+//   iPad del local        →  /?mostrador=1      (o /?unidad=local&mostrador=1)
 //   Tablet del food truck →  /?unidad=food_truck&mostrador=1
 //   QR del food truck     →  /?unidad=food_truck
 //   QR del local          →  /            (los valores por defecto)
 //   Apagar el modo        →  /?mostrador=0
+//
+// Un link con mostrador=1 configura el aparato ENTERO: si no dice unidad, es
+// el local. Antes "/?mostrador=1" respetaba la unidad guardada, y un aparato
+// que alguna vez abrió el link del truck quedaba en el truck aunque después
+// se abriera el del local (27/09).
+//
+// También se puede cambiar sin links, desde el panel de pedidos con la
+// sesión iniciada: configurarAparato().
 // =============================================
 
 const CANAL_KEY = 'buba-canal';
@@ -85,8 +94,11 @@ function resolver() {
 
     // --- canal ---
     const flag = params.get('mostrador');
+    const enURL = params.get('unidad');
+    const deURL = UNIDADES.includes(enURL) ? enURL : null;
     if (flag === '1') {
         guardar(CANAL_KEY, 'mostrador');
+        guardar(UNIDAD_KEY, deURL || 'local');
     } else if (flag === '0') {
         // Apagar el modo también olvida la unidad: el aparato vuelve a ser
         // uno cualquiera y no tiene por qué seguir diciendo "food truck".
@@ -96,12 +108,11 @@ function resolver() {
     const canal = leer(CANAL_KEY) === 'mostrador' ? 'mostrador' : 'qr';
 
     // --- unidad ---
-    const enURL = params.get('unidad');
-    const deURL = UNIDADES.includes(enURL) ? enURL : null;
-
     let unidad;
     if (canal === 'mostrador') {
-        if (deURL) guardar(UNIDAD_KEY, deURL);
+        // El aparato del personal sólo cambia de unidad con un link de
+        // mostrador (arriba) o desde el panel: abrir el QR del truck en el
+        // iPad del local no lo convierte en el truck.
         const guardada = leer(UNIDAD_KEY);
         unidad = UNIDADES.includes(guardada) ? guardada : 'local';
     } else {
@@ -116,5 +127,23 @@ function resolver() {
 const actual = resolver();
 
 export const getUnidad = () => actual.unidad;
+
+/**
+ * Cambiar qué es este aparato sin tocar links (panel de pedidos, con la
+ * sesión del dueño). unidad = 'local' | 'food_truck' lo deja como mostrador
+ * de esa unidad; null lo vuelve un aparato cualquiera (cuenta como QR).
+ * Recarga en "/" sin parámetros: si recargara la URL actual, un
+ * ?unidad=...&mostrador=1 viejo volvería a pisar lo elegido.
+ */
+export function configurarAparato(unidad) {
+    if (unidad && UNIDADES.includes(unidad)) {
+        guardar(CANAL_KEY, 'mostrador');
+        guardar(UNIDAD_KEY, unidad);
+    } else {
+        borrar(CANAL_KEY);
+        borrar(UNIDAD_KEY);
+    }
+    window.location.replace(window.location.pathname);
+}
 export const getCanal = () => actual.canal;
 export const esMostrador = () => actual.canal === 'mostrador';

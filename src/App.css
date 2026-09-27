@@ -4607,3 +4607,37 @@ img.product-image.product-photo {
 
 [data-theme="dark"] .caja-cuenta { background: hsl(var(--buba-cyan-h) 30% 12%); color: #eafdfd; }
 [data-theme="dark"] .caja-sistema { background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18); }
+
+/* ---------- Panel: "Este aparato" (local / truck / común) ---------- */
+.panel-aparato-opciones {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0.9rem;
+}
+
+.panel-aparato-opcion {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  min-height: 44px;
+  border-radius: 14px;
+  border: 2px solid hsl(var(--buba-cyan-h) 40% 85%);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.panel-aparato-opcion small { opacity: 0.75; font-size: 0.82rem; }
+
+.panel-aparato-opcion.activa {
+  border-color: hsl(var(--buba-cyan-h) 91.1% 31%);
+  background: hsl(var(--buba-cyan-h) 86.4% 91.4%);
+}
+
+[data-theme="dark"] .panel-aparato-opcion { border-color: hsl(var(--buba-cyan-h) 30% 25%); }
+[data-theme="dark"] .panel-aparato-opcion.activa {
+  border-color: var(--buba-cyan);
+  background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18);
+}

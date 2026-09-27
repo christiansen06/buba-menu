@@ -44,7 +44,7 @@ Eso se resuelve en [`src/config/unidad.js`](src/config/unidad.js).
 | Para | Dirección | Queda registrado como |
 |---|---|---|
 | **QR del local** (clientes) | `https://buba-mdq.vercel.app` | `unidad=local`, `canal=qr` |
-| **iPad del mostrador** | `https://buba-mdq.vercel.app/?mostrador=1` | `unidad=local`, `canal=mostrador` |
+| **iPad del mostrador** | `https://buba-mdq.vercel.app/?unidad=local&mostrador=1` (o `/?mostrador=1`) | `unidad=local`, `canal=mostrador` |
 | **QR del food truck** (clientes) | `https://buba-mdq.vercel.app/?unidad=food_truck` | `unidad=food_truck`, `canal=qr` |
 | **Tablet del food truck** | `https://buba-mdq.vercel.app/?unidad=food_truck&mostrador=1` | `unidad=food_truck`, `canal=mostrador` |
 | Apagar el modo mostrador | `https://buba-mdq.vercel.app/?mostrador=0` | vuelve a `canal=qr` |
@@ -55,6 +55,15 @@ abajo a la izquierda (`🏠 Local · Mostrador`). Si el cartelito no está, el m
 apagó —típicamente porque se limpiaron los datos del navegador— y hay que volver a
 abrir el link. **Ese cartel es el único aviso**: sin él, todo se cuenta como QR y los
 números salen mal en silencio.
+
+**Un link de mostrador configura el aparato entero.** `/?mostrador=1` sin unidad
+es el local, aunque ese aparato antes haya sido la tablet del truck (hasta el 27/09
+se quedaba en el truck). Y abrir el QR del truck en el iPad del local ya no lo
+cambia: el aparato del personal sólo cambia con un link de mostrador o desde el panel.
+
+**Sin links: Pedidos → "Este aparato"** (abajo, con la sesión iniciada). Elegís
+Mostrador del Local, Mostrador del Food Truck o Aparato común, y vuelve al menú ya
+cambiado. Sirve también para convertir un celular cualquiera en mostrador.
 
 La unidad **no** se guarda en el celular de un cliente, a propósito: el QR del food
 truck lleva el parámetro siempre, y si se guardara, alguien que lo escaneó allá

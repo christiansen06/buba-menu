@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
-import { esMostrador, getUnidad, UNIDAD_LABEL } from '../config/unidad.js';
+import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
 import CierreCaja from './CierreCaja.jsx';
 
 /**
@@ -119,6 +119,50 @@ function CampoPin({ label, valor, onChange, autoFocus }) {
 }
 
 /** Definir el PIN por primera vez, o cambiarlo (pide el actual). */
+/**
+ * Qué es este aparato: mostrador del local, del truck, o uno cualquiera.
+ * Está acá (detrás del login) para cambiarlo sin andar con links: un aparato
+ * que abrió el link del truck y ahora tiene que ser el del local se arregla
+ * con dos toques.
+ */
+const OPCIONES_APARATO = [
+    { id: 'local', titulo: '🏠 Mostrador del Local', ayuda: 'El iPad de Bolívar.' },
+    { id: 'food_truck', titulo: '🚚 Mostrador del Food Truck', ayuda: 'La tablet del truck. Ve y cancela sólo los pedidos del truck.' },
+    { id: null, titulo: '📱 Aparato común', ayuda: 'Como el celular de un cliente: sin botón Pedidos, lo que se pida cuenta como QR.' },
+];
+
+function EsteAparato({ onCerrar }) {
+    const actual = esMostrador() ? getUnidad() : null;
+    const [elegida, setElegida] = useState(actual);
+    return (
+        <div className="panel-caja panel-aparato">
+            <h3>¿Qué es este aparato?</h3>
+            <p className="panel-ayuda">Define qué pedidos ve el panel, qué stock se toca y de qué unidad salen los pedidos que se cargan acá.</p>
+            <div className="panel-aparato-opciones" role="radiogroup" aria-label="Este aparato">
+                {OPCIONES_APARATO.map((o) => (
+                    <button
+                        key={o.id ?? 'comun'}
+                        type="button"
+                        role="radio"
+                        aria-checked={elegida === o.id}
+                        className={`panel-aparato-opcion ${elegida === o.id ? 'activa' : ''}`}
+                        onClick={() => setElegida(o.id)}
+                    >
+                        <strong>{o.titulo}{actual === o.id ? ' · ahora' : ''}</strong>
+                        <small>{o.ayuda}</small>
+                    </button>
+                ))}
+            </div>
+            <div className="panel-acciones-fila">
+                <button type="button" className="panel-btn-sec" onClick={onCerrar}>Volver</button>
+                <button type="button" className="builder-add-btn" disabled={elegida === actual} onClick={() => configurarAparato(elegida)}>
+                    Cambiar y volver al menú
+                </button>
+            </div>
+        </div>
+    );
+}
+
 function FormPin({ hayPin, onListo, onCerrar }) {
     const [actual, setActual] = useState('');
     const [nuevo, setNuevo] = useState('');
@@ -462,6 +506,7 @@ function PanelPedidos() {
             </>)}
 
             <footer className="panel-pie">
+                <button type="button" className="panel-link" onClick={() => setModal({ tipo: 'aparato' })}>Este aparato</button>
                 {hayPin && <button type="button" className="panel-link" onClick={() => setModal({ tipo: 'pin' })}>Cambiar PIN</button>}
                 <button type="button" className="panel-link" onClick={salir}>Cerrar sesión</button>
             </footer>
@@ -472,6 +517,13 @@ function PanelPedidos() {
                     onCerrar={() => setModal(null)}
                     onCancelado={() => { setModal(null); recargar(); }}
                 />
+            )}
+            {modal?.tipo === 'aparato' && (
+                <div className="admin-overlay" onClick={() => setModal(null)}>
+                    <div className="admin-panel panel-modal" onClick={(e) => e.stopPropagation()}>
+                        <EsteAparato onCerrar={() => setModal(null)} />
+                    </div>
+                </div>
             )}
             {modal?.tipo === 'pin' && hayPin && (
                 <div className="admin-overlay" onClick={() => setModal(null)}>

@@ -5,7 +5,7 @@ import { registrarPedido, firmaPedido } from '../utils/pedidos.js';
 import { copyToClipboard } from '../utils/clipboard.js';
 import { formatPrice } from '../utils/format.js';
 import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
-import { getUnidad } from '../config/unidad.js';
+import { getUnidad, esMostrador } from '../config/unidad.js';
 import PaymentInfo from './PaymentInfo.jsx';
 
 // Última venta anotada, para no anotarla de nuevo si se reintenta el envío.
@@ -40,13 +40,38 @@ function olvidarUltimo() {
     }
 }
 
+/**
+ * Medios de pago que se ofrecen.
+ *
+ * El cliente (QR) elige sólo transferencia o efectivo: con el posnet la
+ * comisión la paga el negocio, así que esa opción no se le ofrece. En el
+ * mostrador (iPad del local, tablet del truck) el personal además puede
+ * cobrar con el posnet: tarjeta de débito o crédito, o QR. La plata del
+ * posnet llega días después; por eso importa distinguirla (el cierre de caja
+ * la muestra aparte).
+ */
+function mediosDePago() {
+    const truck = getUnidad() === 'food_truck';
+    const medios = [
+        { id: 'transferencia', icono: '🏦', label: 'Transferencia', sub: 'al alias' },
+        { id: 'efectivo', icono: '💵', label: 'Efectivo', sub: truck ? 'en el truck' : 'en el local' },
+    ];
+    if (esMostrador()) {
+        medios.push({ id: 'posnet', icono: '💳', label: 'Tarjeta o QR', sub: truck ? 'posnet Mercado Pago' : 'posnet' });
+    }
+    return medios;
+}
+
 function Cart() {
     const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
     const [open, setOpen] = useState(false);
     const [checkout, setCheckout] = useState(false);
     const [sent, setSent] = useState(false);
-    // El nombre queda guardado en el teléfono para no reescribirlo en cada pedido
+    // El nombre queda guardado en el teléfono para no reescribirlo en cada
+    // pedido. En el mostrador no: cada pedido es de otra persona, y proponer
+    // el nombre del cliente anterior es invitar a mandar el pedido a su nombre.
     const [name, setName] = useState(() => {
+        if (esMostrador()) return '';
         try {
             return localStorage.getItem('buba-name') || '';
         } catch {
@@ -55,7 +80,10 @@ function Cart() {
     });
     const [note, setNote] = useState('');
     const [nameError, setNameError] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState(null); // 'transferencia' | 'efectivo'
+    const [paymentMethod, setPaymentMethod] = useState(null); // 'transferencia' | 'efectivo' | 'posnet' (sólo mostrador)
+    // La aclaración casi nunca se usa y ocupaba media pantalla del celular:
+    // queda plegada detrás de un botón chico.
+    const [conNota, setConNota] = useState(false);
     const [paymentError, setPaymentError] = useState(false);
     const pagoRef = useRef(null);
     const [copiado, setCopiado] = useState(false);
@@ -126,10 +154,12 @@ function Cart() {
         setPaymentError(faltaPago);
         if (faltaNombre || faltaPago) return;
 
-        try {
-            localStorage.setItem('buba-name', name.trim());
-        } catch {
-            // ignore
+        if (!esMostrador()) {
+            try {
+                localStorage.setItem('buba-name', name.trim());
+            } catch {
+                // ignore
+            }
         }
 
         // Anotamos ANTES de saltar a WhatsApp, sin esperar la respuesta. No
@@ -174,7 +204,9 @@ function Cart() {
     const handleNewOrder = () => {
         clearCart();
         olvidarUltimo();
+        if (esMostrador()) setName('');
         setNote('');
+        setConNota(false);
         setPaymentMethod(null);
         setPaymentError(false);
         setCheckout(false);
@@ -232,11 +264,13 @@ function Cart() {
                                     Tu pedido a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
                                     {paymentMethod === 'efectivo'
                                         ? ' Lo pagás en el mostrador 💵'
-                                        : ' Acá tenés de nuevo los datos para transferir 👇'}
+                                        : paymentMethod === 'posnet'
+                                            ? ' Se cobra con el posnet 💳'
+                                            : ' Acá tenés de nuevo los datos para transferir 👇'}
                                 </p>
                                 {/* Respaldo para quien sí vuelve al menú: los datos ya los vio
                                     en el checkout y también le quedaron en el chat de WhatsApp. */}
-                                {paymentMethod !== 'efectivo' && (
+                                {paymentMethod === 'transferencia' && (
                                     <PaymentInfo total={total} hasConsultarItems={hasConsultarItems} />
                                 )}
                                 <button className="builder-add-btn" onClick={handleNewOrder}>Hacer un nuevo pedido</button>
@@ -291,22 +325,13 @@ function Cart() {
                                             value={name}
                                             placeholder="Tu nombre"
                                             maxLength={40}
+                                            autoComplete="given-name"
                                             className={nameError ? 'input-error' : ''}
                                             onChange={(e) => { setName(e.target.value); if (e.target.value.trim()) setNameError(false); }}
-                                            autoFocus
+                                            // Con el nombre ya guardado no se abre el teclado: taparía los medios de pago.
+                                            autoFocus={!name}
                                         />
                                         {nameError && <span className="field-error">Necesitamos tu nombre para preparar el pedido</span>}
-                                    </label>
-
-                                    <label className="checkout-field">
-                                        <span>Aclaración <span className="opcional-tag">opcional</span></span>
-                                        <textarea
-                                            value={note}
-                                            placeholder="Ej: sin azúcar, para llevar, sin maní…"
-                                            maxLength={200}
-                                            rows={3}
-                                            onChange={(e) => setNote(e.target.value)}
-                                        />
                                     </label>
 
                                     {/*
@@ -315,25 +340,24 @@ function Cart() {
                                       alias apareciera recién después, no lo ve nunca.
                                     */}
                                     <div className="checkout-field">
-                                        <span>¿Cómo vas a pagar? <em className="req">*</em></span>
-                                        <div className="payment-method-group">
-                                            {[
-                                                { id: 'transferencia', icono: '💳', label: 'Transferencia' },
-                                                { id: 'efectivo', icono: '💵', label: 'Efectivo en el local' },
-                                            ].map((m) => (
+                                        <span>¿Cómo {esMostrador() ? 'paga' : 'vas a pagar'}? <em className="req">*</em></span>
+                                        <div className={`payment-method-group ${esMostrador() ? 'tres' : ''}`} role="radiogroup" aria-label="Medio de pago">
+                                            {mediosDePago().map((m) => (
                                                 <button
                                                     key={m.id}
                                                     type="button"
+                                                    role="radio"
                                                     className={`payment-method-option ${paymentMethod === m.id ? 'selected' : ''}`}
-                                                    aria-pressed={paymentMethod === m.id}
+                                                    aria-checked={paymentMethod === m.id}
                                                     onClick={() => { setPaymentMethod(m.id); setPaymentError(false); }}
                                                 >
                                                     <span className="payment-method-icon" aria-hidden="true">{m.icono}</span>
                                                     <span>{m.label}</span>
+                                                    <small className="payment-method-sub">{m.sub}</small>
                                                 </button>
                                             ))}
                                         </div>
-                                        {paymentError && <span className="field-error">Elegí cómo vas a pagar</span>}
+                                        {paymentError && <span className="field-error">Elegí cómo {esMostrador() ? 'paga' : 'vas a pagar'}</span>}
                                     </div>
 
                                     {paymentMethod === 'transferencia' && (
@@ -346,20 +370,34 @@ function Cart() {
                                         </div>
                                     )}
 
-                                    <div className="checkout-summary">
-                                        <div className="cart-total-row">
-                                            <span className="cart-total-label">Total del pedido</span>
-                                            <span className="cart-total-price">{formatPrice(total)}</span>
-                                        </div>
-                                        {hasConsultarItems && (
-                                            <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>
-                                        )}
-                                    </div>
+                                    {conNota || note ? (
+                                        <label className="checkout-field">
+                                            <span>Aclaración <span className="opcional-tag">opcional</span></span>
+                                            <textarea
+                                                value={note}
+                                                placeholder="Ej: sin azúcar, para llevar, sin maní…"
+                                                maxLength={200}
+                                                rows={2}
+                                                autoFocus={conNota && !note}
+                                                onChange={(e) => setNote(e.target.value)}
+                                            />
+                                        </label>
+                                    ) : (
+                                        <button type="button" className="checkout-agregar-nota" onClick={() => setConNota(true)}>
+                                            + Agregar una aclaración <span>(sin azúcar, para llevar…)</span>
+                                        </button>
+                                    )}
+
+                                    {hasConsultarItems && (
+                                        <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>
+                                    )}
                                 </div>
 
                                 <div className="cart-panel-footer">
-                                    <button className="builder-add-btn" onClick={handleSend}>
-                                        Enviar pedido por WhatsApp 📲
+                                    {/* El total va en el botón: es lo último que se mira antes de enviar. */}
+                                    <button className="builder-add-btn checkout-enviar" onClick={handleSend}>
+                                        <span>Enviar por WhatsApp 📲</span>
+                                        <span className="checkout-enviar-total">{formatPrice(total)}</span>
                                     </button>
                                     <p className="cart-hint">Se abrirá WhatsApp con tu pedido ya escrito — solo tenés que enviarlo</p>
                                 </div>

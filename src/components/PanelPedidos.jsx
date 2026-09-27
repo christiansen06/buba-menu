@@ -24,10 +24,10 @@ const OWNER_HINT = 'Entrá con el mail y la contraseña del dueño. Queda guarda
 const MEDIOS = [
     { id: 'efectivo', label: 'Efectivo' },
     { id: 'transferencia', label: 'Transf.' },
-    { id: 'debito', label: 'Débito' },
+    { id: 'posnet', label: 'Tarjeta/QR' },
 ];
 
-const DECLARADO = { efectivo: 'efectivo', transferencia: 'transferencia' };
+const DECLARADO = { efectivo: 'efectivo', transferencia: 'transferencia', posnet: 'tarjeta/QR' };
 
 /** Principio y fin del día calendario del aparato, en ISO para la consulta. */
 function limitesDelDia(fecha) {

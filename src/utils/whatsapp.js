@@ -141,7 +141,7 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
     // De paso, al local le queda claro si esperar una transferencia.
     if (paymentMethod === 'transferencia') {
         L.push('');
-        L.push('💳 *Pago:* Transferencia');
+        L.push('🏦 *Pago:* Transferencia');
         L.push(`*Alias:* ${PAYMENT_CONFIG.alias}`);
         L.push(`*Titular:* ${PAYMENT_CONFIG.aliasHolder}`);
         L.push(`*Monto:* ${formatPrice(total)}`);
@@ -151,7 +151,11 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
         L.push('_Verificar la transferencia antes de entregar_');
     } else if (paymentMethod === 'efectivo') {
         L.push('');
-        L.push('💵 *Pago:* Efectivo en el local');
+        L.push(getUnidad() === 'food_truck' ? '💵 *Pago:* Efectivo en el truck' : '💵 *Pago:* Efectivo en el local');
+    } else if (paymentMethod === 'posnet') {
+        // Sólo desde el mostrador: al cliente no se le ofrece.
+        L.push('');
+        L.push('💳 *Pago:* Tarjeta o QR (posnet)');
     }
 
     L.push('');

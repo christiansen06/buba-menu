@@ -4641,3 +4641,45 @@ img.product-image.product-photo {
   border-color: var(--buba-cyan);
   background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18);
 }
+
+/* ---------- Checkout (28/09): más corto, total en el botón ---------- */
+.payment-method-group.tres { grid-template-columns: repeat(3, 1fr); }
+
+.payment-method-sub {
+  font-size: 0.7rem;
+  font-weight: 700;
+  opacity: 0.7;
+  margin-top: -0.15rem;
+}
+
+.checkout-agregar-nota {
+  justify-self: start;
+  background: none;
+  border: none;
+  padding: 0.35rem 0;
+  min-height: 44px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: hsl(var(--buba-cyan-h) 91.1% 31%);
+  cursor: pointer;
+  text-align: left;
+}
+
+.checkout-agregar-nota span { font-weight: 600; opacity: 0.7; }
+[data-theme="dark"] .checkout-agregar-nota { color: var(--buba-cyan); }
+
+.checkout-enviar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.checkout-enviar-total {
+  font-weight: 900;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.25);
+  white-space: nowrap;
+}

@@ -65,6 +65,27 @@ function mediosDePago() {
     return medios;
 }
 
+/**
+ * Aviso que aparece al elegir el medio de pago: qué hay que hacer. Con
+ * transferencia no hace falta, ya aparece el recuadro con el alias.
+ */
+function avisoDePago(medio) {
+    const staff = esMostrador();
+    const truck = getUnidad() === 'food_truck';
+    if (medio === 'efectivo') {
+        return staff
+            ? { icono: '💵', texto: 'Cobrá en efectivo antes de entregar.' }
+            : { icono: '💵', texto: truck ? 'Pagás en efectivo cuando retirás en el truck.' : 'Pagás en efectivo cuando retirás en el local.' };
+    }
+    if (medio === 'posnet') {
+        return { icono: '💳', texto: truck ? 'Cobrá con el posnet de Mercado Pago: tarjeta o QR.' : 'Cobrá con el posnet: tarjeta o QR.' };
+    }
+    if (medio === 'uber') {
+        return { icono: '🛵', texto: 'Pedido de Uber Eats: no se cobra nada en el local, lo paga Uber.' };
+    }
+    return null;
+}
+
 function Cart() {
     const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
     const [open, setOpen] = useState(false);
@@ -364,6 +385,14 @@ function Cart() {
                                         </div>
                                         {paymentError && <span className="field-error">Elegí cómo {esMostrador() ? 'paga' : 'vas a pagar'}</span>}
                                     </div>
+
+                                    {avisoDePago(paymentMethod) && (
+                                        // key: al cambiar de medio el aviso vuelve a entrar con su animación
+                                        <p key={paymentMethod} className={`pago-aviso ${paymentMethod}`} role="status">
+                                            <span className="pago-aviso-icono" aria-hidden="true">{avisoDePago(paymentMethod).icono}</span>
+                                            {avisoDePago(paymentMethod).texto}
+                                        </p>
+                                    )}
 
                                     {paymentMethod === 'transferencia' && (
                                         <div ref={pagoRef}>

@@ -4688,20 +4688,10 @@ img.product-image.product-photo {
 }
 
 /* ---------- Uber (verde Uber) y cambiar hora del pedido ---------- */
-.payment-method-option.uber.selected,
-.payment-method-option.uber.selected:hover {
-  background: #06c167;
-  border-color: #06c167;
-  color: #fff;
-  box-shadow: 0 6px 18px rgb(6 193 103 / 0.35);
-}
-.payment-method-option.uber.selected .payment-method-sub { opacity: 0.9; }
-[data-theme="dark"] .payment-method-option.uber.selected { background: #06c167; border-color: #06c167; color: #fff; }
-
 .panel-chip-uber.activo {
   background: #06c167 !important;
   border-color: #06c167 !important;
-  color: #fff !important;
+  color: #0b0b0b !important;
 }
 .panel-pedido.es-uber { border-left: 5px solid #06c167; }
 
@@ -4730,3 +4720,98 @@ img.product-image.product-photo {
 }
 [data-theme="dark"] .panel-aviso { background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18); }
 .solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* =============================================
+   Medios de pago: cada uno con su color al elegirlo (29/09)
+   Contraste del texto sobre el color, medido: transferencia 4,9:1 ·
+   efectivo 9,3:1 · posnet 5,9:1 · Uber 8,3:1 (texto negro, como Uber).
+   El color nunca va solo: el botón elegido también lleva ✓ y abajo
+   aparece un aviso con qué hacer.
+   ============================================= */
+.payment-method-option { position: relative; --medio: #1f6fd1; --medio-texto: #fff; }
+.payment-method-option.transferencia { --medio: #1f6fd1; --medio-texto: #ffffff; }
+.payment-method-option.efectivo      { --medio: #f2b21b; --medio-texto: #1a1a1a; }
+.payment-method-option.posnet        { --medio: #6b46e0; --medio-texto: #ffffff; }
+.payment-method-option.uber          { --medio: #06c167; --medio-texto: #0b0b0b; }
+
+.payment-method-option:hover { border-color: var(--medio); }
+
+.payment-method-option.selected,
+.payment-method-option.selected:hover,
+[data-theme="dark"] .payment-method-option.selected {
+  background: var(--medio);
+  border-color: var(--medio);
+  color: var(--medio-texto);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--medio) 40%, transparent);
+  animation: medio-elegido 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.payment-method-option.selected .payment-method-sub { opacity: 0.9; }
+.payment-method-option.selected .payment-method-icon { animation: medio-icono 420ms ease-out; }
+
+/* ✓ en la esquina: que se sepa cuál quedó elegido aunque no se distinga el color */
+.payment-method-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 900;
+  background: var(--medio-texto);
+  color: var(--medio);
+}
+
+@keyframes medio-elegido {
+  0% { transform: scale(0.94); }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+@keyframes medio-icono {
+  0% { transform: translateY(0) rotate(0); }
+  35% { transform: translateY(-5px) rotate(-8deg); }
+  70% { transform: translateY(1px) rotate(4deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+/* Aviso debajo de los medios: qué hacer con el que se eligió */
+.pago-aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 14px;
+  border: 1.5px solid var(--medio);
+  background: color-mix(in srgb, var(--medio) 12%, transparent);
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 750;
+  line-height: 1.35;
+  animation: pago-aviso-entra 260ms ease-out;
+}
+.pago-aviso-icono { font-size: 1.35rem; flex: none; }
+.pago-aviso.efectivo { --medio: #f2b21b; }
+.pago-aviso.posnet   { --medio: #6b46e0; }
+.pago-aviso.uber     { --medio: #06c167; }
+@keyframes pago-aviso-entra {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payment-method-option.selected,
+  .payment-method-option.selected .payment-method-icon,
+  .pago-aviso { animation: none; }
+}
+
+/* Con transferencia elegida, el recuadro del alias toma el azul del botón */
+.payment-info.payment-info-checkout {
+  border-color: #1f6fd1;
+  background: color-mix(in srgb, #1f6fd1 7%, transparent);
+  animation: pago-aviso-entra 260ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) { .payment-info.payment-info-checkout { animation: none; } }

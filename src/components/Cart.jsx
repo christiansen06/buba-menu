@@ -313,7 +313,7 @@ function Cart() {
                                 </div>
 
                                 <div className="cart-checkout-body">
-                                    {!estado.abierto && getUnidad() === 'local' && (
+                                    {!estado.abierto && getUnidad() === 'local' && !esMostrador() && (
                                         <div className="aviso-cerrado" role="status">
                                             <span className="aviso-cerrado-icono" aria-hidden="true">🌙</span>
                                             <div>
@@ -352,7 +352,7 @@ function Cart() {
                                                     key={m.id}
                                                     type="button"
                                                     role="radio"
-                                                    className={`payment-method-option ${paymentMethod === m.id ? 'selected' : ''}`}
+                                                    className={`payment-method-option ${m.id} ${paymentMethod === m.id ? 'selected' : ''}`}
                                                     aria-checked={paymentMethod === m.id}
                                                     onClick={() => { setPaymentMethod(m.id); setPaymentError(false); }}
                                                 >

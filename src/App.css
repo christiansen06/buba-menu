@@ -4686,3 +4686,47 @@ img.product-image.product-photo {
   background: rgb(255 255 255 / 0.25);
   white-space: nowrap;
 }
+
+/* ---------- Uber (verde Uber) y cambiar hora del pedido ---------- */
+.payment-method-option.uber.selected,
+.payment-method-option.uber.selected:hover {
+  background: #06c167;
+  border-color: #06c167;
+  color: #fff;
+  box-shadow: 0 6px 18px rgb(6 193 103 / 0.35);
+}
+.payment-method-option.uber.selected .payment-method-sub { opacity: 0.9; }
+[data-theme="dark"] .payment-method-option.uber.selected { background: #06c167; border-color: #06c167; color: #fff; }
+
+.panel-chip-uber.activo {
+  background: #06c167 !important;
+  border-color: #06c167 !important;
+  color: #fff !important;
+}
+.panel-pedido.es-uber { border-left: 5px solid #06c167; }
+
+.panel-pedido-hora-btn {
+  background: none;
+  border: 1.5px dashed transparent;
+  border-radius: 10px;
+  padding: 0.2rem 0.45rem;
+  margin: -0.2rem -0.45rem;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  min-height: 36px;
+}
+.panel-pedido-hora-btn span[aria-hidden] { font-size: 0.8em; opacity: 0.45; }
+.panel-pedido-hora-btn:hover, .panel-pedido-hora-btn:focus-visible { border-color: currentColor; }
+
+.panel-hora-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.panel-hora-rapido { display: flex; gap: 0.5rem; margin: 0.6rem 0 0.2rem; }
+.panel-aviso {
+  margin: 0.5rem 0;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  background: hsl(var(--buba-cyan-h) 86.4% 91.4%);
+  font-weight: 750;
+}
+[data-theme="dark"] .panel-aviso { background: hsl(var(--buba-cyan-h) 79.9% 61% / 0.18); }
+.solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

@@ -28,7 +28,6 @@ const MEDIOS = [
     { id: 'uber', label: 'Uber' },
 ];
 
-const DECLARADO = { efectivo: 'efectivo', transferencia: 'transferencia', posnet: 'tarjeta/QR', uber: 'Uber' };
 
 /** Principio y fin del día calendario del aparato, en ISO para la consulta. */
 function limitesDelDia(fecha) {
@@ -61,6 +60,22 @@ const esHoy = (fecha) => {
 const hora = (iso) => new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
 const volverAlMenu = () => { window.location.hash = ''; };
+
+// Día y hora de un pedido en hora de Mar del Plata, para los campos de
+// "Cambiar día u hora" (el aparato podría estar en otra zona horaria).
+const ZONA = 'America/Argentina/Buenos_Aires';
+const diaAR = (iso) => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
+const horaAR = (iso) => new Intl.DateTimeFormat('en-GB', { timeZone: ZONA, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso));
+// Argentina no tiene horario de verano: siempre UTC−3.
+const isoAR = (dia, hhmm) => `${dia}T${hhmm}:00-03:00`;
+const diaLindo = (dia) => new Date(`${dia}T12:00:00-03:00`).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'numeric' });
+
+/**
+ * El medio de pago que se ve marcado: el que se anotó al cobrar y, si no se
+ * anotó nada, el que se eligió en el checkout. Así lo elegido al hacer el
+ * pedido ya aparece marcado, y sólo se toca si cambió.
+ */
+const medioEfectivo = (pedido) => pedido.medio_pago_cobro || pedido.medio_pago || null;
 
 /* ------------------------------------------------------------------ */
 
@@ -257,6 +272,72 @@ function ModalCancelar({ pedido, onCerrar, onCancelado }) {
     );
 }
 
+/**
+ * Cambiar el día o la hora de un pedido. Caso típico: un pedido del domingo
+ * que se cargó pasada la medianoche y quedó el lunes. La hora original no
+ * se pierde (queda guardada en la base).
+ */
+function ModalHora({ pedido, onCerrar, onListo }) {
+    const [dia, setDia] = useState(() => diaAR(pedido.creado_en));
+    const [hhmm, setHhmm] = useState(() => horaAR(pedido.creado_en));
+    const [enviando, setEnviando] = useState(false);
+    const [error, setError] = useState('');
+    const hoy = diaAR(new Date().toISOString());
+    const cambio = dia !== diaAR(pedido.creado_en) || hhmm !== horaAR(pedido.creado_en);
+
+    const guardar = async (e) => {
+        e.preventDefault();
+        if (!dia || !/^\d{2}:\d{2}$/.test(hhmm)) { setError('Elegí el día y la hora'); return; }
+        setEnviando(true);
+        const { error } = await supabase.rpc('cambiar_fecha_pedido', { p_id: pedido.id, p_creado_en: isoAR(dia, hhmm) });
+        setEnviando(false);
+        if (error) { setError(error.message); return; }
+        onListo(dia);
+    };
+
+    return (
+        <div className="admin-overlay" onClick={onCerrar}>
+            <form className="admin-panel panel-modal" onClick={(e) => e.stopPropagation()} onSubmit={guardar}>
+                <div className="admin-header">
+                    <h3>Cambiar día u hora</h3>
+                    <button className="cart-close-btn" type="button" onClick={onCerrar} aria-label="Cerrar">✕</button>
+                </div>
+                <p className="panel-modal-resumen">
+                    <strong>{hora(pedido.creado_en)}</strong> · {formatPrice(pedido.total)}
+                    <br />
+                    {resumenItems(pedido)}
+                </p>
+                <div className="panel-hora-campos">
+                    <label className="checkout-field">
+                        <span>Día</span>
+                        <input type="date" value={dia} max={hoy} onChange={(e) => { setDia(e.target.value); setError(''); }} required />
+                    </label>
+                    <label className="checkout-field">
+                        <span>Hora</span>
+                        <input type="time" value={hhmm} onChange={(e) => { setHhmm(e.target.value); setError(''); }} required />
+                    </label>
+                </div>
+                <div className="panel-hora-rapido">
+                    <button type="button" className="panel-chip" onClick={() => {
+                        const d = new Date(`${diaAR(pedido.creado_en)}T12:00:00-03:00`); d.setDate(d.getDate() - 1);
+                        setDia(diaAR(d.toISOString())); setHhmm('23:30'); setError('');
+                    }}>Día anterior, 23:30</button>
+                </div>
+                {dia !== diaAR(pedido.creado_en) && (
+                    <p className="panel-ayuda">Pasa al {diaLindo(dia)}: cuenta en el cierre de ese día.</p>
+                )}
+                {error && <p className="field-error">{error}</p>}
+                <div className="panel-acciones-fila">
+                    <button type="button" className="panel-btn-sec" onClick={onCerrar}>Volver</button>
+                    <button type="submit" className="builder-add-btn" disabled={enviando || !cambio}>
+                        {enviando ? 'Guardando…' : 'Guardar'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
 function resumenItems(pedido) {
     const items = pedido.pedido_items || [];
     return items
@@ -266,14 +347,24 @@ function resumenItems(pedido) {
 
 /* ------------------------------------------------------------------ */
 
-function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar }) {
+function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora }) {
     const cancelado = pedido.estado === 'cancelado';
+    const medio = medioEfectivo(pedido);
     return (
-        <article className={`panel-pedido ${cancelado ? 'cancelado' : ''}`}>
+        <article className={`panel-pedido ${cancelado ? 'cancelado' : ''} ${medio === 'uber' ? 'es-uber' : ''}`}>
             <div className="panel-pedido-cab">
-                <span className="panel-pedido-hora">{hora(pedido.creado_en)}</span>
+                <button
+                    type="button"
+                    className="panel-pedido-hora panel-pedido-hora-btn"
+                    onClick={() => onCambiarHora(pedido)}
+                    disabled={ocupado}
+                    title="Cambiar día u hora"
+                >
+                    {hora(pedido.creado_en)} <span aria-hidden="true">✎</span>
+                    <span className="solo-lector"> — cambiar día u hora</span>
+                </button>
                 <span className="panel-pedido-canal">
-                    {pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
+                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
                 </span>
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
@@ -297,21 +388,16 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar }) {
             ) : (
                 <div className="panel-pedido-pie">
                     <div className="panel-cobro">
-                        <span className="panel-cobro-label">
-                            Cobrado con
-                            {pedido.medio_pago && (
-                                <small> (dijo {DECLARADO[pedido.medio_pago] || pedido.medio_pago})</small>
-                            )}
-                        </span>
+                        <span className="panel-cobro-label">Cobrado con</span>
                         <div className="panel-cobro-chips" role="group" aria-label="Medio de cobro">
                             {MEDIOS.map((m) => (
                                 <button
                                     key={m.id}
                                     type="button"
-                                    className={`panel-chip ${pedido.medio_pago_cobro === m.id ? 'activo' : ''}`}
+                                    className={`panel-chip panel-chip-${m.id} ${medio === m.id ? 'activo' : ''}`}
                                     onClick={() => onCobro(pedido, m.id)}
                                     disabled={ocupado}
-                                    aria-pressed={pedido.medio_pago_cobro === m.id}
+                                    aria-pressed={medio === m.id}
                                 >
                                     {m.label}
                                 </button>
@@ -343,6 +429,7 @@ function PanelPedidos() {
     const [modal, setModal] = useState(null);           // { tipo: 'cancelar', pedido } | { tipo: 'pin' }
     const [ocupado, setOcupado] = useState(null);       // id del pedido con una acción en curso
     const [error, setError] = useState('');
+    const [avisoPanel, setAvisoPanel] = useState('');   // "Pedido movido al …"
     const [version, setVersion] = useState(0);          // se incrementa para volver a cargar
     const [vista, setVista] = useState('pedidos');      // 'pedidos' | 'caja'
 
@@ -411,9 +498,10 @@ function PanelPedidos() {
     };
 
     const cobro = (pedido, medio) => {
-        // Tocar el chip activo lo apaga (borra la marca).
-        const nuevo = pedido.medio_pago_cobro === medio ? null : medio;
-        return accion(pedido, () => supabase.rpc('registrar_cobro', { p_id: pedido.id, p_medio: nuevo }), 'No se pudo anotar el cobro');
+        // El marcado ya viene del checkout: tocarlo de nuevo no cambia nada.
+        // Tocar otro lo corrige (queda anotado como cobrado con ese).
+        if (medioEfectivo(pedido) === medio) return undefined;
+        return accion(pedido, () => supabase.rpc('registrar_cobro', { p_id: pedido.id, p_medio: medio }), 'No se pudo anotar el cobro');
     };
 
     const reactivar = (pedido) =>
@@ -485,6 +573,11 @@ function PanelPedidos() {
             {hayPin === false && <FormPin hayPin={false} onListo={() => setHayPin(true)} />}
 
             {error && <p className="field-error panel-error">{error}</p>}
+            {avisoPanel && (
+                <p className="panel-aviso" role="status">
+                    {avisoPanel} <button type="button" className="panel-link" onClick={() => setAvisoPanel('')}>OK</button>
+                </p>
+            )}
 
             {pedidos === null ? (
                 <p className="panel-ayuda">Cargando pedidos…</p>
@@ -500,6 +593,7 @@ function PanelPedidos() {
                             onCobro={cobro}
                             onCancelar={pedirCancelar}
                             onReactivar={reactivar}
+                            onCambiarHora={(pedido) => setModal({ tipo: 'hora', pedido })}
                         />
                     ))}
                 </div>
@@ -517,6 +611,18 @@ function PanelPedidos() {
                     pedido={modal.pedido}
                     onCerrar={() => setModal(null)}
                     onCancelado={() => { setModal(null); recargar(); }}
+                />
+            )}
+            {modal?.tipo === 'hora' && (
+                <ModalHora
+                    pedido={modal.pedido}
+                    onCerrar={() => setModal(null)}
+                    onListo={(diaNuevo) => {
+                        setModal(null);
+                        const antes = diaAR(modal.pedido.creado_en);
+                        setAvisoPanel(diaNuevo !== antes ? `Pedido movido al ${diaLindo(diaNuevo)}.` : 'Hora cambiada.');
+                        recargar();
+                    }}
                 />
             )}
             {modal?.tipo === 'aparato' && (

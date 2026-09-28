@@ -114,6 +114,7 @@ export const USOS = {
             pepito: 'pepito',
             coffler: 'coffler',
             ferrero: 'ferrero',
+            perlas: 'perlas',              // sólo en el Waffle BüBa
         },
         salsas: {
             chocolate: 'salsa-chocolate',

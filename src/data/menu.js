@@ -397,6 +397,23 @@ export const menuCategories = [
     nutellaSaucePrice: 500,
     presets: [
       {
+        // El waffle de la casa (28/09). Las perlas van SÓLO en este: no son
+        // un topping del armador (soloPreset).
+        id: 'buba',
+        name: 'Waffle BüBa',
+        description: 'Perlas de tapioca, helado americana y crema chantilly',
+        featured: true,
+        config: {
+          rellenos: [
+            { id: 'helado-americana-p', type: 'helado', flavor: 'americana', label: 'Helado Americana' },
+            { id: 'crema', type: 'crema', label: 'Crema Chantilly' },
+          ],
+          toppings: ['perlas'],
+          salsas: [],
+          extraNutella: false,
+        },
+      },
+      {
         id: 'frutilla',
         name: 'Waffle Frutilla',
         description: 'Crema chantilly, frutillas y salsa de chocolate',
@@ -480,6 +497,8 @@ export const menuCategories = [
       { id: 'pepito', label: 'Pepito', group: 'Galletitas' },
       { id: 'coffler', label: 'Cofler', group: 'Galletitas' },
       { id: 'ferrero', label: 'Ferrero Rocher', group: 'Galletitas' },
+      // Sólo en el Waffle BüBa: el armador no la ofrece.
+      { id: 'perlas', label: 'Perlas de tapioca', group: 'Especiales', soloPreset: true },
     ],
     salsas: [
       { id: 'chocolate', label: 'Chocolate' },

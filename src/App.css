@@ -4643,7 +4643,10 @@ img.product-image.product-photo {
 }
 
 /* ---------- Checkout (28/09): más corto, total en el botón ---------- */
-.payment-method-group.tres { grid-template-columns: repeat(3, 1fr); }
+.payment-method-group.cuatro { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 560px) {
+  .payment-method-group.cuatro { grid-template-columns: repeat(2, 1fr); }
+}
 
 .payment-method-sub {
   font-size: 0.7rem;

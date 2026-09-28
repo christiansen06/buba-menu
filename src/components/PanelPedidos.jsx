@@ -25,9 +25,10 @@ const MEDIOS = [
     { id: 'efectivo', label: 'Efectivo' },
     { id: 'transferencia', label: 'Transf.' },
     { id: 'posnet', label: 'Tarjeta/QR' },
+    { id: 'uber', label: 'Uber' },
 ];
 
-const DECLARADO = { efectivo: 'efectivo', transferencia: 'transferencia', posnet: 'tarjeta/QR' };
+const DECLARADO = { efectivo: 'efectivo', transferencia: 'transferencia', posnet: 'tarjeta/QR', uber: 'Uber' };
 
 /** Principio y fin del día calendario del aparato, en ISO para la consulta. */
 function limitesDelDia(fecha) {

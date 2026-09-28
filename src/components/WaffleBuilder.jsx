@@ -41,6 +41,9 @@ function OptionTile({ emoji, img, name, selected, disabled, onClick, tag }) {
 }
 
 function WaffleBuilder({ category }) {
+    // Las perlas (y lo que venga marcado soloPreset) van en un prearmado,
+    // no se ofrecen para armar.
+    const toppingsDelArmador = category.toppings.filter((t) => !t.soloPreset);
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
     const { opcionAgotada } = useDisponibilidad();
 
@@ -88,7 +91,7 @@ function WaffleBuilder({ category }) {
                     (o.id === 'helado' || !selectedRellenos.some((r) => r.type === o.id))
             ),
         2: selectedToppings.length < MAX_TOPPINGS &&
-            quedaLibre('toppings', category.toppings, selectedToppings),
+            quedaLibre('toppings', toppingsDelArmador, selectedToppings),
         3: selectedSalsas.length < MAX_SALSAS &&
             quedaLibre('salsas', category.salsas, selectedSalsas),
     };
@@ -207,7 +210,7 @@ function WaffleBuilder({ category }) {
         showToast('¡Agregado al pedido! 🧇');
     };
 
-    const toppingGroups = category.toppings.reduce((acc, t) => {
+    const toppingGroups = toppingsDelArmador.reduce((acc, t) => {
         (acc[t.group] = acc[t.group] || []).push(t);
         return acc;
     }, {});

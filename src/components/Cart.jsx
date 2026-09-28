@@ -58,6 +58,9 @@ function mediosDePago() {
     ];
     if (esMostrador()) {
         medios.push({ id: 'posnet', icono: '💳', label: 'Tarjeta o QR', sub: truck ? 'posnet Mercado Pago' : 'posnet' });
+        // Pedido que entró por la app de Uber y se marcha desde acá: lo paga
+        // Uber en la liquidación semanal, no está en la caja del día.
+        medios.push({ id: 'uber', icono: '🛵', label: 'Uber Eats', sub: 'lo liquida Uber' });
     }
     return medios;
 }
@@ -266,6 +269,8 @@ function Cart() {
                                         ? ' Lo pagás en el mostrador 💵'
                                         : paymentMethod === 'posnet'
                                             ? ' Se cobra con el posnet 💳'
+                                            : paymentMethod === 'uber'
+                                                ? ' Pedido de Uber Eats: lo cobra Uber 🛵'
                                             : ' Acá tenés de nuevo los datos para transferir 👇'}
                                 </p>
                                 {/* Respaldo para quien sí vuelve al menú: los datos ya los vio
@@ -323,7 +328,7 @@ function Cart() {
                                         <input
                                             type="text"
                                             value={name}
-                                            placeholder="Tu nombre"
+                                            placeholder={paymentMethod === 'uber' ? 'Nombre o código del pedido de Uber' : esMostrador() ? 'Nombre del cliente' : 'Tu nombre'}
                                             maxLength={40}
                                             autoComplete="given-name"
                                             className={nameError ? 'input-error' : ''}
@@ -341,7 +346,7 @@ function Cart() {
                                     */}
                                     <div className="checkout-field">
                                         <span>¿Cómo {esMostrador() ? 'paga' : 'vas a pagar'}? <em className="req">*</em></span>
-                                        <div className={`payment-method-group ${esMostrador() ? 'tres' : ''}`} role="radiogroup" aria-label="Medio de pago">
+                                        <div className={`payment-method-group ${esMostrador() ? 'cuatro' : ''}`} role="radiogroup" aria-label="Medio de pago">
                                             {mediosDePago().map((m) => (
                                                 <button
                                                     key={m.id}

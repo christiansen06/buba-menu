@@ -10,7 +10,9 @@
 --   · uber_items          los productos de cada pedido
 --
 -- Sin duplicados: los ID de Uber son las claves. Importar el mismo archivo
--- dos veces actualiza lo que ya estaba (por si Uber corrigió algo).
+-- dos veces actualiza lo que ya estaba (por si Uber corrigió algo), y los
+-- totales de cada pago se recalculan con todos sus pedidos: un reporte que
+-- trae sólo parte de una semana no lo deja incompleto.
 --
 -- La PLATA no entra por acá: la liquidación ya cuenta como ingreso desde el
 -- cierre de caja del día que llega ("De eso, liquidación de Uber", parte
@@ -98,6 +100,9 @@ declare
   v_liq_nuevas  integer := 0;
   v_ped_nuevos  integer := 0;
   v_ped_total   integer := 0;
+  v_en_otro     integer := 0;
+  v_ref_previo  text;
+  v_refs        text[] := '{}';
   l jsonb;
   ped jsonb;
 begin
@@ -106,28 +111,37 @@ begin
   end if;
 
   for l in select * from jsonb_array_elements(coalesce(p->'liquidaciones', '[]'::jsonb)) loop
+    v_refs := v_refs || (l->>'ref_pago');
     if not exists (select 1 from uber_liquidaciones where ref_pago = l->>'ref_pago') then
       v_liq_nuevas := v_liq_nuevas + 1;
+      -- Valores del archivo sólo para crearla: los totales se recalculan abajo.
+      insert into uber_liquidaciones
+        (ref_pago, fecha_pago, desde, hasta, pedidos, ventas, promociones, tasa_mercado,
+         red_entregas, impuestos, otros, cargos, pago_total, archivo)
+      values (l->>'ref_pago', (l->>'fecha_pago')::date, (l->>'desde')::date, (l->>'hasta')::date,
+              (l->>'pedidos')::int, (l->>'ventas')::numeric, coalesce((l->>'promociones')::numeric, 0),
+              coalesce((l->>'tasa_mercado')::numeric, 0), coalesce((l->>'red_entregas')::numeric, 0),
+              coalesce((l->>'impuestos')::numeric, 0), coalesce((l->>'otros')::numeric, 0),
+              (l->>'cargos')::numeric, (l->>'pago_total')::numeric, p->>'archivo');
+    else
+      update uber_liquidaciones
+         set fecha_pago = coalesce((l->>'fecha_pago')::date, fecha_pago),
+             archivo = p->>'archivo', importado_en = now()
+       where ref_pago = l->>'ref_pago';
     end if;
-    insert into uber_liquidaciones
-      (ref_pago, fecha_pago, desde, hasta, pedidos, ventas, promociones, tasa_mercado,
-       red_entregas, impuestos, otros, cargos, pago_total, archivo)
-    values (l->>'ref_pago', (l->>'fecha_pago')::date, (l->>'desde')::date, (l->>'hasta')::date,
-            (l->>'pedidos')::int, (l->>'ventas')::numeric, coalesce((l->>'promociones')::numeric, 0),
-            coalesce((l->>'tasa_mercado')::numeric, 0), coalesce((l->>'red_entregas')::numeric, 0),
-            coalesce((l->>'impuestos')::numeric, 0), coalesce((l->>'otros')::numeric, 0),
-            (l->>'cargos')::numeric, (l->>'pago_total')::numeric, p->>'archivo')
-    on conflict (ref_pago) do update set
-      fecha_pago = excluded.fecha_pago, desde = excluded.desde, hasta = excluded.hasta,
-      pedidos = excluded.pedidos, ventas = excluded.ventas, promociones = excluded.promociones,
-      tasa_mercado = excluded.tasa_mercado, red_entregas = excluded.red_entregas,
-      impuestos = excluded.impuestos, otros = excluded.otros, cargos = excluded.cargos,
-      pago_total = excluded.pago_total, archivo = excluded.archivo, importado_en = now();
   end loop;
 
   for ped in select * from jsonb_array_elements(coalesce(p->'pedidos', '[]'::jsonb)) loop
+    v_ref_previo := null;
+    select ref_pago into v_ref_previo from uber_pedidos where id_pedido = ped->>'id_pedido';
+    -- Un pedido que ya está en OTRO pago (un ajuste o reembolso posterior)
+    -- no se mueve: se cuenta y se avisa, para no desarmar el pago anterior.
+    if v_ref_previo is not null and v_ref_previo <> ped->>'ref_pago' then
+      v_en_otro := v_en_otro + 1;
+      continue;
+    end if;
     v_ped_total := v_ped_total + 1;
-    if not exists (select 1 from uber_pedidos where id_pedido = ped->>'id_pedido') then
+    if v_ref_previo is null then
       v_ped_nuevos := v_ped_nuevos + 1;
     end if;
     insert into uber_pedidos
@@ -142,7 +156,7 @@ begin
             coalesce((ped->>'otros')::numeric, 0), coalesce((ped->>'cobrado_efectivo')::numeric, 0),
             (ped->>'pago_total')::numeric, (ped->>'fecha_pago')::date)
     on conflict (id_pedido) do update set
-      ref_pago = excluded.ref_pago, flujo = excluded.flujo, fecha = excluded.fecha, hora = excluded.hora,
+      flujo = excluded.flujo, fecha = excluded.fecha, hora = excluded.hora,
       estado = excluded.estado, medio_pago = excluded.medio_pago, entrega = excluded.entrega,
       ventas = excluded.ventas, iva = excluded.iva, promociones = excluded.promociones,
       total_ajustado = excluded.total_ajustado, tasa_mercado = excluded.tasa_mercado,
@@ -163,10 +177,27 @@ begin
       precio_unitario = excluded.precio_unitario, ventas = excluded.ventas;
   end loop;
 
+  -- Los totales de cada pago salen de TODOS sus pedidos cargados, no del
+  -- archivo: un reporte que trae sólo una parte de la semana (por ejemplo,
+  -- "últimos 14 días") no achica un pago que ya estaba completo.
+  update uber_liquidaciones l
+     set pedidos = a.pedidos, ventas = a.ventas, promociones = a.promociones,
+         tasa_mercado = a.tasa_mercado, red_entregas = a.red_entregas, impuestos = a.impuestos,
+         otros = a.otros, cargos = a.cargos, pago_total = a.pago_total,
+         desde = a.desde, hasta = a.hasta
+    from (select ref_pago, count(*)::int as pedidos, sum(ventas) as ventas, sum(promociones) as promociones,
+                 sum(tasa_mercado) as tasa_mercado, sum(red_entregas) as red_entregas,
+                 sum(impuesto_red) as impuestos, sum(otros) as otros,
+                 sum(pago_total - total_ajustado) as cargos, sum(pago_total) as pago_total,
+                 min(fecha) as desde, max(fecha) as hasta
+            from uber_pedidos where ref_pago = any (v_refs) group by ref_pago) a
+   where l.ref_pago = a.ref_pago;
+
   return jsonb_build_object(
     'liquidaciones_nuevas', v_liq_nuevas,
     'pedidos_nuevos', v_ped_nuevos,
-    'pedidos_actualizados', v_ped_total - v_ped_nuevos);
+    'pedidos_actualizados', v_ped_total - v_ped_nuevos,
+    'pedidos_en_otro_pago', v_en_otro);
 end;
 $$;
 

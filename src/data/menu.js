@@ -739,7 +739,7 @@ export const menuCategories = [
       {
         id: 'coca',
         name: 'Coca-Cola',
-        description: 'Gaseosa',
+        description: 'Sabor original, botellita',
         image: 'Coca-Cola',
         badge: null,
         featured: false,

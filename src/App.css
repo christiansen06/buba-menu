@@ -414,6 +414,10 @@ a {
 
 .menu-category-list {
   display: grid;
+  /* minmax(0, 1fr): la columna mide lo que mide la pantalla. Con "auto",
+     el armable más ancho (medialunas) estiraba toda la página en celulares
+     de 375 px o menos y el navegador la achicaba o la dejaba correr de costado. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   max-width: 940px;
   margin: 0 auto;
@@ -669,6 +673,9 @@ a {
 
 .product-content {
   display: grid;
+  /* minmax(0, 1fr): ningún hijo puede ensanchar la columna más que la
+     tarjeta (antes, un elemento que no se parte empujaba todo a la derecha). */
+  grid-template-columns: minmax(0, 1fr);
   align-content: space-between;
   gap: 0.75rem;
   min-width: 0;
@@ -759,6 +766,7 @@ a {
 .builder-wrapper {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.6rem;
 }
 
@@ -1158,6 +1166,24 @@ a {
   color: #252525;
   min-width: 64px;
   text-align: right;
+}
+
+/* En celulares chicos la fila no entra en una línea (nombre + contador +
+   subtotal): el nombre ocupa el renglón de arriba y el resto va abajo. */
+@media (max-width: 420px) {
+  .medialuna-row {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 0.85rem;
+  }
+
+  .medialuna-info {
+    flex: 1 1 100%;
+  }
+
+  .medialuna-subtotal {
+    margin-left: auto;
+  }
 }
 
 .discount-banner {
@@ -4106,6 +4132,14 @@ img.product-image.product-photo {
   box-shadow: 0 3px 10px hsl(var(--buba-pink-h) 100% 79.6% / 0.25);
 }
 
+.extra-chip {
+  max-width: 100%;
+}
+
+.extra-chip > span {
+  min-width: 0;
+}
+
 .extra-chip-price {
   font-size: 0.74rem;
   font-weight: 850;
@@ -4128,6 +4162,60 @@ img.product-image.product-photo {
 
 [data-theme="dark"] .extra-chip-price {
   color: hsl(var(--buba-pink-h) 85% 78%);
+}
+
+/* Con cantidad (perlas ×2, ×3): el chip elegido suma − y + a los costados. */
+.extra-chip.extra-cantidad {
+  cursor: default;
+  padding: 0.2rem 0.25rem;
+  gap: 0.3rem;
+  max-width: 100%;
+  justify-content: space-between;
+}
+
+/* Nombre arriba y precio abajo: así entra en la tarjeta angosta del celular. */
+.extra-cantidad-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.extra-cantidad-nombre {
+  text-wrap: balance;
+}
+
+.extra-cantidad-texto strong {
+  font-weight: 900;
+}
+
+.extra-cantidad-btn {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: hsl(var(--buba-pink-h) 65% 45%);
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 4px hsl(var(--buba-pink-h) 60% 40% / 0.2);
+}
+
+.extra-cantidad-btn[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .extra-cantidad-btn {
+  background: hsl(var(--buba-pink-h) 30% 22%);
+  color: hsl(var(--buba-pink-h) 85% 82%);
 }
 
 /* =============================================

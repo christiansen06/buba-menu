@@ -48,10 +48,6 @@ function FeaturedCard({ item }) {
     const extrasCategoria = esPreset ? null : categoria?.extras;
     const extras = resumenExtras(extrasCategoria, extrasElegidos);
 
-    const toggleExtra = (id) =>
-        setExtrasElegidos((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
 
     const handleAdd = () => {
         if (estaAgotado(item.categoryId, item.id, item)) return;
@@ -133,7 +129,7 @@ function FeaturedCard({ item }) {
                             <ExtrasPicker
                                 extras={extrasCategoria}
                                 seleccionados={extrasElegidos}
-                                onToggle={toggleExtra}
+                                onChange={setExtrasElegidos}
                             />
                         )}
 

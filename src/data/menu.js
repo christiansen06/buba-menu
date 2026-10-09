@@ -23,7 +23,8 @@ export const menuCategories = [
     // en otra categoría) tocando sólo datos.
     // "insumo" los conecta con el stock: si se acaba, el extra deja de ofrecerse.
     extras: [
-      { id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1000, insumo: 'perlas' },
+      // max: hasta 3 porciones ("doble" o "triple perla"), $1.000 cada una.
+      { id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1000, insumo: 'perlas', max: 3 },
     ],
     // Frío / caliente: los mismos sabores, con un recargo fijo en el caliente
     // (sobre CADA tamaño). El frío va primero porque es el producto estrella.

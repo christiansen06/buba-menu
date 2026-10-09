@@ -42,10 +42,6 @@ function ProductCard({ item, category, presentacion = null }) {
     const [extrasElegidos, setExtrasElegidos] = useState([]);
     const extras = resumenExtras(category.extras, extrasElegidos);
 
-    const toggleExtra = (id) =>
-        setExtrasElegidos((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
 
     const handleAdd = () => {
         if (!selected || agotado) return;
@@ -124,7 +120,7 @@ function ProductCard({ item, category, presentacion = null }) {
                     <ExtrasPicker
                         extras={category.extras}
                         seleccionados={extrasElegidos}
-                        onToggle={toggleExtra}
+                        onChange={setExtrasElegidos}
                     />
                 )}
 

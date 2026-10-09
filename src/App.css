@@ -5004,3 +5004,40 @@ img.product-image.product-photo {
 [data-theme="dark"] .envio-desglose .envio-total { color: #f2f2f2; border-color: rgba(255, 255, 255, 0.2); }
 .panel-pedido-envio { margin: 0.2rem 0 0; font-size: 0.8rem; font-weight: 800; color: #b86a00; }
 [data-theme="dark"] .panel-pedido-envio { color: #f5b04a; }
+
+/* ---------- Editar un pedido ya tomado (09/10) ---------- */
+.panel-pedido-pie .panel-btn-sec + .panel-btn-cancelar { margin-left: 0; }
+.editar-pedido { max-height: calc(100dvh - 2rem); overflow-y: auto; }
+.editar-lineas { list-style: none; margin: 0.4rem 0; padding: 0; display: grid; gap: 0.55rem; }
+.editar-lineas li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "nombre qty" "precio qty";
+  align-items: center;
+  column-gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border: 1.5px solid rgba(37, 37, 37, 0.12);
+  border-radius: 14px;
+}
+.editar-lineas li.quitada { opacity: 0.5; }
+.editar-lineas li.quitada .editar-nombre { text-decoration: line-through; }
+.editar-nombre { grid-area: nombre; font-weight: 800; font-size: 0.92rem; overflow-wrap: anywhere; }
+.editar-precio { grid-area: precio; font-size: 0.82rem; font-weight: 700; opacity: 0.7; }
+.editar-lineas .cart-qty { grid-area: qty; }
+.editar-agregar { width: 100%; margin: 0.4rem 0; }
+.editar-picker { display: grid; gap: 0.6rem; margin: 0.4rem 0; padding: 0.7rem; border-radius: 14px; background: hsl(var(--buba-cyan-h) 100% 97%); }
+.editar-cats { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.editar-opciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; max-height: 240px; overflow-y: auto; }
+.editar-opciones button {
+  display: flex; justify-content: space-between; gap: 0.8rem; width: 100%;
+  padding: 0.6rem 0.75rem; border-radius: 12px; border: 1.5px solid rgba(37, 37, 37, 0.12);
+  background: #fff; color: inherit; font: inherit; font-size: 0.9rem; text-align: left; cursor: pointer;
+}
+.editar-opciones button:hover { border-color: hsl(var(--buba-pink-h) 77.3% 70.6%); }
+.editar-otro { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem auto; gap: 0.4rem; }
+.editar-otro input { min-width: 0; padding: 0.6rem; border-radius: 12px; border: 1.5px solid rgba(37, 37, 37, 0.15); font: inherit; }
+.editar-total { display: flex; justify-content: space-between; align-items: baseline; margin: 0.6rem 0 0.2rem; font-size: 1.1rem; font-weight: 800; }
+.editar-total s { opacity: 0.5; font-weight: 600; margin-right: 0.4rem; }
+[data-theme="dark"] .editar-lineas li, [data-theme="dark"] .editar-opciones button, [data-theme="dark"] .editar-otro input { border-color: rgba(255, 255, 255, 0.18); }
+[data-theme="dark"] .editar-opciones button, [data-theme="dark"] .editar-otro input { background: rgba(255, 255, 255, 0.06); color: #f2f2f2; }
+[data-theme="dark"] .editar-picker { background: rgba(255, 255, 255, 0.05); }

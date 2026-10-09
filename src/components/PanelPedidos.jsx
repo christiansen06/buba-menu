@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
+import EditarPedido from './EditarPedido.jsx';
 import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
 
 /**
@@ -338,7 +339,8 @@ function ModalHora({ pedido, onCerrar, onListo }) {
 }
 
 function resumenItems(pedido) {
-    const items = pedido.pedido_items || [];
+    // Las líneas que se sacaron al editar quedan con cantidad 0: no se muestran.
+    const items = (pedido.pedido_items || []).filter((it) => it.cantidad > 0);
     return items
         .map((it) => (it.cantidad > 1 ? `${it.cantidad}× ${it.nombre}` : it.nombre))
         .join(' · ');
@@ -346,7 +348,7 @@ function resumenItems(pedido) {
 
 /* ------------------------------------------------------------------ */
 
-function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora }) {
+function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar }) {
     const cancelado = pedido.estado === 'cancelado';
     const medio = medioEfectivo(pedido);
     return (
@@ -411,6 +413,14 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     </div>
                     <button
                         type="button"
+                        className="panel-btn-sec"
+                        onClick={() => onEditar(pedido)}
+                        disabled={ocupado}
+                    >
+                        ✏️ Editar
+                    </button>
+                    <button
+                        type="button"
                         className="panel-btn-cancelar"
                         onClick={() => onCancelar(pedido)}
                         disabled={ocupado}
@@ -456,7 +466,7 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, envio, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(nombre, cantidad, precio_unitario)')
+            .select('id, creado_en, total, envio, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, nombre, cantidad, precio_unitario)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)
@@ -589,6 +599,7 @@ function PanelPedidos() {
                             onCancelar={pedirCancelar}
                             onReactivar={reactivar}
                             onCambiarHora={(pedido) => setModal({ tipo: 'hora', pedido })}
+                            onEditar={(pedido) => setModal({ tipo: 'editar', pedido })}
                         />
                     ))}
                 </div>
@@ -600,6 +611,14 @@ function PanelPedidos() {
                 <button type="button" className="panel-link" onClick={salir}>Cerrar sesión</button>
             </footer>
 
+            {modal?.tipo === 'editar' && (
+                <EditarPedido
+                    pedido={modal.pedido}
+                    hayPin={hayPin}
+                    onCerrar={() => setModal(null)}
+                    onListo={() => { setModal(null); setAvisoPanel('Pedido actualizado.'); recargar(); }}
+                />
+            )}
             {modal?.tipo === 'cancelar' && (
                 <ModalCancelar
                     pedido={modal.pedido}

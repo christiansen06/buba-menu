@@ -252,9 +252,23 @@ a {
 }
 
 .hero-nav-grid {
+  /* 6 columnas: las dos categorías grandes ocupan 3 cada una (una fila),
+     el resto ocupa 2 (tres por fila). */
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.45rem;
+}
+
+.hero-nav-grid > .hero-nav-item { grid-column: span 2; }
+.hero-nav-grid > .hero-nav-item-grande { grid-column: span 3; }
+
+/* Si en la última fila queda un solo botón (hoy: Bebidas), ocupa todo el ancho
+   y se acuesta, para que no quede un hueco. Sirve con 2 categorías grandes. */
+.hero-nav-grid > .hero-nav-item:nth-child(3n):last-child {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  min-height: 56px;
+  gap: 0.6rem;
 }
 
 .hero-nav-item {
@@ -295,6 +309,32 @@ a {
   text-align: center;
   line-height: 1.15;
   text-wrap: balance;
+}
+
+/* Las dos categorías grandes de la grilla (Bubble Tea y Waffles). */
+.hero-nav-item-grande {
+  min-height: 112px;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.78);
+  border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.45);
+  box-shadow: 0 6px 18px hsl(var(--buba-cyan-h) 79.9% 61% / 0.16);
+}
+
+.hero-nav-item-grande .hero-nav-icon { font-size: 2.35rem; }
+.hero-nav-item-grande .hero-nav-name { font-size: 1.02rem; font-weight: 850; }
+
+.hero-nav-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  opacity: 0.72;
+}
+
+[data-theme="dark"] .hero-nav-item-grande {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: hsl(var(--buba-cyan-h) 79.9% 61% / 0.4);
+  box-shadow: none;
 }
 
 /* =============================================

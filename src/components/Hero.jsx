@@ -77,11 +77,14 @@ function Hero() {
                             <a
                                 key={category.id}
                                 href={`#${category.id}`}
-                                className="hero-nav-item"
+                                className={`hero-nav-item ${category.grande ? 'hero-nav-item-grande' : ''}`}
                                 onClick={(e) => handleCategoryClick(e, category.id)}
                             >
                                 <span className="hero-nav-icon">{category.icon}</span>
                                 <span className="hero-nav-name">{category.name}</span>
+                                {category.grande && category.subtitulo && (
+                                    <span className="hero-nav-sub">{category.subtitulo}</span>
+                                )}
                             </a>
                         ))}
                     </div>

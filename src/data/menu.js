@@ -11,12 +11,34 @@
  */
 
 export const menuCategories = [
+  // ---------------------------------------------------------------------
+  // ORDEN DE LAS CATEGORÍAS (09/10/2026)
+  //
+  // Este orden manda en todo el menú: la grilla "¿Qué vas a pedir hoy?",
+  // la barra fija de arriba, el orden de la página y el panel de stock.
+  //
+  //   1. Bubble Tea  → la marca. Siempre primero (decisión de Agustín).
+  //   2. Waffles     → el que más plata deja (44 % de los ingresos contra
+  //                    41 % del bubble). Antes estaba 7º, a 7.000 px de
+  //                    scroll. Pegado al bubble porque son los dos que la
+  //                    gente viene a buscar (cada uno en ~48 % de los pedidos).
+  //   3 a 11.        → de más a menos ingresos de los últimos 70 días:
+  //                    Café, Frappuccinos, Pastelería, Helados, Licuados,
+  //                    Medialunas, Tostados, Postres, Iced Coffee.
+  //   12. Bebidas    → siempre última (decisión de Agustín).
+  //
+  // "grande: true" las muestra más grandes en la grilla de arriba.
+  // Conviene revisar el orden cada tanto con las ventas nuevas.
+  // ---------------------------------------------------------------------
+
   // ===== BUBBLE TEA =====
   {
     id: 'bubble-tea',
     name: 'Bubble Tea',
     icon: '🧋',
     accent: 'cyan',
+    grande: true,
+    subtitulo: 'El original de BüBa',
     description: 'El original de BüBa. Té, frutas, chocolate y flan, siempre con perlas de tapioca',
     // Adicionales que se le pueden sumar a cualquier producto de la categoría.
     // Están acá y no en el componente para poder agregar otros (o habilitarlos
@@ -133,301 +155,6 @@ export const menuCategories = [
     ],
   },
 
-  // ===== CAFÉ CALIENTE =====
-  {
-    id: 'cafe',
-    name: 'Café',
-    icon: '☕',
-    accent: 'cyan',
-    description: 'Café de prensa francesa, recién preparado',
-    items: [
-      {
-        id: 'cafe-negro',
-        name: 'Café Negro',
-        description: 'Café puro e intenso, hecho con prensa francesa. 2 shots',
-        image: 'Espresso',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$3.000',
-          large: '$3.500',
-        },
-      },
-      {
-        id: 'cafe-cortado',
-        name: 'Cortado',
-        description: 'Café cortado con leche caliente',
-        image: 'Cortado',
-        badge: 'Recomendado',
-        featured: false,
-        sizes: {
-          medium: '$4.000',
-          large: '$4.500',
-        },
-      },{
-        id: 'lagrima',
-        name: 'Lágrima',
-        description: 'Leche espumada con un toque de café',
-        image: 'Lágrima',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$4.000',
-          large: '$4.500',
-        },
-      },
-      {
-        id: 'cappuccino',
-        name: 'Cappuccino',
-        description: '2 shots de café hecho con prensa y leche espumada',
-        image: 'Cappuccino',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$4.500',
-          large: '$5.000',
-        },
-      },
-      {
-        id: 'cafe-leche',
-        name: 'Café con Leche',
-        description: 'Café con leche caliente',
-        image: 'Café con Leche',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$4.500',
-          large: '$5.000',
-        },
-      },
-      {
-        id: 'submarino',
-        name: 'Submarino',
-        description: 'Leche caliente con una barra de chocolate para derretir. Tamaño grande',
-        image: 'Submarino',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: 'N/A',
-          large: '$5.000',
-        },
-      },
-    ],
-  },
-
-  // ===== ICED COFFEE =====
-  {
-    id: 'iced-coffee',
-    name: 'Iced Coffee',
-    icon: '❄️',
-    accent: 'cyan',
-    description: 'Café frío refrescante. Perfecto para días calurosos',
-    items: [
-      {
-        id: 'americano',
-        name: 'Americano Frío',
-        description: 'Café frío clásico',
-        image: 'Americano',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$7.000',
-          large: '$7.500',
-        },
-      },
-      {
-        id: 'latte',
-        name: 'Latte Frío',
-        description: 'Café frío con leche',
-        image: 'Latte',
-        badge: 'Más vendido',
-        featured: false,
-        sizes: {
-          medium: '$7.500',
-          large: '$8.000',
-        },
-      },
-      {
-        id: 'dark-moca',
-        name: 'Dark Moca',
-        description: 'Café frío con cacao intenso',
-        image: 'Moca',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$7.500',
-          large: '$8.000',
-        },
-      },
-      {
-        id: 'caramel-latte',
-        name: 'Caramel Latte Frío',
-        description: 'Latte frío con caramelo',
-        image: 'Caramel',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$7.500',
-          large: '$8.000',
-        },
-      },
-      {
-        id: 'matcha-latte',
-        name: 'Matcha Latte Frío',
-        description: 'Matcha frío con leche',
-        image: 'Matcha',
-        badge: 'Nuevo',
-        featured: false,
-        sizes: {
-          medium: '$8.000',
-          large: '$9.000',
-        },
-      },
-    ],
-  },
-
-  // ===== FRAPPUCCINOS =====
-  {
-    id: 'frappuccinos',
-    name: 'Frappuccinos',
-    icon: '🥤',
-    accent: 'cyan',
-    description: 'Bebidas cremosas congeladas. Ideales para refrescarse',
-    items: [
-      {
-        id: 'chocolate-moca',
-        name: 'Chocolate Moca',
-        description: 'Frappuccino de chocolate, café y crema',
-        image: 'Moca',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$8.000',
-          large: '$9.000',
-        },
-      },
-      {
-        id: 'oreo-frappe',
-        name: 'Frappé Oreo',
-        description: 'Frappé cremoso con Oreo y crema',
-        image: 'Oreo',
-        badge: 'Más vendido',
-        featured: true,
-        sizes: {
-          medium: '$8.000',
-          large: '$9.000',
-        },
-      },
-      {
-        id: 'ddl',
-        name: 'Frappé Dulce de Leche',
-        description: 'Frappé cremoso con dulce de leche y crema',
-        image: 'DDL',
-        badge: 'Recomendado',
-        featured: false,
-        sizes: {
-          medium: '$8.000',
-          large: '$9.000',
-        },
-      },
-      {
-        id: 'frutilla-frappe',
-        name: 'Frappé Frutilla',
-        description: 'Frappé cremoso con frutilla y crema',
-        image: 'Frutilla',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$8.000',
-          large: '$9.000',
-        },
-      },
-      {
-        id: 'matcha-frappe',
-        name: 'Frappé Matcha',
-        description: 'Frappé de matcha con crema',
-        image: 'Matcha',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$8.000',
-          large: '$9.000',
-        },
-      },
-    ],
-  },
-
-  // ===== LICUADOS =====
-  {
-    id: 'licuados',
-    name: 'Licuados',
-    icon: '🍓',
-    accent: 'cyan',
-    description: 'Licuados frescos. Elegís vos cómo los querés',
-    type: 'builder',
-    builderType: 'licuado',
-    price: { simple: 7500, mixto: 8000 },
-    fruits: [
-      { id: 'frutilla', label: 'Frutilla' },
-      { id: 'banana', label: 'Banana' },
-      { id: 'durazno', label: 'Durazno' },
-      { id: 'mango', label: 'Mango' },
-    ],
-    bases: [
-      { id: 'leche', label: 'Leche' },
-      { id: 'jugo', label: 'Jugo de Naranja' },
-      { id: 'agua', label: 'Agua' },
-    ],
-  },
-
-  // ===== BEBIDAS =====
-  // 09/10: precios de Agustín. Las aguas son Pureza de 500 cc (BüBa 2.0).
-  {
-    id: 'bebidas',
-    name: 'Bebidas',
-    icon: '🧃',
-    accent: 'cyan',
-    description: 'Para acompañar',
-    items: [
-      {
-        id: 'agua',
-        name: 'Agua',
-        description: 'Botella de 500 cc',
-        image: 'Agua',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$2.000',
-          large: 'N/A',
-        },
-      },
-      {
-        id: 'agua-saborizada',
-        name: 'Agua saborizada',
-        description: 'Botella de 500 cc',
-        image: 'Agua saborizada',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$2.500',
-          large: 'N/A',
-        },
-      },
-      {
-        id: 'coca',
-        name: 'Coca-Cola',
-        description: 'Gaseosa',
-        image: 'Coca-Cola',
-        badge: null,
-        featured: false,
-        sizes: {
-          medium: '$2.500',
-          large: 'N/A',
-        },
-      },
-    ],
-  },
-
   // ===== WAFFLES =====
   // ===== REEMPLAZAR LA CATEGORÍA WAFFLES EN src/data/menu.js =====
 // Buscá el bloque que empieza con  id: 'waffles'  y reemplazalo ENTERO por esto:
@@ -438,6 +165,8 @@ export const menuCategories = [
     name: 'Waffles',
     icon: '🧇',
     accent: 'pink',
+    grande: true,
+    subtitulo: 'Recién hechos',
     description: 'Recién hecho y calentito. Elegí uno de los nuestros o armá el tuyo con relleno, toppings y salsa',
     type: 'builder',
     builderType: 'waffle',
@@ -559,37 +288,203 @@ export const menuCategories = [
     ],
   },
 
-  // ===== POSTRES =====
+  // ===== CAFÉ CALIENTE =====
   {
-    id: 'postres',
-    name: 'Postres',
-    icon: '🍰',
-    accent: 'pink',
-    description: 'Postres artesanales. Caseros y deliciosos',
+    id: 'cafe',
+    name: 'Café',
+    icon: '☕',
+    accent: 'cyan',
+    description: 'Café de prensa francesa, recién preparado',
     items: [
       {
-        id: 'chocotorta',
-        name: 'Chocotorta',
-        description: 'Chocotorta clásica con dulce de leche y queso crema',
-        image: 'Chocotorta',
-        badge: 'Más vendido',
-        featured: true,
-        sizes: {
-          medium: '$7.000',
-          large: 'N/A',
-        },
-      },
-      {
-        id: 'postre-oreo',
-        name: 'Postre Oreo',
-        description: 'Oreo en su base, dulce de leche y crema',
-        image: 'Oreo',
+        id: 'cafe-negro',
+        name: 'Café Negro',
+        description: 'Café puro e intenso, hecho con prensa francesa. 2 shots',
+        image: 'Espresso',
         badge: null,
         featured: false,
         sizes: {
-          medium: '$7.000',
-          large: 'N/A',
+          medium: '$3.000',
+          large: '$3.500',
         },
+      },
+      {
+        id: 'cafe-cortado',
+        name: 'Cortado',
+        description: 'Café cortado con leche caliente',
+        image: 'Cortado',
+        badge: 'Recomendado',
+        featured: false,
+        sizes: {
+          medium: '$4.000',
+          large: '$4.500',
+        },
+      },{
+        id: 'lagrima',
+        name: 'Lágrima',
+        description: 'Leche espumada con un toque de café',
+        image: 'Lágrima',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$4.000',
+          large: '$4.500',
+        },
+      },
+      {
+        id: 'cappuccino',
+        name: 'Cappuccino',
+        description: '2 shots de café hecho con prensa y leche espumada',
+        image: 'Cappuccino',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$4.500',
+          large: '$5.000',
+        },
+      },
+      {
+        id: 'cafe-leche',
+        name: 'Café con Leche',
+        description: 'Café con leche caliente',
+        image: 'Café con Leche',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$4.500',
+          large: '$5.000',
+        },
+      },
+      {
+        id: 'submarino',
+        name: 'Submarino',
+        description: 'Leche caliente con una barra de chocolate para derretir. Tamaño grande',
+        image: 'Submarino',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: 'N/A',
+          large: '$5.000',
+        },
+      },
+    ],
+  },
+
+  // ===== FRAPPUCCINOS =====
+  {
+    id: 'frappuccinos',
+    name: 'Frappuccinos',
+    icon: '🥤',
+    accent: 'cyan',
+    description: 'Bebidas cremosas congeladas. Ideales para refrescarse',
+    items: [
+      {
+        id: 'chocolate-moca',
+        name: 'Chocolate Moca',
+        description: 'Frappuccino de chocolate, café y crema',
+        image: 'Moca',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$8.000',
+          large: '$9.000',
+        },
+      },
+      {
+        id: 'oreo-frappe',
+        name: 'Frappé Oreo',
+        description: 'Frappé cremoso con Oreo y crema',
+        image: 'Oreo',
+        badge: 'Más vendido',
+        featured: true,
+        sizes: {
+          medium: '$8.000',
+          large: '$9.000',
+        },
+      },
+      {
+        id: 'ddl',
+        name: 'Frappé Dulce de Leche',
+        description: 'Frappé cremoso con dulce de leche y crema',
+        image: 'DDL',
+        badge: 'Recomendado',
+        featured: false,
+        sizes: {
+          medium: '$8.000',
+          large: '$9.000',
+        },
+      },
+      {
+        id: 'frutilla-frappe',
+        name: 'Frappé Frutilla',
+        description: 'Frappé cremoso con frutilla y crema',
+        image: 'Frutilla',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$8.000',
+          large: '$9.000',
+        },
+      },
+      {
+        id: 'matcha-frappe',
+        name: 'Frappé Matcha',
+        description: 'Frappé de matcha con crema',
+        image: 'Matcha',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$8.000',
+          large: '$9.000',
+        },
+      },
+    ],
+  },
+
+  // ===== PASTELERÍA =====
+  {
+    id: 'pasteleria',
+    name: 'Pastelería',
+    icon: '🧁',
+    accent: 'pink',
+    type: 'builder',
+    builderType: 'medialunas',
+    description: 'Cookies, budines y scones de Zizu Pastelería',
+    products: [
+      {
+        id: 'cookie-doble-choco',
+        label: 'Cookie Doble Chocolate',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'cookie-red-velvet',
+        label: 'Cookie Red Velvet',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'cookie-chips',
+        label: 'Cookie Chips de Chocolate',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'cookie-pistacho',
+        label: 'Cookie de Pistacho',
+        pricePerUnit: 5000,
+      },
+      {
+        id: 'budin-chips',
+        label: 'Budín de Chips (porción)',
+        pricePerUnit: 3000,
+      },
+      {
+        id: 'budin-limon',
+        label: 'Budín de Limón (porción)',
+        pricePerUnit: 3000,
+      },
+      {
+        id: 'scones-bolsa',
+        label: 'Bolsita de Scones de Queso (x4)',
+        pricePerUnit: 4000,
       },
     ],
   },
@@ -626,6 +521,29 @@ export const menuCategories = [
     cupTypes: [
       { id: 'barquillo', label: 'Vasito de Barquillo', description: 'Comestible y crujiente' },
       { id: 'papel', label: 'Vasito Ecológico', description: 'De papel reciclable' },
+    ],
+  },
+
+  // ===== LICUADOS =====
+  {
+    id: 'licuados',
+    name: 'Licuados',
+    icon: '🍓',
+    accent: 'cyan',
+    description: 'Licuados frescos. Elegís vos cómo los querés',
+    type: 'builder',
+    builderType: 'licuado',
+    price: { simple: 7500, mixto: 8000 },
+    fruits: [
+      { id: 'frutilla', label: 'Frutilla' },
+      { id: 'banana', label: 'Banana' },
+      { id: 'durazno', label: 'Durazno' },
+      { id: 'mango', label: 'Mango' },
+    ],
+    bases: [
+      { id: 'leche', label: 'Leche' },
+      { id: 'jugo', label: 'Jugo de Naranja' },
+      { id: 'agua', label: 'Agua' },
     ],
   },
 
@@ -679,45 +597,156 @@ export const menuCategories = [
     ],
   },
 
-  // ===== PASTELERÍA =====
+  // ===== POSTRES =====
   {
-    id: 'pasteleria',
-    name: 'Pastelería',
-    icon: '🧁',
+    id: 'postres',
+    name: 'Postres',
+    icon: '🍰',
     accent: 'pink',
-    type: 'builder',
-    builderType: 'medialunas',
-    description: 'Cookies, budines y scones de Zizu Pastelería',
-    products: [
+    description: 'Postres artesanales. Caseros y deliciosos',
+    items: [
       {
-        id: 'cookie-doble-choco',
-        label: 'Cookie Doble Chocolate',
-        pricePerUnit: 5000,
+        id: 'chocotorta',
+        name: 'Chocotorta',
+        description: 'Chocotorta clásica con dulce de leche y queso crema',
+        image: 'Chocotorta',
+        badge: 'Más vendido',
+        featured: true,
+        sizes: {
+          medium: '$7.000',
+          large: 'N/A',
+        },
       },
       {
-        id: 'cookie-red-velvet',
-        label: 'Cookie Red Velvet',
-        pricePerUnit: 5000,
+        id: 'postre-oreo',
+        name: 'Postre Oreo',
+        description: 'Oreo en su base, dulce de leche y crema',
+        image: 'Oreo',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$7.000',
+          large: 'N/A',
+        },
+      },
+    ],
+  },
+
+  // ===== ICED COFFEE =====
+  {
+    id: 'iced-coffee',
+    name: 'Iced Coffee',
+    icon: '❄️',
+    accent: 'cyan',
+    description: 'Café frío refrescante. Perfecto para días calurosos',
+    items: [
+      {
+        id: 'americano',
+        name: 'Americano Frío',
+        description: 'Café frío clásico',
+        image: 'Americano',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$7.000',
+          large: '$7.500',
+        },
       },
       {
-        id: 'cookie-chips',
-        label: 'Cookie Chips de Chocolate',
-        pricePerUnit: 5000,
+        id: 'latte',
+        name: 'Latte Frío',
+        description: 'Café frío con leche',
+        image: 'Latte',
+        badge: 'Más vendido',
+        featured: false,
+        sizes: {
+          medium: '$7.500',
+          large: '$8.000',
+        },
       },
       {
-        id: 'budin-chips',
-        label: 'Budín de Chips (porción)',
-        pricePerUnit: 3000,
+        id: 'dark-moca',
+        name: 'Dark Moca',
+        description: 'Café frío con cacao intenso',
+        image: 'Moca',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$7.500',
+          large: '$8.000',
+        },
       },
       {
-        id: 'budin-limon',
-        label: 'Budín de Limón (porción)',
-        pricePerUnit: 3000,
+        id: 'caramel-latte',
+        name: 'Caramel Latte Frío',
+        description: 'Latte frío con caramelo',
+        image: 'Caramel',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$7.500',
+          large: '$8.000',
+        },
       },
       {
-        id: 'scones-bolsa',
-        label: 'Bolsita de Scones de Queso (x4)',
-        pricePerUnit: 4000,
+        id: 'matcha-latte',
+        name: 'Matcha Latte Frío',
+        description: 'Matcha frío con leche',
+        image: 'Matcha',
+        badge: 'Nuevo',
+        featured: false,
+        sizes: {
+          medium: '$8.000',
+          large: '$9.000',
+        },
+      },
+    ],
+  },
+
+  // ===== BEBIDAS =====
+  // 09/10: precios de Agustín. Las aguas son Pureza de 500 cc (BüBa 2.0).
+  {
+    id: 'bebidas',
+    name: 'Bebidas',
+    icon: '🧃',
+    accent: 'cyan',
+    description: 'Para acompañar',
+    items: [
+      {
+        id: 'agua',
+        name: 'Agua',
+        description: 'Botella de 500 cc',
+        image: 'Agua',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$2.000',
+          large: 'N/A',
+        },
+      },
+      {
+        id: 'agua-saborizada',
+        name: 'Agua saborizada',
+        description: 'Botella de 500 cc',
+        image: 'Agua saborizada',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$2.500',
+          large: 'N/A',
+        },
+      },
+      {
+        id: 'coca',
+        name: 'Coca-Cola',
+        description: 'Gaseosa',
+        image: 'Coca-Cola',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$2.500',
+          large: 'N/A',
+        },
       },
     ],
   },
@@ -838,6 +867,7 @@ export const promociones = [
           { producto: 'cookie-doble-choco', label: 'Doble Chocolate' },
           { producto: 'cookie-red-velvet', label: 'Red Velvet' },
           { producto: 'cookie-chips', label: 'Chips de Chocolate' },
+          { producto: 'cookie-pistacho', label: 'Pistacho' },
         ],
       },
       {

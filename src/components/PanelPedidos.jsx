@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
-import CierreCaja from './CierreCaja.jsx';
 
 /**
  * Panel de pedidos del local. Se abre con #pedidos.
@@ -437,7 +436,6 @@ function PanelPedidos() {
     const [error, setError] = useState('');
     const [avisoPanel, setAvisoPanel] = useState('');   // "Pedido movido al …"
     const [version, setVersion] = useState(0);          // se incrementa para volver a cargar
-    const [vista, setVista] = useState('pedidos');      // 'pedidos' | 'caja'
 
     const recargar = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -550,7 +548,6 @@ function PanelPedidos() {
 
     const confirmados = (pedidos || []).filter((p) => p.estado !== 'cancelado');
     const cancelados = (pedidos || []).length - confirmados.length;
-    const total = confirmados.reduce((s, p) => s + (p.total || 0), 0);
 
     return (
         <main className="panel">
@@ -562,17 +559,8 @@ function PanelPedidos() {
                 <button type="button" className="panel-btn-sec" onClick={() => moverDia(1)} disabled={esHoy(dia)} aria-label="Día siguiente">›</button>
             </nav>
 
-            <div className="admin-tabs panel-tabs">
-                <button type="button" className={`admin-tab ${vista === 'pedidos' ? 'activa' : ''}`} onClick={() => setVista('pedidos')}>Pedidos</button>
-                <button type="button" className={`admin-tab ${vista === 'caja' ? 'activa' : ''}`} onClick={() => setVista('caja')}>Cierre de caja</button>
-            </div>
-
-            {vista === 'caja' && <CierreCaja dia={dia} unidad={getUnidad()} />}
-
-            {vista === 'pedidos' && (<>
             <div className="panel-resumen">
                 <span><strong>{confirmados.length}</strong> {confirmados.length === 1 ? 'pedido' : 'pedidos'}</span>
-                <span className="panel-resumen-total">{formatPrice(total)}</span>
                 {cancelados > 0 && <span className="panel-resumen-cancelados">+ {cancelados} cancelado{cancelados > 1 ? 's' : ''}</span>}
                 <button type="button" className="panel-btn-sec" onClick={recargar}>Actualizar</button>
             </div>
@@ -605,7 +593,6 @@ function PanelPedidos() {
                     ))}
                 </div>
             )}
-            </>)}
 
             <footer className="panel-pie">
                 <button type="button" className="panel-link" onClick={() => setModal({ tipo: 'aparato' })}>Este aparato</button>

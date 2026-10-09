@@ -5041,3 +5041,7 @@ img.product-image.product-photo {
 [data-theme="dark"] .editar-lineas li, [data-theme="dark"] .editar-opciones button, [data-theme="dark"] .editar-otro input { border-color: rgba(255, 255, 255, 0.18); }
 [data-theme="dark"] .editar-opciones button, [data-theme="dark"] .editar-otro input { background: rgba(255, 255, 255, 0.06); color: #f2f2f2; }
 [data-theme="dark"] .editar-picker { background: rgba(255, 255, 255, 0.05); }
+.panel-modal.editar-ancho { max-width: 760px; }
+.editar-armable { margin: 0.6rem 0; max-height: 62dvh; overflow-y: auto; overflow-x: hidden; }
+.editar-armable .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.editar-rehacer { margin-left: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1.5px solid rgba(37, 37, 37, 0.2); background: transparent; color: inherit; font: inherit; font-size: 0.78rem; font-weight: 800; cursor: pointer; }

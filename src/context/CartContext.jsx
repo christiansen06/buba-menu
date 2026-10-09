@@ -1,6 +1,9 @@
 import { createContext, useContext, useReducer, useState, useEffect } from 'react';
 
-const CartContext = createContext();
+// Se exporta para que el panel de pedidos pueda reutilizar los armables del
+// menú (waffles, medialunas, perlas extra…) al editar un pedido ya tomado.
+// eslint-disable-next-line react-refresh/only-export-components
+export const CartContext = createContext();
 
 const initialState = { items: [] };
 

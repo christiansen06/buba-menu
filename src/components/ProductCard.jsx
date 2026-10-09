@@ -9,7 +9,7 @@ import { resumenExtras, precioConExtras } from '../utils/extras.js';
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
-function ProductCard({ item, category, presentacion = null }) {
+function ProductCard({ item, category, presentacion = null, inicial = null }) {
     const { addItem } = useCart();
     const [justAdded, setJustAdded] = useState(false);
 
@@ -36,10 +36,13 @@ function ProductCard({ item, category, presentacion = null }) {
         });
 
     const multiSize = sizes.length > 1;
-    const [selectedKey, setSelectedKey] = useState(sizes[0]?.key || 'medium');
+    const [selectedKey, setSelectedKey] = useState(
+        (inicial?.variante && sizes.some((s) => s.key === inicial.variante) ? inicial.variante : sizes[0]?.key) || 'medium'
+    );
     const selected = sizes.find((s) => s.key === selectedKey) || sizes[0];
 
-    const [extrasElegidos, setExtrasElegidos] = useState([]);
+    // `inicial` sólo lo usa el panel al editar un pedido: arranca con lo que ya tenía.
+    const [extrasElegidos, setExtrasElegidos] = useState(inicial?.extras || []);
     const extras = resumenExtras(category.extras, extrasElegidos);
 
 

@@ -10,11 +10,12 @@ import ProductCard from './ProductCard';
  *
  * Arranca siempre en la marcada porDefecto — el frío, que es lo que más sale.
  */
-function ProductosDeCategoria({ category }) {
+function ProductosDeCategoria({ category, soloProducto = null, inicial = null }) {
     const presentaciones = category.presentaciones || [];
 
     const [presentacionId, setPresentacionId] = useState(
-        () => (presentaciones.find((p) => p.porDefecto) || presentaciones[0])?.id ?? null
+        () => (presentaciones.find((p) => p.id === inicial?.presentacion)
+            || presentaciones.find((p) => p.porDefecto) || presentaciones[0])?.id ?? null
     );
 
     const presentacion = presentaciones.find((p) => p.id === presentacionId) || null;
@@ -38,11 +39,12 @@ function ProductosDeCategoria({ category }) {
             )}
 
             <div className="products-grid">
-                {category.items.map((item) => (
+                {category.items.filter((item) => !soloProducto || item.id === soloProducto).map((item) => (
                     <ProductCard
                         item={item}
                         category={category}
                         presentacion={presentacion}
+                        inicial={soloProducto ? inicial : null}
                         // La key incluye la presentación para que al cambiar de
                         // pestaña las tarjetas se rearmen: si no, el tamaño y las
                         // perlas elegidas quedarían pegados de la otra.

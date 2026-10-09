@@ -466,7 +466,7 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, envio, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, nombre, cantidad, precio_unitario)')
+            .select('id, creado_en, total, envio, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)

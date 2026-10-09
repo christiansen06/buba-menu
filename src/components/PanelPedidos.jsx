@@ -370,6 +370,9 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
             </div>
 
             <p className="panel-pedido-items">{resumenItems(pedido) || 'Sin detalle'}</p>
+            {pedido.envio > 0 && (
+                <p className="panel-pedido-envio">🛵 Delivery · incluye envío {formatPrice(pedido.envio)}</p>
+            )}
 
             {cancelado ? (
                 <div className="panel-pedido-pie">
@@ -452,7 +455,7 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(nombre, cantidad, precio_unitario)')
+            .select('id, creado_en, total, envio, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(nombre, cantidad, precio_unitario)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)

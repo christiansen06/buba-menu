@@ -71,14 +71,16 @@ function splitLabel(label) {
     return { title: parts[0], detail: parts.slice(1) };
 }
 
-export function buildOrderMessage({ items, total, name, note, hasConsultarItems, paymentMethod }) {
+export function buildOrderMessage({ items, total, name, note, hasConsultarItems, paymentMethod, envio = 0 }) {
     const L = [];
 
     // Durante el evento el local y el truck mandan al mismo WhatsApp: el
     // encabezado es lo que dice de dónde viene cada pedido.
+    // `total` es lo que se cobra: con delivery ya incluye el envío.
+    const conEnvio = envio > 0;
     L.push(getUnidad() === 'food_truck'
         ? '🚚 *NUEVO PEDIDO — BüBa FOOD TRUCK*'
-        : '🧋 *NUEVO PEDIDO — BüBa*');
+        : conEnvio ? '🛵 *NUEVO PEDIDO DELIVERY — BüBa*' : '🧋 *NUEVO PEDIDO — BüBa*');
     L.push('');
     L.push(`👤 *Nombre:* ${name}`);
     L.push('');
@@ -124,7 +126,13 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
         L.push('');
     });
 
-    L.push(`💰 *Total: ${formatPrice(total)}*`);
+    if (conEnvio) {
+        L.push(`🧾 Productos: ${formatPrice(total - envio)}`);
+        L.push(`🛵 Envío (moto): ${formatPrice(envio)}`);
+        L.push(`💰 *Total a pagar: ${formatPrice(total)}*`);
+    } else {
+        L.push(`💰 *Total: ${formatPrice(total)}*`);
+    }
 
     if (hasConsultarItems) {
         L.push('_(Algunos ítems se cotizan en el mostrador)_');

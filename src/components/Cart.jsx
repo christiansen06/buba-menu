@@ -82,8 +82,14 @@ function avisoDePago(medio) {
     return null;
 }
 
+/** "4.200", "$ 4200" → 4200. Sólo cuentan los dígitos. */
+const aEntero = (t) => parseInt(String(t || '').replace(/\D/g, ''), 10) || 0;
+
+// Sólo el mostrador del local manda pedidos con moto.
+const aceptaDelivery = () => esMostrador() && getUnidad() === 'local';
+
 function Cart() {
-    const { items, total, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
+    const { items, total: totalProductos, count, hasConsultarItems, setQuantity, removeItem, clearCart, startEdit, theme, toggleTheme } = useCart();
     const [open, setOpen] = useState(false);
     const [checkout, setCheckout] = useState(false);
     const [sent, setSent] = useState(false);
@@ -105,11 +111,21 @@ function Cart() {
     // queda plegada detrás de un botón chico.
     const [conNota, setConNota] = useState(false);
     const [paymentError, setPaymentError] = useState(false);
+    // Delivery con moto (mostrador): el cliente paga los productos MÁS el envío
+    // que cotizó Uber. El envío viaja aparte para poder separarlo en la caja.
+    const [salida, setSalida] = useState('local'); // 'local' | 'delivery'
+    const [envioTexto, setEnvioTexto] = useState('');
+    const [envioError, setEnvioError] = useState(false);
     const pagoRef = useRef(null);
     const [copiado, setCopiado] = useState(false);
     const copiadoRef = useRef(null);
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
+
+    const delivery = aceptaDelivery() && salida === 'delivery';
+    const envio = delivery ? aEntero(envioTexto) : 0;
+    // Lo que se cobra: con delivery incluye el envío.
+    const total = totalProductos + envio;
 
     useEffect(() => () => clearTimeout(copiadoRef.current), []);
 
@@ -170,9 +186,11 @@ function Cart() {
         // vuelve a tocar enviar y recién ahí se entera del otro.
         const faltaNombre = !name.trim();
         const faltaPago = !paymentMethod;
+        const faltaEnvio = delivery && envio <= 0;
         setNameError(faltaNombre);
         setPaymentError(faltaPago);
-        if (faltaNombre || faltaPago) return;
+        setEnvioError(faltaEnvio);
+        if (faltaNombre || faltaPago || faltaEnvio) return;
 
         if (!esMostrador()) {
             try {
@@ -196,7 +214,7 @@ function Cart() {
         const firma = firmaPedido(items, total);
         if (!yaAnotado(firma)) {
             anotar(firma);
-            void registrarPedido({ items, total, medioPago: paymentMethod });
+            void registrarPedido({ items, total, medioPago: paymentMethod, envio });
         }
 
         enviarWhatsApp();
@@ -205,14 +223,14 @@ function Cart() {
 
     // Reintento manual: abre WhatsApp de nuevo SIN volver a anotar la venta.
     const enviarWhatsApp = () => {
-        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod });
+        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod, envio });
     };
 
     // Respaldo para cuando WhatsApp no llega a mandarse (con señal floja no
     // puede resolver el número). Se copia el mensaje entero para pegarlo a mano.
     const handleCopyOrder = async () => {
         const texto = buildOrderMessage({
-            items, total, name: name.trim(), note, hasConsultarItems, paymentMethod,
+            items, total, name: name.trim(), note, hasConsultarItems, paymentMethod, envio,
         });
         if (await copyToClipboard(texto)) {
             setCopiado(true);
@@ -229,6 +247,9 @@ function Cart() {
         setConNota(false);
         setPaymentMethod(null);
         setPaymentError(false);
+        setSalida('local');
+        setEnvioTexto('');
+        setEnvioError(false);
         setCheckout(false);
         setSent(false);
         setOpen(false);
@@ -252,7 +273,7 @@ function Cart() {
                 onClick={handleOpen}
                 aria-label={
                     items.length > 0
-                        ? `Ver mi pedido: ${count} ${count === 1 ? 'producto' : 'productos'}, ${formatPrice(total)}`
+                        ? `Ver mi pedido: ${count} ${count === 1 ? 'producto' : 'productos'}, ${formatPrice(totalProductos)}`
                         : 'Ver mi pedido'
                 }
             >
@@ -264,7 +285,7 @@ function Cart() {
                     ) : (
                         <span className="cart-fab-info">
                             <span className="cart-fab-count">{count}</span>
-                            <span className="cart-fab-total">{formatPrice(total)}</span>
+                            <span className="cart-fab-total">{formatPrice(totalProductos)}</span>
                         </span>
                     )
                 )}
@@ -281,7 +302,7 @@ function Cart() {
                                 <div className="cart-confirm-icon">✅</div>
                                 <h3>¡Pedido enviado!</h3>
                                 <p>
-                                    Tu pedido a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
+                                    {delivery ? 'El delivery' : 'Tu pedido'} a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
                                     {paymentMethod === 'efectivo'
                                         ? ' Lo pagás en el mostrador 💵'
                                         : paymentMethod === 'posnet'
@@ -354,6 +375,60 @@ function Cart() {
                                         {nameError && <span className="field-error">Necesitamos tu nombre para preparar el pedido</span>}
                                     </label>
 
+                                    {aceptaDelivery() && (
+                                        <div className="checkout-field">
+                                            <span>¿Cómo sale? <em className="req">*</em></span>
+                                            <div className="payment-method-group salida-group" role="radiogroup" aria-label="Cómo sale el pedido">
+                                                {[
+                                                    { id: 'local', icono: '🏪', label: 'En el local', sub: 'retira' },
+                                                    { id: 'delivery', icono: '🛵', label: 'Delivery', sub: 'moto de Uber' },
+                                                ].map((o) => (
+                                                    <button
+                                                        key={o.id}
+                                                        type="button"
+                                                        role="radio"
+                                                        className={`payment-method-option salida-${o.id} ${salida === o.id ? 'selected' : ''}`}
+                                                        aria-checked={salida === o.id}
+                                                        onClick={() => {
+                                                            setSalida(o.id);
+                                                            setEnvioError(false);
+                                                            if (o.id === 'delivery') setConNota(true);
+                                                        }}
+                                                    >
+                                                        <span className="payment-method-icon" aria-hidden="true">{o.icono}</span>
+                                                        <span>{o.label}</span>
+                                                        <small className="payment-method-sub">{o.sub}</small>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {delivery && (
+                                        <div className="checkout-field envio-field">
+                                            <span><label htmlFor="envio-monto">Envío que cotizó Uber</label> <em className="req">*</em></span>
+                                            <div className={`envio-input ${envioError ? 'input-error' : ''}`}>
+                                                <span aria-hidden="true">$</span>
+                                                <input
+                                                    id="envio-monto"
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    placeholder="Ej: 4200"
+                                                    value={envioTexto}
+                                                    maxLength={7}
+                                                    autoFocus
+                                                    onChange={(e) => { setEnvioTexto(e.target.value.replace(/\D/g, '')); setEnvioError(false); }}
+                                                />
+                                            </div>
+                                            {envioError && <span className="field-error">Poné lo que cotizó Uber para el envío</span>}
+                                            <div className="envio-desglose" aria-live="polite">
+                                                <div><span>Productos</span><span>{formatPrice(totalProductos)}</span></div>
+                                                <div><span>🛵 Envío</span><span>{formatPrice(envio)}</span></div>
+                                                <div className="envio-total"><span>Total a cobrar</span><span>{formatPrice(total)}</span></div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/*
                                       El método de pago se elige ACÁ, antes de enviar. Al tocar
                                       "Enviar" se abre WhatsApp y el cliente sale del menú: si el
@@ -403,10 +478,10 @@ function Cart() {
                                             <span>Aclaración <span className="opcional-tag">opcional</span></span>
                                             <textarea
                                                 value={note}
-                                                placeholder="Ej: sin azúcar, para llevar, sin maní…"
+                                                placeholder={delivery ? 'Dirección y datos para la moto' : 'Ej: sin azúcar, para llevar, sin maní…'}
                                                 maxLength={200}
                                                 rows={2}
-                                                autoFocus={conNota && !note}
+                                                autoFocus={conNota && !note && !delivery}
                                                 onChange={(e) => setNote(e.target.value)}
                                             />
                                         </label>
@@ -479,7 +554,7 @@ function Cart() {
                                 <div className="cart-panel-footer">
                                     <div className="cart-total-row">
                                         <span className="cart-total-label">Total</span>
-                                        <span className="cart-total-price">{formatPrice(total)}</span>
+                                        <span className="cart-total-price">{formatPrice(totalProductos)}</span>
                                     </div>
                                     {hasConsultarItems && (
                                         <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>

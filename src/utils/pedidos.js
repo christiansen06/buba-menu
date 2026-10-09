@@ -119,7 +119,10 @@ function nuevoId() {
 }
 
 async function subir(pedido) {
-    const { error } = await supabase.rpc('registrar_pedido', pedido);
+    // Los pedidos con delivery usan la función que además anota el envío; los
+    // demás siguen por la de siempre (así un pedido viejo en la cola no cambia).
+    const funcion = 'p_envio' in pedido ? 'registrar_pedido_con_envio' : 'registrar_pedido';
+    const { error } = await supabase.rpc(funcion, pedido);
     if (error) throw error;
 }
 
@@ -177,7 +180,7 @@ export function iniciarColaDePedidos() {
  * Guarda el pedido. Devuelve { ok } — nunca tira error hacia afuera,
  * porque quien la llama está en el medio de mandar un WhatsApp.
  */
-export async function registrarPedido({ items, total, medioPago = null }) {
+export async function registrarPedido({ items, total, medioPago = null, envio = 0 }) {
     if (!hayBase) return { ok: false, motivo: 'sin-base' };
     if (!items || items.length === 0) return { ok: false, motivo: 'vacio' };
 
@@ -196,6 +199,10 @@ export async function registrarPedido({ items, total, medioPago = null }) {
         p_unidad: getUnidad(),
         p_canal: getCanal(),
     };
+    // Delivery con moto (sólo mostrador del local): p_total INCLUYE el envío,
+    // que viaja aparte para poder separar productos de envío en la caja.
+    const envioEntero = Math.round(envio || 0);
+    if (envioEntero > 0) pedido.p_envio = envioEntero;
 
     // Primero al aparato, después a la base. Si se corta en el medio, la
     // cola lo tiene.

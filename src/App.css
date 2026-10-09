@@ -4867,6 +4867,8 @@ img.product-image.product-photo {
 .payment-method-option.transferencia { --medio: #1f6fd1; --medio-texto: #ffffff; }
 .payment-method-option.efectivo      { --medio: #f2b21b; --medio-texto: #1a1a1a; }
 .payment-method-option.posnet        { --medio: #6b46e0; --medio-texto: #ffffff; }
+.payment-method-option.tarjeta       { --medio: #6b46e0; --medio-texto: #ffffff; }
+.payment-method-option.qr            { --medio: #0b7f7c; --medio-texto: #ffffff; }
 .payment-method-option.uber          { --medio: #06c167; --medio-texto: #0b0b0b; }
 
 .payment-method-option:hover { border-color: var(--medio); }
@@ -4931,6 +4933,8 @@ img.product-image.product-photo {
 .pago-aviso-icono { font-size: 1.35rem; flex: none; }
 .pago-aviso.efectivo { --medio: #f2b21b; }
 .pago-aviso.posnet   { --medio: #6b46e0; }
+.pago-aviso.tarjeta  { --medio: #6b46e0; }
+.pago-aviso.qr       { --medio: #0b7f7c; }
 .pago-aviso.uber     { --medio: #06c167; }
 @keyframes pago-aviso-entra {
   from { opacity: 0; transform: translateY(-6px); }

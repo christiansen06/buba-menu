@@ -121,7 +121,7 @@ function nuevoId() {
 async function subir(pedido) {
     // Los pedidos con delivery usan la función que además anota el envío; los
     // demás siguen por la de siempre (así un pedido viejo en la cola no cambia).
-    const funcion = 'p_envio' in pedido ? 'registrar_pedido_con_envio' : 'registrar_pedido';
+    const funcion = 'p_posnet_tipo' in pedido || 'p_envio' in pedido ? 'registrar_pedido_completo' : 'registrar_pedido';
     const { error } = await supabase.rpc(funcion, pedido);
     if (error) throw error;
 }
@@ -190,12 +190,15 @@ export async function registrarPedido({ items, total, medioPago = null, envio = 
     //
     // medioPago es lo único "de la persona" que sí viaja, y no la identifica:
     // es transferencia o efectivo. Cualquier otro valor lo ignora la base.
+    // Tarjeta y QR se cobran con el posnet: para la base el medio sigue siendo
+    // 'posnet' y cómo pagó viaja aparte (parte 29).
+    const esTarjetaOQr = medioPago === 'tarjeta' || medioPago === 'qr';
     const pedido = {
         p_id: nuevoId(),
         p_creado_en: new Date().toISOString(),
         p_total: Math.round(total || 0),
         p_items: itemsParaBase(items),
-        p_medio_pago: medioPago,
+        p_medio_pago: esTarjetaOQr ? 'posnet' : medioPago,
         p_unidad: getUnidad(),
         p_canal: getCanal(),
     };
@@ -203,6 +206,7 @@ export async function registrarPedido({ items, total, medioPago = null, envio = 
     // que viaja aparte para poder separar productos de envío en la caja.
     const envioEntero = Math.round(envio || 0);
     if (envioEntero > 0) pedido.p_envio = envioEntero;
+    if (esTarjetaOQr) pedido.p_posnet_tipo = medioPago;
 
     // Primero al aparato, después a la base. Si se corta en el medio, la
     // cola lo tiene.

@@ -57,7 +57,9 @@ function mediosDePago() {
         { id: 'efectivo', icono: '💵', label: 'Efectivo', sub: truck ? 'en el truck' : 'en el local' },
     ];
     if (esMostrador()) {
-        medios.push({ id: 'posnet', icono: '💳', label: 'Tarjeta o QR', sub: truck ? 'posnet Mercado Pago' : 'posnet' });
+        // Tarjeta y QR se cobran con el mismo posnet pero se anotan por separado (parte 29).
+        medios.push({ id: 'tarjeta', icono: '💳', label: 'Tarjeta', sub: 'débito o crédito' });
+        medios.push({ id: 'qr', icono: '📱', label: 'QR', sub: truck ? 'Mercado Pago' : 'código QR' });
         // Uber Eats ya no se carga acá (09/10): los pedidos de Uber entran solos
         // con el reporte semanal que se sube en BüBa Gestión, con su precio real.
     }
@@ -76,8 +78,11 @@ function avisoDePago(medio) {
             ? { icono: '💵', texto: 'Cobrá en efectivo antes de entregar.' }
             : { icono: '💵', texto: truck ? 'Pagás en efectivo cuando retirás en el truck.' : 'Pagás en efectivo cuando retirás en el local.' };
     }
-    if (medio === 'posnet') {
-        return { icono: '💳', texto: truck ? 'Cobrá con el posnet de Mercado Pago: tarjeta o QR.' : 'Cobrá con el posnet: tarjeta o QR.' };
+    if (medio === 'tarjeta') {
+        return { icono: '💳', texto: truck ? 'Cobrá con el posnet de Mercado Pago.' : 'Cobrá con el posnet.' };
+    }
+    if (medio === 'qr') {
+        return { icono: '📱', texto: 'Que el cliente escanee el QR y te muestre el pago aprobado.' };
     }
     return null;
 }
@@ -106,7 +111,7 @@ function Cart() {
     });
     const [note, setNote] = useState('');
     const [nameError, setNameError] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState(null); // 'transferencia' | 'efectivo' | 'posnet' (sólo mostrador)
+    const [paymentMethod, setPaymentMethod] = useState(null); // 'transferencia' | 'efectivo' | 'tarjeta' | 'qr' (los dos últimos sólo mostrador)
     // La aclaración casi nunca se usa y ocupaba media pantalla del celular:
     // queda plegada detrás de un botón chico.
     const [conNota, setConNota] = useState(false);
@@ -305,8 +310,10 @@ function Cart() {
                                     {delivery ? 'El delivery' : 'Tu pedido'} a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
                                     {paymentMethod === 'efectivo'
                                         ? ' Lo pagás en el mostrador 💵'
-                                        : paymentMethod === 'posnet'
-                                            ? ' Se cobra con el posnet 💳'
+                                        : paymentMethod === 'tarjeta'
+                                            ? ' Se cobra con tarjeta 💳'
+                                            : paymentMethod === 'qr'
+                                                ? ' Se cobra con QR 📱'
                                             : ' Acá tenés de nuevo los datos para transferir 👇'}
                                 </p>
                                 {/* Respaldo para quien sí vuelve al menú: los datos ya los vio
@@ -436,7 +443,7 @@ function Cart() {
                                     */}
                                     <div className="checkout-field">
                                         <span>¿Cómo {esMostrador() ? 'paga' : 'vas a pagar'}? <em className="req">*</em></span>
-                                        <div className={`payment-method-group ${esMostrador() ? 'tres' : ''}`} role="radiogroup" aria-label="Medio de pago">
+                                        <div className={`payment-method-group ${esMostrador() ? 'cuatro' : ''}`} role="radiogroup" aria-label="Medio de pago">
                                             {mediosDePago().map((m) => (
                                                 <button
                                                     key={m.id}

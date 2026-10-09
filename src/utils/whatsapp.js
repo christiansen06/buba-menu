@@ -160,6 +160,12 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
     } else if (paymentMethod === 'efectivo') {
         L.push('');
         L.push(getUnidad() === 'food_truck' ? '💵 *Pago:* Efectivo en el truck' : '💵 *Pago:* Efectivo en el local');
+    } else if (paymentMethod === 'tarjeta') {
+        L.push('');
+        L.push('💳 *Pago:* Tarjeta (posnet)');
+    } else if (paymentMethod === 'qr') {
+        L.push('');
+        L.push('📱 *Pago:* QR');
     } else if (paymentMethod === 'posnet') {
         // Sólo desde el mostrador: al cliente no se le ofrece.
         L.push('');

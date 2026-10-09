@@ -156,9 +156,6 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
         // Sólo desde el mostrador: al cliente no se le ofrece.
         L.push('');
         L.push('💳 *Pago:* Tarjeta o QR (posnet)');
-    } else if (paymentMethod === 'uber') {
-        L.push('');
-        L.push('🛵 *Pedido de Uber Eats* (lo cobra Uber, no se cobra en el local)');
     }
 
     L.push('');

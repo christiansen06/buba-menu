@@ -25,7 +25,7 @@ const MEDIOS = [
     { id: 'efectivo', label: 'Efectivo' },
     { id: 'transferencia', label: 'Transf.' },
     { id: 'posnet', label: 'Tarjeta/QR' },
-    { id: 'uber', label: 'Uber' },
+    // Uber Eats ya no se marca a mano: entra con el reporte semanal (parte 27).
 ];
 
 
@@ -454,6 +454,7 @@ function PanelPedidos() {
             .from('pedidos')
             .select('id, creado_en, total, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(nombre, cantidad, precio_unitario)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
+            .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)
             .lt('creado_en', fin)
             .order('creado_en', { ascending: false })

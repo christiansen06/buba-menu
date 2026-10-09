@@ -4735,6 +4735,13 @@ img.product-image.product-photo {
 @media (max-width: 560px) {
   .payment-method-group.cuatro { grid-template-columns: repeat(2, 1fr); }
 }
+/* Mostrador (09/10): efectivo, transferencia y tarjeta/QR en una fila; en
+   celulares chicos, dos arriba y la tercera ocupa todo el ancho. */
+.payment-method-group.tres { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 420px) {
+  .payment-method-group.tres { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .payment-method-group.tres > :last-child { grid-column: 1 / -1; }
+}
 
 .payment-method-sub {
   font-size: 0.7rem;

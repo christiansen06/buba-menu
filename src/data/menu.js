@@ -380,6 +380,54 @@ export const menuCategories = [
     ],
   },
 
+  // ===== BEBIDAS =====
+  // 09/10: precios de Agustín. Las aguas son Pureza de 500 cc (BüBa 2.0).
+  {
+    id: 'bebidas',
+    name: 'Bebidas',
+    icon: '🧃',
+    accent: 'cyan',
+    description: 'Para acompañar',
+    items: [
+      {
+        id: 'agua',
+        name: 'Agua',
+        description: 'Botella de 500 cc',
+        image: 'Agua',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$2.000',
+          large: 'N/A',
+        },
+      },
+      {
+        id: 'agua-saborizada',
+        name: 'Agua saborizada',
+        description: 'Botella de 500 cc',
+        image: 'Agua saborizada',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$2.500',
+          large: 'N/A',
+        },
+      },
+      {
+        id: 'coca',
+        name: 'Coca-Cola',
+        description: 'Gaseosa',
+        image: 'Coca-Cola',
+        badge: null,
+        featured: false,
+        sizes: {
+          medium: '$2.500',
+          large: 'N/A',
+        },
+      },
+    ],
+  },
+
   // ===== WAFFLES =====
   // ===== REEMPLAZAR LA CATEGORÍA WAFFLES EN src/data/menu.js =====
 // Buscá el bloque que empieza con  id: 'waffles'  y reemplazalo ENTERO por esto:

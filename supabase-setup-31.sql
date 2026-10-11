@@ -3,18 +3,16 @@
 --
 -- Correr en el editor SQL de Supabase, como las partes anteriores.
 --
--- Mientras no llegue la primera liquidación de PedidosYa (y se vea qué
--- reporte manda), los pedidos se cargan a mano desde el mostrador, como se
--- hacía al principio con Uber:
+-- Los pedidos de PedidosYa NO se cargan desde el mostrador: entran con el
+-- reporte de la plataforma, como los de Uber (pedidos.plataforma =
+-- 'pedidos_ya', valor que ya estaba permitido). Esta parte deja lista la caja:
 --
---   · pedidos.plataforma = 'pedidos_ya' (el valor ya estaba permitido). El
---     medio de pago queda vacío: la plata no entra a la caja ese día, la
---     liquida PedidosYa después.
---   · registrar_pedido_plataforma   lo llama el mostrador para estos pedidos.
+--   · registrar_pedido_plataforma   quedó creada pero SIN permisos (11/10: se
+--     decidió no cargar PedidosYa a mano). No la usa nadie.
 --   · cierres_caja.pedidosya_liquidacion   la parte de "transferencias" que
 --     fue un pago de PedidosYa (como uber_liquidacion). Queda anotada sola en
 --     el libro como "Liquidación PedidosYa" y se descuenta del Cierre de Caja.
---   · editar_pedido: estos pedidos sí se pueden editar (los de Uber no: vienen
+--   · editar_pedido: ni los de Uber ni los de PedidosYa se editan (vienen
 --     del reporte).
 --   · cierre_vs_sistema: total de PedidosYa y su liquidación, al final.
 --
@@ -59,7 +57,8 @@ end;
 $$;
 
 revoke all on function public.registrar_pedido_plataforma(integer, jsonb, text, uuid, timestamptz, text) from public;
-grant execute on function public.registrar_pedido_plataforma(integer, jsonb, text, uuid, timestamptz, text) to anon, authenticated;
+-- Sin grant: no se carga PedidosYa a mano (ver arriba).
+revoke execute on function public.registrar_pedido_plataforma(integer, jsonb, text, uuid, timestamptz, text) from anon, authenticated;
 
 
 -- ---------------------------------------------------------------------
@@ -152,79 +151,4 @@ full outer join sistema s on s.dia = c.dia and s.unidad = c.unidad
 order by 1 desc, 2;
 
 
--- ---------------------------------------------------------------------
--- editar_pedido: igual que la parte 30, pero los de PedidosYa (cargados a
--- mano en el mostrador) sí se pueden editar.
--- ---------------------------------------------------------------------
-create or replace function public.editar_pedido(p_id uuid, p_items jsonb, p_pin text default null)
-returns integer
-language plpgsql
-security definer
-set search_path = public, pg_temp
-as $$
-declare
-  v_ped    public.pedidos%rowtype;
-  v_hash   text;
-  v_item   jsonb;
-  v_cant   integer;
-  v_antes  jsonb;
-  v_total  integer;
-  v_vivas  integer;
-begin
-  if auth.uid() is distinct from 'ed9986b4-4135-4da3-9fc2-0eb46a7e1e11'::uuid then
-    raise exception 'No autorizado' using errcode = '42501';
-  end if;
-  if p_items is null or jsonb_typeof(p_items) <> 'array' then
-    raise exception 'Faltan las líneas del pedido';
-  end if;
-
-  select * into v_ped from public.pedidos where id = p_id for update;
-  if not found then raise exception 'No existe ese pedido'; end if;
-  if v_ped.estado = 'cancelado' then raise exception 'El pedido está cancelado'; end if;
-  if v_ped.plataforma = 'uber_eats' then raise exception 'Los pedidos de Uber vienen del reporte: no se editan acá'; end if;
-  if v_ped.cae is not null then raise exception 'Este pedido ya tiene comprobante'; end if;
-
-  select coalesce(jsonb_agg(jsonb_build_object('id', id, 'nombre', nombre, 'variante', variante,
-           'cantidad', cantidad, 'precio_unitario', precio_unitario) order by id), '[]'::jsonb)
-    into v_antes from public.pedido_items where pedido_id = p_id;
-
-  for v_item in select * from jsonb_array_elements(p_items) loop
-    v_cant := (v_item->>'cantidad')::integer;
-    if v_cant is null or v_cant < 0 or v_cant > 99 then raise exception 'Cantidad inválida'; end if;
-    if (v_item->>'id') is not null then
-      update public.pedido_items set cantidad = v_cant
-       where id = (v_item->>'id')::bigint and pedido_id = p_id;
-      if not found then raise exception 'Una línea no es de este pedido'; end if;
-    elsif v_cant > 0 then
-      if coalesce(btrim(v_item->>'nombre'), '') = '' or length(v_item->>'nombre') > 160 then
-        raise exception 'Falta el nombre del producto';
-      end if;
-      if (v_item->>'precio_unitario') is not null
-         and ((v_item->>'precio_unitario')::integer < 0 or (v_item->>'precio_unitario')::integer > 500000) then
-        raise exception 'Precio inválido';
-      end if;
-      insert into public.pedido_items (pedido_id, categoria_id, producto_id, nombre, variante, cantidad, precio_unitario, detalle)
-      values (p_id, coalesce(v_item->>'categoria_id', 'otros'), v_item->>'producto_id', v_item->>'nombre',
-              v_item->>'variante', v_cant, (v_item->>'precio_unitario')::integer,
-              case when jsonb_typeof(v_item->'detalle') = 'object' then v_item->'detalle' end);
-    end if;
-  end loop;
-
-  select count(*) filter (where cantidad > 0), coalesce(sum(cantidad * coalesce(precio_unitario, 0)), 0) + v_ped.envio
-    into v_vivas, v_total from public.pedido_items where pedido_id = p_id;
-  if v_vivas = 0 then raise exception 'El pedido quedaría vacío: cancelalo en su lugar'; end if;
-  if v_total > 2000000 then raise exception 'Total inválido'; end if;
-
-  if v_total < v_ped.total then
-    select hash into v_hash from public.panel_pin where id = 1;
-    if v_hash is null then raise exception 'Todavía no hay un PIN definido'; end if;
-    if p_pin is null or extensions.crypt(p_pin, v_hash) <> v_hash then raise exception 'PIN incorrecto'; end if;
-  end if;
-
-  insert into public.pedido_ediciones (pedido_id, total_antes, total_despues, items_antes)
-  values (p_id, v_ped.total, v_total, v_antes);
-  update public.pedidos set total = v_total where id = p_id;
-  return v_total;
-end;
-$$;
-
+-- editar_pedido queda como en la parte 30 (no edita pedidos con plataforma).

@@ -121,7 +121,9 @@ function nuevoId() {
 async function subir(pedido) {
     // Los pedidos con delivery usan la función que además anota el envío; los
     // demás siguen por la de siempre (así un pedido viejo en la cola no cambia).
-    const funcion = 'p_posnet_tipo' in pedido || 'p_envio' in pedido ? 'registrar_pedido_completo' : 'registrar_pedido';
+    const funcion = 'p_plataforma' in pedido ? 'registrar_pedido_plataforma'
+        : 'p_posnet_tipo' in pedido || 'p_envio' in pedido ? 'registrar_pedido_completo'
+            : 'registrar_pedido';
     const { error } = await supabase.rpc(funcion, pedido);
     if (error) throw error;
 }
@@ -207,6 +209,13 @@ export async function registrarPedido({ items, total, medioPago = null, envio = 
     const envioEntero = Math.round(envio || 0);
     if (envioEntero > 0) pedido.p_envio = envioEntero;
     if (esTarjetaOQr) pedido.p_posnet_tipo = medioPago;
+
+    // PedidosYa (parte 31): no es un medio de pago, es una plataforma que
+    // liquida después. Va por su propia función, sin medio ni envío.
+    if (medioPago === 'pedidosya') {
+        for (const k of ['p_medio_pago', 'p_canal', 'p_envio', 'p_posnet_tipo']) delete pedido[k];
+        pedido.p_plataforma = 'pedidos_ya';
+    }
 
     // Primero al aparato, después a la base. Si se corta en el medio, la
     // cola lo tiene.

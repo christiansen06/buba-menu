@@ -60,6 +60,8 @@ function mediosDePago() {
         // Tarjeta y QR se cobran con el mismo posnet pero se anotan por separado (parte 29).
         medios.push({ id: 'tarjeta', icono: '💳', label: 'Tarjeta', sub: 'débito o crédito' });
         medios.push({ id: 'qr', icono: '📱', label: 'QR', sub: truck ? 'Mercado Pago' : 'código QR' });
+        // PedidosYa (11/10): se carga a mano hasta ver cómo liquida. Sólo el local.
+        if (!truck) medios.push({ id: 'pedidosya', icono: '🛵', label: 'PedidosYa', sub: 'lo paga la app' });
         // Uber Eats ya no se carga acá (09/10): los pedidos de Uber entran solos
         // con el reporte semanal que se sube en BüBa Gestión, con su precio real.
     }
@@ -80,6 +82,9 @@ function avisoDePago(medio) {
     }
     if (medio === 'tarjeta') {
         return { icono: '💳', texto: truck ? 'Cobrá con el posnet de Mercado Pago.' : 'Cobrá con el posnet.' };
+    }
+    if (medio === 'pedidosya') {
+        return { icono: '🛵', texto: 'Pedido de PedidosYa: no se cobra acá, lo liquida la app. Cargalo con lo que pidió el cliente.' };
     }
     if (medio === 'qr') {
         return { icono: '📱', texto: 'Que el cliente escanee el QR y te muestre el pago aprobado.' };
@@ -127,7 +132,8 @@ function Cart() {
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
 
-    const delivery = aceptaDelivery() && salida === 'delivery';
+    // Con PedidosYa el envío lo maneja la app: no hay delivery propio.
+    const delivery = aceptaDelivery() && salida === 'delivery' && paymentMethod !== 'pedidosya';
     const envio = delivery ? aEntero(envioTexto) : 0;
     // Lo que se cobra: con delivery incluye el envío.
     const total = totalProductos + envio;
@@ -312,6 +318,8 @@ function Cart() {
                                         ? ' Lo pagás en el mostrador 💵'
                                         : paymentMethod === 'tarjeta'
                                             ? ' Se cobra con tarjeta 💳'
+                                            : paymentMethod === 'pedidosya'
+                                                ? ' Lo liquida PedidosYa 🛵'
                                             : paymentMethod === 'qr'
                                                 ? ' Se cobra con QR 📱'
                                             : ' Acá tenés de nuevo los datos para transferir 👇'}
@@ -382,7 +390,7 @@ function Cart() {
                                         {nameError && <span className="field-error">Necesitamos tu nombre para preparar el pedido</span>}
                                     </label>
 
-                                    {aceptaDelivery() && (
+                                    {aceptaDelivery() && paymentMethod !== 'pedidosya' && (
                                         <div className="checkout-field">
                                             <span>¿Cómo sale? <em className="req">*</em></span>
                                             <div className="payment-method-group salida-group" role="radiogroup" aria-label="Cómo sale el pedido">
@@ -443,7 +451,7 @@ function Cart() {
                                     */}
                                     <div className="checkout-field">
                                         <span>¿Cómo {esMostrador() ? 'paga' : 'vas a pagar'}? <em className="req">*</em></span>
-                                        <div className={`payment-method-group ${esMostrador() ? 'cuatro' : ''}`} role="radiogroup" aria-label="Medio de pago">
+                                        <div className={`payment-method-group ${esMostrador() ? (mediosDePago().length === 5 ? 'cinco' : 'cuatro') : ''}`} role="radiogroup" aria-label="Medio de pago">
                                             {mediosDePago().map((m) => (
                                                 <button
                                                     key={m.id}

@@ -4868,6 +4868,8 @@ img.product-image.product-photo {
 .payment-method-option.efectivo      { --medio: #f2b21b; --medio-texto: #1a1a1a; }
 .payment-method-option.posnet        { --medio: #6b46e0; --medio-texto: #ffffff; }
 .payment-method-option.tarjeta       { --medio: #6b46e0; --medio-texto: #ffffff; }
+.payment-method-option.pedidosya     { --medio: #e3002b; --medio-texto: #ffffff; }
+.pago-aviso.pedidosya { --medio: #e3002b; }
 .payment-method-option.qr            { --medio: #0b7f7c; --medio-texto: #ffffff; }
 .payment-method-option.uber          { --medio: #06c167; --medio-texto: #0b0b0b; }
 
@@ -5045,3 +5047,10 @@ img.product-image.product-photo {
 .editar-armable { margin: 0.6rem 0; max-height: 62dvh; overflow-y: auto; overflow-x: hidden; }
 .editar-armable .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 .editar-rehacer { margin-left: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1.5px solid rgba(37, 37, 37, 0.2); background: transparent; color: inherit; font: inherit; font-size: 0.78rem; font-weight: 800; cursor: pointer; }
+
+/* Mostrador del local (11/10): 5 medios. Dos filas en la compu; en celular de a dos y el último a lo ancho. */
+.payment-method-group.cinco { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 560px) {
+  .payment-method-group.cinco { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .payment-method-group.cinco > :last-child { grid-column: 1 / -1; }
+}

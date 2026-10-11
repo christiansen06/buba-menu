@@ -365,7 +365,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     <span className="solo-lector"> — cambiar día u hora</span>
                 </button>
                 <span className="panel-pedido-canal">
-                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
+                    {pedido.plataforma === 'pedidos_ya' ? '🛵 PedidosYa' : medio === 'uber' ? '🛵 Uber Eats' : pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
                 </span>
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
@@ -394,6 +394,9 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                 </div>
             ) : (
                 <div className="panel-pedido-pie">
+                    {pedido.plataforma === 'pedidos_ya' ? (
+                    <div className="panel-cobro"><span className="panel-cobro-label">Lo liquida PedidosYa</span></div>
+                    ) : (
                     <div className="panel-cobro">
                         <span className="panel-cobro-label">Cobrado con</span>
                         <div className="panel-cobro-chips" role="group" aria-label="Medio de cobro">
@@ -411,6 +414,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                             ))}
                         </div>
                     </div>
+                    )}
                     <button
                         type="button"
                         className="panel-btn-sec"
@@ -466,9 +470,9 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, envio, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
+            .select('id, creado_en, total, envio, posnet_tipo, plataforma, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
-            .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
+            .or('plataforma.is.null,plataforma.eq.pedidos_ya')   // las de Uber vienen del reporte: no se tocan desde acá
             .gte('creado_en', ini)
             .lt('creado_en', fin)
             .order('creado_en', { ascending: false })

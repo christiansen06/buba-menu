@@ -80,7 +80,8 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
     const conEnvio = envio > 0;
     L.push(getUnidad() === 'food_truck'
         ? '🚚 *NUEVO PEDIDO — BüBa FOOD TRUCK*'
-        : conEnvio ? '🛵 *NUEVO PEDIDO DELIVERY — BüBa*' : '🧋 *NUEVO PEDIDO — BüBa*');
+        : paymentMethod === 'pedidosya' ? '🛵 *NUEVO PEDIDO PEDIDOSYA — BüBa*'
+            : conEnvio ? '🛵 *NUEVO PEDIDO DELIVERY — BüBa*' : '🧋 *NUEVO PEDIDO — BüBa*');
     L.push('');
     L.push(`👤 *Nombre:* ${name}`);
     L.push('');
@@ -163,6 +164,9 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
     } else if (paymentMethod === 'tarjeta') {
         L.push('');
         L.push('💳 *Pago:* Tarjeta (posnet)');
+    } else if (paymentMethod === 'pedidosya') {
+        L.push('');
+        L.push('🛵 *PedidosYa* (no se cobra: lo liquida la app)');
     } else if (paymentMethod === 'qr') {
         L.push('');
         L.push('📱 *Pago:* QR');

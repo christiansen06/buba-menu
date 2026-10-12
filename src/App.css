@@ -5045,3 +5045,7 @@ img.product-image.product-photo {
 .editar-armable { margin: 0.6rem 0; max-height: 62dvh; overflow-y: auto; overflow-x: hidden; }
 .editar-armable .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 .editar-rehacer { margin-left: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1.5px solid rgba(37, 37, 37, 0.2); background: transparent; color: inherit; font: inherit; font-size: 0.78rem; font-weight: 800; cursor: pointer; }
+
+/* Aviso de versión nueva (sólo mostrador) */
+.aviso-version { position: sticky; top: 0; z-index: 200; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem; padding: 0.6rem 1rem; background: #fff4db; color: #6b4500; font-weight: 800; font-size: 0.95rem; border-bottom: 1px solid #f0d9a0; }
+.aviso-version button { border: 0; border-radius: 999px; padding: 0.45rem 1rem; background: #6b4500; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }

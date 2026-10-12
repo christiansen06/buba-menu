@@ -9,6 +9,7 @@ import InstagramSection from './components/InstagramSection';
 import Cart from './components/Cart';
 import StickyNav from './components/StickyNav';
 import PanelPedidos from './components/PanelPedidos.jsx';
+import AvisoVersion from './components/AvisoVersion.jsx';
 import { CartProvider } from './context/CartContext';
 import { DisponibilidadProvider } from './context/DisponibilidadContext.jsx';
 import { esMostrador, getUnidad, UNIDAD_LABEL } from './config/unidad.js';
@@ -76,12 +77,13 @@ function App() {
         return <StorySection />;
     }
     if (view === 'panel') {
-        return <PanelPedidos />;
+        return <>{esMostrador() && <AvisoVersion />}<PanelPedidos /></>;
     }
 
     return (
         <DisponibilidadProvider>
             <CartProvider>
+                {esMostrador() && <AvisoVersion />}
                 <IndicadorMostrador />
                 <StickyNav />
                 <Hero />

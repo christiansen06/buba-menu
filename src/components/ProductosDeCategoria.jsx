@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ProductCard from './ProductCard';
+import { esMostrador } from '../config/unidad.js';
 
 /**
  * La grilla de productos de una categoría.
@@ -11,6 +12,8 @@ import ProductCard from './ProductCard';
  * Arranca siempre en la marcada porDefecto — el frío, que es lo que más sale.
  */
 function ProductosDeCategoria({ category, soloProducto = null, inicial = null }) {
+    // Hay productos que sólo se venden desde el mostrador (ej: agua caliente).
+    const items = category.items.filter((item) => !item.soloMostrador || esMostrador());
     const presentaciones = category.presentaciones || [];
 
     const [presentacionId, setPresentacionId] = useState(
@@ -39,7 +42,7 @@ function ProductosDeCategoria({ category, soloProducto = null, inicial = null })
             )}
 
             <div className="products-grid">
-                {category.items.filter((item) => !soloProducto || item.id === soloProducto).map((item) => (
+                {items.filter((item) => !soloProducto || item.id === soloProducto).map((item) => (
                     <ProductCard
                         item={item}
                         category={category}

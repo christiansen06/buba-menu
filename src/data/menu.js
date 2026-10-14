@@ -748,6 +748,21 @@ export const menuCategories = [
           large: 'N/A',
         },
       },
+      // Sólo se ve en el mostrador (el cliente del QR no lo ve): el agua caliente
+      // para el mate se vendía sin poder registrarla y descuadraba la caja.
+      {
+        id: 'agua-caliente',
+        name: 'Agua caliente',
+        description: 'Para el mate',
+        image: 'Agua caliente',
+        badge: null,
+        featured: false,
+        soloMostrador: true,
+        sizes: {
+          medium: '$500',
+          large: 'N/A',
+        },
+      },
     ],
   },
 ];

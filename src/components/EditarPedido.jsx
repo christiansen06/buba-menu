@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import { itemsParaBase } from '../utils/pedidos.js';
+import { TIPOS_DESCUENTO, calcularDescuento } from '../utils/descuento.js';
 import { menuCategories } from '../data/menu.js';
 import { CartContext } from '../context/CartContext.jsx';
 import { DisponibilidadProvider } from '../context/DisponibilidadContext.jsx';
@@ -70,12 +71,26 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
     const [pin, setPin] = useState('');
     const [error, setError] = useState('');
     const [enviando, setEnviando] = useState(false);
+    // Descuento (parte 38): cupón en pesos, cupón de % o tarjeta de fidelidad completa (un producto gratis).
+    const [desc, setDesc] = useState(() => ({
+        tipo: pedido.descuento_tipo || '',
+        valor: pedido.descuento_tipo === 'porcentaje' || pedido.descuento_tipo === 'monto' ? String(Number(pedido.descuento_valor || '')) : '',
+        linea: '',                                   // tarjeta: la línea que va gratis
+        nota: pedido.descuento_nota || '',
+        monto: pedido.descuento_tipo === 'tarjeta' ? pedido.descuento : 0,   // tarjeta ya guardada: lo que se regaló
+    }));
 
     const envio = pedido.envio || 0;
-    const total = lineas.reduce((s, l) => s + l.cantidad * (l.precio || 0), 0) + envio;
+    const subtotal = lineas.reduce((s, l) => s + l.cantidad * (l.precio || 0), 0);
+    const lineaGratis = desc.tipo === 'tarjeta' ? lineas.find((l) => l.clave === desc.linea && l.cantidad > 0) : null;
+    const valorDescuento = desc.tipo === 'tarjeta' ? (lineaGratis ? lineaGratis.precio : desc.monto) : desc.valor;
+    const descuento = calcularDescuento(subtotal, { tipo: desc.tipo, valor: valorDescuento });
+    const total = subtotal - descuento + envio;
     const baja = total < pedido.total;
+    const descuentoCambio = (desc.tipo || '') !== (pedido.descuento_tipo || '') || descuento !== (pedido.descuento || 0)
+        || (desc.nota || '') !== (pedido.descuento_nota || '');
     const vivas = lineas.filter((l) => l.cantidad > 0).length;
-    const cambio = lineas.some((l) => l.cantidad !== l.antes || !l.id);
+    const cambio = lineas.some((l) => l.cantidad !== l.antes || !l.id) || descuentoCambio;
 
     const cambiarCantidad = (clave, delta) => setLineas((ls) => ls.map((l) => (
         l.clave === clave ? { ...l, cantidad: Math.max(0, Math.min(99, l.cantidad + delta)) } : l
@@ -134,7 +149,12 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
         const items = lineas.map((l) => (l.id
             ? { id: l.id, cantidad: l.cantidad }
             : { categoria_id: l.categoria_id, producto_id: l.producto_id, nombre: l.nombre, variante: l.variante, cantidad: l.cantidad, precio_unitario: l.precio, detalle: l.detalle }));
-        const { error: err } = await supabase.rpc('editar_pedido', { p_id: pedido.id, p_items: items, p_pin: baja ? pin : null });
+        if (desc.tipo && !descuento) { setEnviando(false); setError(desc.tipo === 'tarjeta' ? 'Elegí qué producto va gratis' : 'Poné cuánto es el descuento'); return; }
+        // null = no tocar el descuento; {} = sacarlo; con tipo = aplicarlo.
+        const p_descuento = !descuentoCambio ? null
+            : !desc.tipo ? {}
+                : { tipo: desc.tipo, valor: desc.tipo === 'tarjeta' ? valorDescuento : Number(desc.valor), nota: desc.nota.trim() };
+        const { error: err } = await supabase.rpc('editar_pedido', { p_id: pedido.id, p_items: items, p_pin: baja ? pin : null, p_descuento });
         setEnviando(false);
         if (err) { setError(err.message); if (baja) setPin(''); return; }
         onListo();
@@ -215,6 +235,49 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
                 {envio > 0 && <p className="panel-ayuda">🛵 Incluye el envío de {formatPrice(envio)}.</p>}
 
                 <button type="button" className="panel-btn-sec editar-agregar" onClick={() => setPicker({ catId: CATEGORIAS[0].id })}>+ Agregar algo</button>
+
+                <fieldset className="editar-descuento">
+                    <legend>Descuento</legend>
+                    <div className="editar-cats" role="group" aria-label="Tipo de descuento">
+                        <button type="button" className={`panel-chip ${desc.tipo === '' ? 'activo' : ''}`} onClick={() => setDesc({ ...desc, tipo: '' })}>Sin descuento</button>
+                        {TIPOS_DESCUENTO.map((t) => (
+                            <button key={t.id} type="button" className={`panel-chip ${desc.tipo === t.id ? 'activo' : ''}`}
+                                onClick={() => setDesc({ ...desc, tipo: t.id, valor: t.id === desc.tipo ? desc.valor : '' })}>{t.etiqueta}</button>
+                        ))}
+                    </div>
+                    {desc.tipo === 'monto' && (
+                        <label className="checkout-field">
+                            <span>Cuánto se descuenta ($)</span>
+                            <input type="text" inputMode="numeric" placeholder="3000" value={desc.valor}
+                                onChange={(e) => setDesc({ ...desc, valor: e.target.value.replace(/\D/g, '').slice(0, 6) })} />
+                        </label>
+                    )}
+                    {desc.tipo === 'porcentaje' && (
+                        <label className="checkout-field">
+                            <span>Porcentaje (%)</span>
+                            <input type="text" inputMode="numeric" placeholder="10" value={desc.valor}
+                                onChange={(e) => { const n = e.target.value.replace(/\D/g, '').slice(0, 3); setDesc({ ...desc, valor: n === '' ? '' : String(Math.min(100, Number(n))) }); }} />
+                        </label>
+                    )}
+                    {desc.tipo === 'tarjeta' && (
+                        <label className="checkout-field">
+                            <span>Qué producto va gratis (uno)</span>
+                            <select value={desc.linea} onChange={(e) => setDesc({ ...desc, linea: e.target.value })}>
+                                <option value="">{desc.monto > 0 && !lineaGratis ? `Sin cambios (regala ${formatPrice(desc.monto)})` : 'Elegí…'}</option>
+                                {lineas.filter((l) => l.cantidad > 0 && l.precio > 0).map((l) => (
+                                    <option key={l.clave} value={l.clave}>{l.nombre} · {formatPrice(l.precio)}</option>
+                                ))}
+                            </select>
+                        </label>
+                    )}
+                    {desc.tipo && (
+                        <label className="checkout-field">
+                            <span>Nota <small>opcional</small></span>
+                            <input type="text" maxLength={120} placeholder="Cupón Instagram, cliente frecuente…" value={desc.nota} onChange={(e) => setDesc({ ...desc, nota: e.target.value })} />
+                        </label>
+                    )}
+                    {descuento > 0 && <p className="panel-ayuda">Descuento: −{formatPrice(descuento)}</p>}
+                </fieldset>
 
                 <p className="editar-total">
                     <span>Total</span>

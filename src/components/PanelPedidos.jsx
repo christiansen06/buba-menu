@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import EditarPedido from './EditarPedido.jsx';
+import { textoDescuento } from '../utils/descuento.js';
 import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
 
 /**
@@ -374,6 +375,9 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
             {pedido.posnet_tipo && medio === 'posnet' && (
                 <p className="panel-pedido-envio">{pedido.posnet_tipo === 'qr' ? '📱 Se cobró con QR' : '💳 Se cobró con tarjeta'}</p>
             )}
+            {textoDescuento(pedido, formatPrice) && (
+                <p className="panel-pedido-envio">{textoDescuento(pedido, formatPrice)}</p>
+            )}
             {pedido.envio > 0 && (
                 <p className="panel-pedido-envio">🛵 Delivery · incluye envío {formatPrice(pedido.envio)}</p>
             )}
@@ -466,7 +470,7 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, envio, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
+            .select('id, creado_en, total, envio, descuento, descuento_tipo, descuento_valor, descuento_nota, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)

@@ -71,7 +71,7 @@ function splitLabel(label) {
     return { title: parts[0], detail: parts.slice(1) };
 }
 
-export function buildOrderMessage({ items, total, name, note, hasConsultarItems, paymentMethod, envio = 0 }) {
+export function buildOrderMessage({ items, total, name, note, hasConsultarItems, paymentMethod, envio = 0, descuento = 0 }) {
     const L = [];
 
     // Durante el evento el local y el truck mandan al mismo WhatsApp: el
@@ -126,6 +126,7 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
         L.push('');
     });
 
+    if (descuento > 0) L.push(`🏷️ Descuento: −${formatPrice(descuento)}`);
     if (conEnvio) {
         L.push(`🧾 Productos: ${formatPrice(total - envio)}`);
         L.push(`🛵 Envío (moto): ${formatPrice(envio)}`);

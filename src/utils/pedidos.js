@@ -121,7 +121,7 @@ function nuevoId() {
 async function subir(pedido) {
     // Los pedidos con delivery usan la función que además anota el envío; los
     // demás siguen por la de siempre (así un pedido viejo en la cola no cambia).
-    const funcion = 'p_posnet_tipo' in pedido || 'p_envio' in pedido ? 'registrar_pedido_completo' : 'registrar_pedido';
+    const funcion = 'p_posnet_tipo' in pedido || 'p_envio' in pedido || 'p_descuento' in pedido ? 'registrar_pedido_completo' : 'registrar_pedido';
     const { error } = await supabase.rpc(funcion, pedido);
     if (error) throw error;
 }
@@ -180,7 +180,7 @@ export function iniciarColaDePedidos() {
  * Guarda el pedido. Devuelve { ok } — nunca tira error hacia afuera,
  * porque quien la llama está en el medio de mandar un WhatsApp.
  */
-export async function registrarPedido({ items, total, medioPago = null, envio = 0 }) {
+export async function registrarPedido({ items, total, medioPago = null, envio = 0, descuento = null }) {
     if (!hayBase) return { ok: false, motivo: 'sin-base' };
     if (!items || items.length === 0) return { ok: false, motivo: 'vacio' };
 
@@ -207,6 +207,8 @@ export async function registrarPedido({ items, total, medioPago = null, envio = 
     const envioEntero = Math.round(envio || 0);
     if (envioEntero > 0) pedido.p_envio = envioEntero;
     if (esTarjetaOQr) pedido.p_posnet_tipo = medioPago;
+    // Descuento del mostrador (parte 39): p_total ya viene con el descuento; esto anota cuánto fue.
+    if (descuento?.tipo) pedido.p_descuento = descuento;
 
     // Primero al aparato, después a la base. Si se corta en el medio, la
     // cola lo tiene.

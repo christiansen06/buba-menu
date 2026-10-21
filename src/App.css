@@ -5054,3 +5054,13 @@ img.product-image.product-photo {
 .editar-descuento { margin: 0.8rem 0 0.4rem; padding: 0.6rem 0.7rem 0.7rem; border: 1px solid var(--border, rgba(0,0,0,0.15)); border-radius: 12px; display: grid; gap: 0.5rem; }
 .editar-descuento legend { padding: 0 0.4rem; font-weight: 800; font-size: 0.85rem; }
 .editar-descuento select, .editar-descuento input { width: 100%; box-sizing: border-box; }
+
+/* Cupón de descuento en el carrito (sólo mostrador, parte 39) */
+.cart-header-acciones { display: inline-flex; align-items: center; gap: 0.4rem; }
+.cart-cupon-btn { background: none; border: 1px solid transparent; border-radius: 10px; font-size: 1.15rem; line-height: 1; padding: 0.3rem 0.4rem; cursor: pointer; opacity: 0.55; }
+.cart-cupon-btn:hover, .cart-cupon-btn[aria-expanded="true"], .cart-cupon-btn.activo { opacity: 1; border-color: var(--border, rgba(0,0,0,0.15)); }
+.cart-cupon { display: grid; gap: 0.5rem; padding: 0.6rem 1rem 0.8rem; border-bottom: 1px solid var(--border, rgba(0,0,0,0.1)); }
+.cart-cupon-tipos { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.cart-cupon input, .cart-cupon select { width: 100%; box-sizing: border-box; padding: 0.55rem 0.7rem; border-radius: 10px; border: 1px solid var(--border, rgba(0,0,0,0.2)); font: inherit; background: var(--card-bg, #fff); color: inherit; }
+.cart-descuento-row { font-weight: 700; color: #b86a00; }
+[data-theme="dark"] .cart-descuento-row { color: #f5b04a; }

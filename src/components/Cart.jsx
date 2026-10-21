@@ -6,6 +6,7 @@ import { copyToClipboard } from '../utils/clipboard.js';
 import { formatPrice } from '../utils/format.js';
 import { getEstadoLocal, getTextoEstado } from '../utils/horarios.js';
 import { getUnidad, esMostrador } from '../config/unidad.js';
+import { TIPOS_DESCUENTO, calcularDescuento } from '../utils/descuento.js';
 import PaymentInfo from './PaymentInfo.jsx';
 
 // Última venta anotada, para no anotarla de nuevo si se reintenta el envío.
@@ -127,10 +128,21 @@ function Cart() {
     const [bump, setBump] = useState(false);
     const prevCount = useRef(count);
 
+    // Descuento (sólo mostrador, escondido detrás del 🎟️): cupón en $, cupón de % o tarjeta completa.
+    const [cuponAbierto, setCuponAbierto] = useState(false);
+    const [desc, setDesc] = useState({ tipo: '', valor: '', linea: '', nota: '' });
+    const lineaGratis = desc.tipo === 'tarjeta' ? items.find((it) => it.id === desc.linea) : null;
+    const descuento = esMostrador()
+        ? calcularDescuento(totalProductos, { tipo: desc.tipo, valor: desc.tipo === 'tarjeta' ? lineaGratis?.unitPrice : desc.valor })
+        : 0;
+    const descuentoParaBase = descuento > 0
+        ? { tipo: desc.tipo, valor: desc.tipo === 'tarjeta' ? lineaGratis.unitPrice : Number(desc.valor), nota: desc.nota.trim() }
+        : null;
+
     const delivery = aceptaDelivery() && salida === 'delivery';
     const envio = delivery ? aEntero(envioTexto) : 0;
-    // Lo que se cobra: con delivery incluye el envío.
-    const total = totalProductos + envio;
+    // Lo que se cobra: con delivery incluye el envío; con descuento, ya descontado.
+    const total = totalProductos - descuento + envio;
 
     useEffect(() => () => clearTimeout(copiadoRef.current), []);
 
@@ -219,7 +231,7 @@ function Cart() {
         const firma = firmaPedido(items, total);
         if (!yaAnotado(firma)) {
             anotar(firma);
-            void registrarPedido({ items, total, medioPago: paymentMethod, envio });
+            void registrarPedido({ items, total, medioPago: paymentMethod, envio, descuento: descuentoParaBase });
         }
 
         enviarWhatsApp();
@@ -228,14 +240,14 @@ function Cart() {
 
     // Reintento manual: abre WhatsApp de nuevo SIN volver a anotar la venta.
     const enviarWhatsApp = () => {
-        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod, envio });
+        sendOrderToWhatsApp({ items, total, name: name.trim(), note, hasConsultarItems, paymentMethod, envio, descuento });
     };
 
     // Respaldo para cuando WhatsApp no llega a mandarse (con señal floja no
     // puede resolver el número). Se copia el mensaje entero para pegarlo a mano.
     const handleCopyOrder = async () => {
         const texto = buildOrderMessage({
-            items, total, name: name.trim(), note, hasConsultarItems, paymentMethod, envio,
+            items, total, name: name.trim(), note, hasConsultarItems, paymentMethod, envio, descuento,
         });
         if (await copyToClipboard(texto)) {
             setCopiado(true);
@@ -255,6 +267,8 @@ function Cart() {
         setSalida('local');
         setEnvioTexto('');
         setEnvioError(false);
+        setDesc({ tipo: '', valor: '', linea: '', nota: '' });
+        setCuponAbierto(false);
         setCheckout(false);
         setSent(false);
         setOpen(false);
@@ -527,8 +541,46 @@ function Cart() {
                             <>
                                 <div className="cart-panel-header">
                                     <h3>Tu pedido</h3>
-                                    <button className="cart-close-btn" onClick={handleClose}>✕</button>
+                                    <span className="cart-header-acciones">
+                                        {esMostrador() && (
+                                            <button type="button" className={`cart-cupon-btn ${descuento > 0 ? 'activo' : ''}`} onClick={() => setCuponAbierto((v) => !v)}
+                                                aria-label="Descuento" aria-expanded={cuponAbierto} title="Descuento">🎟️</button>
+                                        )}
+                                        <button className="cart-close-btn" onClick={handleClose}>✕</button>
+                                    </span>
                                 </div>
+
+                                {esMostrador() && cuponAbierto && (
+                                    <div className="cart-cupon">
+                                        <div className="cart-cupon-tipos" role="group" aria-label="Tipo de descuento">
+                                            <button type="button" className={`panel-chip ${desc.tipo === '' ? 'activo' : ''}`} onClick={() => setDesc({ ...desc, tipo: '' })}>Sin descuento</button>
+                                            {TIPOS_DESCUENTO.map((t) => (
+                                                <button key={t.id} type="button" className={`panel-chip ${desc.tipo === t.id ? 'activo' : ''}`}
+                                                    onClick={() => setDesc({ ...desc, tipo: t.id, valor: t.id === desc.tipo ? desc.valor : '' })}>{t.etiqueta}</button>
+                                            ))}
+                                        </div>
+                                        {desc.tipo === 'monto' && (
+                                            <input type="text" inputMode="numeric" placeholder="Cuánto se descuenta ($)" aria-label="Cuánto se descuenta" value={desc.valor}
+                                                onChange={(e) => setDesc({ ...desc, valor: e.target.value.replace(/\D/g, '').slice(0, 6) })} />
+                                        )}
+                                        {desc.tipo === 'porcentaje' && (
+                                            <input type="text" inputMode="numeric" placeholder="Porcentaje (%)" aria-label="Porcentaje" value={desc.valor}
+                                                onChange={(e) => { const n = e.target.value.replace(/\D/g, '').slice(0, 3); setDesc({ ...desc, valor: n === '' ? '' : String(Math.min(100, Number(n))) }); }} />
+                                        )}
+                                        {desc.tipo === 'tarjeta' && (
+                                            <select aria-label="Qué producto va gratis" value={desc.linea} onChange={(e) => setDesc({ ...desc, linea: e.target.value })}>
+                                                <option value="">Qué producto va gratis…</option>
+                                                {items.filter((it) => it.unitPrice > 0).map((it) => (
+                                                    <option key={it.id} value={it.id}>{it.label} · {formatPrice(it.unitPrice)}</option>
+                                                ))}
+                                            </select>
+                                        )}
+                                        {desc.tipo && (
+                                            <input type="text" maxLength={120} placeholder="Nota (opcional): cupón Instagram…" aria-label="Nota del descuento" value={desc.nota}
+                                                onChange={(e) => setDesc({ ...desc, nota: e.target.value })} />
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="cart-items-list">
                                     {items.map((item) => {
@@ -559,9 +611,15 @@ function Cart() {
                                 </div>
 
                                 <div className="cart-panel-footer">
+                                    {descuento > 0 && (
+                                        <div className="cart-total-row cart-descuento-row">
+                                            <span className="cart-total-label">🏷️ Descuento</span>
+                                            <span>−{formatPrice(descuento)}</span>
+                                        </div>
+                                    )}
                                     <div className="cart-total-row">
                                         <span className="cart-total-label">Total</span>
-                                        <span className="cart-total-price">{formatPrice(totalProductos)}</span>
+                                        <span className="cart-total-price">{formatPrice(totalProductos - descuento)}</span>
                                     </div>
                                     {hasConsultarItems && (
                                         <p className="cart-consultar-note">Algunos ítems se cotizan en el mostrador</p>

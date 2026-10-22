@@ -5064,3 +5064,5 @@ img.product-image.product-photo {
 .cart-cupon input, .cart-cupon select { width: 100%; box-sizing: border-box; padding: 0.55rem 0.7rem; border-radius: 10px; border: 1px solid var(--border, rgba(0,0,0,0.2)); font: inherit; background: var(--card-bg, #fff); color: inherit; }
 .cart-descuento-row { font-weight: 700; color: #b86a00; }
 [data-theme="dark"] .cart-descuento-row { color: #f5b04a; }
+
+.promo-slot-pres { margin-top: 0.35rem; }

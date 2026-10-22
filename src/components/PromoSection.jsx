@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { promociones, buscarProducto, opcionesDeSlot, fijosDePromo } from '../data/menu';
+import { promociones, buscarProducto, opcionesDeSlot, fijosDePromo, menuCategories } from '../data/menu';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
 const formatPrice = (n) =>
@@ -11,6 +11,8 @@ function PromoCard({ promo }) {
     const { estaAgotado } = useDisponibilidad();
     const [expanded, setExpanded] = useState(false);
     const [selections, setSelections] = useState({});
+    // Frío / caliente de los slots cuya categoría lo ofrece (bubble tea): el caliente suma su recargo.
+    const [presElegidas, setPresElegidas] = useState({});
     const [justAdded, setJustAdded] = useState(false);
 
     // Un componente de promo está agotado si lo está el producto real
@@ -38,6 +40,15 @@ function PromoCard({ promo }) {
     // opción posible: no tiene sentido ofrecer un combo que no se puede armar.
     const promoDisponible = fijosOk && slots.every((s) => s.hayAlguna);
 
+    const presentacionesDe = (slot) => menuCategories.find((c) => c.id === slot.cat)?.presentaciones || null;
+    const presDe = (slot) => {
+        const lista = presentacionesDe(slot);
+        if (!lista) return null;
+        return lista.find((p) => p.id === presElegidas[slot.label]) || lista.find((p) => p.porDefecto) || lista[0];
+    };
+    const recargo = slots.reduce((t, s) => t + (presDe(s)?.priceDelta || 0), 0);
+    const precioFinal = promo.price == null ? null : promo.price + recargo;
+
     const elegidas = slots.map((s) => s.opciones.find((o) => o.id === selections[s.label]));
     const allSelected = elegidas.every((o) => o && !o.agotada);
 
@@ -45,6 +56,7 @@ function PromoCard({ promo }) {
         if (justAdded || !promoDisponible) return;
         setExpanded((prev) => !prev);
         setSelections({});
+        setPresElegidas({});
     };
 
     const handleSelect = (slotLabel, opcion) => {
@@ -55,14 +67,21 @@ function PromoCard({ promo }) {
     const handleConfirm = () => {
         if (!allSelected || !promoDisponible) return;
 
-        const detail = elegidas.map((o) => o.label).join(' + ');
+        // "Thai (Caliente)": el sufijo sólo cuando la presentación no es la de siempre.
+        const detail = elegidas.map((o, i) => {
+            const pres = presDe(slots[i]);
+            return pres?.sufijoNombre ? `${o.label} (${pres.sufijoNombre})` : o.label;
+        }).join(' + ');
 
         // Desglose real de la promo: qué productos salieron por la ventana.
         // Es lo que después permite contar un cappuccino vendido dentro de
         // un combo igual que uno vendido suelto.
         const componentes = [
             ...fijos,
-            ...elegidas.flatMap((o) => o.productos),
+            ...elegidas.flatMap((o, i) => {
+                const pres = presDe(slots[i]);
+                return o.productos.map((c) => (pres?.sufijoNombre ? { ...c, presentacion: pres.id } : c));
+            }),
         ].map((c) => ({ ...c, cantidad: 1 }));
 
         addItem({
@@ -71,11 +90,12 @@ function PromoCard({ promo }) {
             builderType: null,
             productId: promo.id,
             label: `🎉 ${promo.name} · ${detail}`,
-            unitPrice: promo.price,
+            unitPrice: precioFinal,
             mergeKey: null,
             config: {
                 promoId: promo.id,
                 elecciones: Object.fromEntries(slots.map((s, i) => [s.label, elegidas[i].id])),
+                ...(recargo > 0 ? { recargo, presentaciones: Object.fromEntries(slots.flatMap((s) => { const p = presDe(s); return p?.sufijoNombre ? [[s.label, p.id]] : []; })) } : {}),
                 componentes,
             },
         });
@@ -83,6 +103,7 @@ function PromoCard({ promo }) {
         setJustAdded(true);
         setExpanded(false);
         setSelections({});
+        setPresElegidas({});
         setTimeout(() => setJustAdded(false), 1800);
     };
 
@@ -104,7 +125,7 @@ function PromoCard({ promo }) {
                 )}
                 <div className="promo-footer">
           <span className="promo-price">
-            {promo.price == null ? 'Consultar' : formatPrice(promo.price)}
+            {promo.price == null ? 'Consultar' : formatPrice(expanded ? precioFinal : promo.price)}
           </span>
                     <button
                         className={`product-add-btn promo-add-btn ${justAdded ? 'added' : ''}`}
@@ -132,6 +153,20 @@ function PromoCard({ promo }) {
                                         </button>
                                     ))}
                                 </div>
+                                {presentacionesDe(slot) && (
+                                    <div className="promo-slot-options promo-slot-pres" role="group" aria-label={`${slot.label}: frío o caliente`}>
+                                        {presentacionesDe(slot).map((p) => (
+                                            <button
+                                                key={p.id}
+                                                type="button"
+                                                className={`promo-slot-chip ${presDe(slot)?.id === p.id ? 'selected' : ''}`}
+                                                onClick={() => setPresElegidas((prev) => ({ ...prev, [slot.label]: p.id }))}
+                                            >
+                                                {p.emoji} {p.label}{p.priceDelta > 0 ? ` +${formatPrice(p.priceDelta)}` : ''}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                         <button

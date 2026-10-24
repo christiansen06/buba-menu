@@ -5,8 +5,8 @@
 --
 -- Kinder: una barrita de chocolate con leche (12,5 g) por waffle, a
 -- $788,64 cada una (precio de Agustín).
--- Chocolate: el que quedó del dueño anterior. Sin precio ni gramaje todavía:
--- va en $0 marcado como estimado.
+-- Chocolate: el que vino con el fondo de comercio, así que no costó nada:
+-- va en $0 y 15 g por waffle. Cuando se compre, cargar el precio.
 -- =====================================================================
 
 insert into public.costos_componente_waffle
@@ -14,10 +14,9 @@ insert into public.costos_componente_waffle
 values
   ('kinder', 'topping', 'Kinder (barrita 12,5 g)', 'unidad', 788.64, 1, false, 0, false,
    'Agustín: $788,64 la barrita', '1 barrita por waffle.'),
-  ('chocolate', 'topping', 'Chocolate (topping)', 'g', 0, 20, false, 0, true,
-   'SIN DATO',
-   'FALTA el precio por kilo y el gramaje (20 g asumido). Es el que quedó del dueño anterior: '
-   'mientras esté en $0 el waffle con este topping parece más barato de lo que cuesta.')
+  ('chocolate', 'topping', 'Chocolate (topping)', 'g', 0, 15, false, 0, false,
+   'Fondo de comercio: lo dejó el inquilino anterior',
+   '15 g por waffle. Cuesta $0 hasta que se termine; cuando se compre, cargar el precio por gramo.')
 on conflict (tipo, componente) do update
   set costo_unitario = excluded.costo_unitario, cantidad = excluded.cantidad, es_estimado = excluded.es_estimado,
       fuente = excluded.fuente, nota = excluded.nota, actualizado_en = now();

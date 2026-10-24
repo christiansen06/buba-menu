@@ -869,7 +869,7 @@ export const promociones = [
     id: 'promo-bubble-waffle',
     name: 'Bubble Tea + Waffle',
     description: 'Bubble Tea grande + 1 waffle simple',
-    price: 19000,
+    price: 20000,
     slots: [BUBBLE_GRANDE, WAFFLE_SIMPLE],
   },
   {

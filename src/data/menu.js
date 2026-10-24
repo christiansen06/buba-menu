@@ -64,8 +64,8 @@ export const menuCategories = [
         badge: 'Recomendado',
         featured: true,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
       {
@@ -76,8 +76,8 @@ export const menuCategories = [
         badge: null,
         featured: true,
         sizes: {
-          medium: '$9.500',
-          large: '$10.500',
+          medium: '$10.500',
+          large: '$11.500',
         },
       },
       {
@@ -88,8 +88,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
       {
@@ -100,8 +100,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
       {
@@ -112,8 +112,8 @@ export const menuCategories = [
         badge: 'Más vendido',
         featured: false,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
       {
@@ -124,8 +124,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
       {
@@ -136,8 +136,8 @@ export const menuCategories = [
         badge: 'Nuevo',
         featured: false,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
       {
@@ -148,8 +148,8 @@ export const menuCategories = [
         badge: null,
         featured: false,
         sizes: {
-          medium: '$9.000',
-          large: '$10.000',
+          medium: '$10.000',
+          large: '$11.000',
         },
       },
     ],
@@ -277,6 +277,8 @@ export const menuCategories = [
       { id: 'ferrero', label: 'Ferrero Rocher', group: 'Galletitas y chocolates' },
       // Una barrita de Kinder de chocolate con leche (12,5 g).
       { id: 'kinder', label: 'Kinder', group: 'Galletitas y chocolates' },
+      // El chocolate para toppings que quedó del dueño anterior.
+      { id: 'chocolate', label: 'Chocolate', group: 'Galletitas y chocolates' },
       // Sólo en el Waffle BüBa: el armador no la ofrece.
       { id: 'perlas', label: 'Perlas de tapioca', group: 'Especiales', soloPreset: true },
     ],

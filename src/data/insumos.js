@@ -64,6 +64,7 @@ export const INSUMOS = [
     { id: 'coffler', label: 'Cofler', grupo: 'Galletitas' },
     { id: 'ferrero', label: 'Ferrero Rocher', grupo: 'Galletitas' },
     { id: 'kinder', label: 'Kinder (barrita 12,5 g)', grupo: 'Galletitas' },
+    { id: 'chocolate-topping', label: 'Chocolate (topping)', grupo: 'Galletitas' },
 
     // --- Bases líquidas ---
     // Ojo con la leche: no es sólo la base del licuado. Es la misma leche
@@ -116,6 +117,7 @@ export const USOS = {
             coffler: 'coffler',
             ferrero: 'ferrero',
             kinder: 'kinder',
+            chocolate: 'chocolate-topping',
             perlas: 'perlas',              // sólo en el Waffle BüBa
         },
         salsas: {

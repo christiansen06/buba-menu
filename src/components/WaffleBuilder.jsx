@@ -23,7 +23,7 @@ const OPTION_EMOJI = {
     relleno: { helado: '🍦', ddl: '🍯', crema: '☁️', nutella: '🌰', mani: '🥜' },
     topping: {
         banana: '🍌', frutilla: '🍓', durazno: '🍑', oreo: '🍪', chocolinas: '🍪',
-        pepito: '🍪', coffler: '🍫', ferrero: '🌰', kinder: '🍫', perlas: '🧋',
+        pepito: '🍪', coffler: '🍫', ferrero: '🌰', kinder: '🍫', chocolate: '🍫', perlas: '🧋',
     },
     salsa: { chocolate: '🍫', caramelo: '🍮', frutilla: '🍓', pistacho: '🌱', ddl: '🍯', nutella: '🌰' },
 };

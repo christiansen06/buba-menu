@@ -270,11 +270,13 @@ export const menuCategories = [
       { id: 'banana', label: 'Banana', group: 'Frutas' },
       { id: 'frutilla', label: 'Frutilla', group: 'Frutas' },
       { id: 'durazno', label: 'Durazno', group: 'Frutas' },
-      { id: 'oreo', label: 'Oreo', group: 'Galletitas' },
-      { id: 'chocolinas', label: 'Chocolinas', group: 'Galletitas' },
-      { id: 'pepito', label: 'Pepito', group: 'Galletitas' },
-      { id: 'coffler', label: 'Cofler', group: 'Galletitas' },
-      { id: 'ferrero', label: 'Ferrero Rocher', group: 'Galletitas' },
+      { id: 'oreo', label: 'Oreo', group: 'Galletitas y chocolates' },
+      { id: 'chocolinas', label: 'Chocolinas', group: 'Galletitas y chocolates' },
+      { id: 'pepito', label: 'Pepito', group: 'Galletitas y chocolates' },
+      { id: 'coffler', label: 'Cofler', group: 'Galletitas y chocolates' },
+      { id: 'ferrero', label: 'Ferrero Rocher', group: 'Galletitas y chocolates' },
+      // Una barrita de Kinder de chocolate con leche (12,5 g).
+      { id: 'kinder', label: 'Kinder', group: 'Galletitas y chocolates' },
       // Sólo en el Waffle BüBa: el armador no la ofrece.
       { id: 'perlas', label: 'Perlas de tapioca', group: 'Especiales', soloPreset: true },
     ],

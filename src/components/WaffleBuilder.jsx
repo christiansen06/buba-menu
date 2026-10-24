@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import StepProgress from './StepProgress';
 import { getProductImage } from '../utils/productImages.js';
+import { getOpcionImage } from '../utils/opcionImages.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 import {
     MAX_RELLENOS,
@@ -17,12 +18,16 @@ import {
 const formatPrice = (n) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
 
+// Sin foto (ver src/assets/opciones/LEEME.txt), cada opción muestra su emoji.
 const OPTION_EMOJI = {
-    helado: '🍦', ddl: '🍯', crema: '🥛', nutella: '🍫',
-    banana: '🍌', frutilla: '🍓', durazno: '🍑', oreo: '🍪', chocolinas: '🍫',
-    chocolate: '🍫', caramelo: '🍮', pistacho: '🥜',
+    relleno: { helado: '🍦', ddl: '🍯', crema: '☁️', nutella: '🌰', mani: '🥜' },
+    topping: {
+        banana: '🍌', frutilla: '🍓', durazno: '🍑', oreo: '🍪', chocolinas: '🍪',
+        pepito: '🍪', coffler: '🍫', ferrero: '🌰', kinder: '🍫', perlas: '🧋',
+    },
+    salsa: { chocolate: '🍫', caramelo: '🍮', frutilla: '🍓', pistacho: '🌱', ddl: '🍯', nutella: '🌰' },
 };
-const emojiFor = (id) => OPTION_EMOJI[id] || '🧇';
+const emojiFor = (paso, id) => OPTION_EMOJI[paso]?.[id] || '🧇';
 
 function OptionTile({ emoji, img, name, selected, disabled, onClick, tag }) {
     return (
@@ -33,7 +38,7 @@ function OptionTile({ emoji, img, name, selected, disabled, onClick, tag }) {
             disabled={disabled}
         >
       <span className="option-circle">
-        {img ? <img src={img} alt={name} className="option-img" /> : emoji}
+        {img ? <img src={img} alt="" className="option-img" loading="lazy" /> : emoji}
       </span>
             <span className="option-name">{name}{tag ? ` ${tag}` : ''}</span>
         </button>
@@ -299,7 +304,8 @@ function WaffleBuilder({ category }) {
 
                             <div className="option-tiles">
                                 <OptionTile
-                                    emoji={emojiFor('helado')}
+                                    emoji={emojiFor('relleno', 'helado')}
+                                    img={getOpcionImage('relleno', 'helado')}
                                     name="Helado"
                                     selected={heladoPickerOpen}
                                     disabled={selectedRellenos.length >= MAX_RELLENOS}
@@ -312,7 +318,8 @@ function WaffleBuilder({ category }) {
                                     return (
                                         <OptionTile
                                             key={opt.id}
-                                            emoji={emojiFor(opt.id)}
+                                            emoji={emojiFor('relleno', opt.id)}
+                                            img={getOpcionImage('relleno', opt.id)}
                                             name={opt.label}
                                             tag={sinStock ? 'sin stock' : (opt.forcesMixto ? '✨' : '')}
                                             selected={selected}
@@ -366,7 +373,8 @@ function WaffleBuilder({ category }) {
                                             return (
                                                 <OptionTile
                                                     key={t.id}
-                                                    emoji={emojiFor(t.id)}
+                                                    emoji={emojiFor('topping', t.id)}
+                                                    img={getOpcionImage('topping', t.id)}
                                                     name={t.label}
                                                     tag={sinStock ? 'sin stock' : ''}
                                                     selected={selected}
@@ -401,7 +409,8 @@ function WaffleBuilder({ category }) {
                                     return (
                                         <OptionTile
                                             key={s.id}
-                                            emoji={emojiFor(s.id)}
+                                            emoji={emojiFor('salsa', s.id)}
+                                            img={getOpcionImage('salsa', s.id)}
                                             name={s.label}
                                             tag={tag}
                                             selected={selected}

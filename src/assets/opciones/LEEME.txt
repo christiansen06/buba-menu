@@ -1,0 +1,13 @@
+FOTOS DE LAS OPCIONES DEL WAFFLE
+================================
+
+Una foto por opción, con el nombre <paso>-<id>:
+  relleno-ddl, relleno-crema, relleno-nutella, relleno-mani
+  relleno-helado (el botón "Helado")
+  topping-banana, topping-oreo, topping-kinder, topping-ferrero...
+  salsa-chocolate, salsa-caramelo, salsa-pistacho...
+
+Los ids están en src/data/menu.js (categoría waffles).
+Formato: webp cuadrado de 160x160, menos de 10 KB. Se ve en un círculo:
+que el producto quede centrado.
+Si una opción no tiene foto, se muestra su emoji.

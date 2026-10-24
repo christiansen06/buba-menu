@@ -158,7 +158,7 @@ begin
            greatest(1, i.cantidad), i.precio_unitario,
            jsonb_strip_nulls(jsonb_build_object(
              'presentacion', i.presentacion,
-             'extras', case when i.perlas > 0 then (select jsonb_agg('perlas') from generate_series(1, i.perlas)) end,
+             'extras', case when i.perlas > 0 then (select jsonb_agg('perlas'::text) from generate_series(1, i.perlas)) end,
              'pedidosya', jsonb_build_object('nombre', i.nombre, 'pedido', pp.nro, 'opciones', i.opciones)))
       from pya_items i
       left join pya_productos m on m.nombre_pya = i.nombre

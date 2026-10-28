@@ -366,7 +366,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     <span className="solo-lector"> — cambiar día u hora</span>
                 </button>
                 <span className="panel-pedido-canal">
-                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
+                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.peya_efectivo ? '🛵 PeYa en efectivo' : pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
                 </span>
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
@@ -470,7 +470,7 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, envio, descuento, descuento_tipo, descuento_valor, descuento_nota, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
+            .select('id, creado_en, total, envio, peya_efectivo, descuento, descuento_tipo, descuento_valor, descuento_nota, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
             .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)

@@ -38,6 +38,23 @@ export function itemsParaBase(items) {
 }
 
 /**
+ * PeYa en efectivo: se cobra lo que dice la app de PeYa, que no es el precio
+ * del menú. Se reparte ese total entre las líneas, en proporción, para que
+ * la suma dé exacto (el redondeo va a la línea más cara de a uno).
+ */
+export function escalarPrecios(items, total) {
+    const base = items.reduce((s, it) => s + (it.unitPrice || 0) * (it.quantity || 1), 0);
+    if (!base) return items;
+    const out = items.map((it) => ({ ...it, unitPrice: Math.round(((it.unitPrice || 0) * total) / base) }));
+    const resto = Math.round(total) - out.reduce((s, it) => s + it.unitPrice * (it.quantity || 1), 0);
+    if (resto) {
+        const k = out.reduce((m, it, i) => ((it.quantity || 1) === 1 && (m < 0 || it.unitPrice > out[m].unitPrice) ? i : m), -1);
+        if (k >= 0) out[k] = { ...out[k], unitPrice: out[k].unitPrice + resto };
+    }
+    return out;
+}
+
+/**
  * Huella de un carrito: mismo contenido → misma firma.
  *
  * Sirve para no anotar dos veces la misma venta. Cuando WhatsApp falla (pasa
@@ -121,7 +138,8 @@ function nuevoId() {
 async function subir(pedido) {
     // Los pedidos con delivery usan la función que además anota el envío; los
     // demás siguen por la de siempre (así un pedido viejo en la cola no cambia).
-    const funcion = 'p_posnet_tipo' in pedido || 'p_envio' in pedido || 'p_descuento' in pedido ? 'registrar_pedido_completo' : 'registrar_pedido';
+    const funcion = 'p_posnet_tipo' in pedido || 'p_envio' in pedido || 'p_descuento' in pedido || pedido.p_medio_pago === 'pedidosya_efectivo'
+        ? 'registrar_pedido_completo' : 'registrar_pedido';
     const { error } = await supabase.rpc(funcion, pedido);
     if (error) throw error;
 }
@@ -192,12 +210,13 @@ export async function registrarPedido({ items, total, medioPago = null, envio = 
     // es transferencia o efectivo. Cualquier otro valor lo ignora la base.
     // Tarjeta y QR se cobran con el posnet: para la base el medio sigue siendo
     // 'posnet' y cómo pagó viaja aparte (parte 29).
+    // 'pedidosya_efectivo' (parte 45) la base lo guarda como efectivo marcado de PeYa.
     const esTarjetaOQr = medioPago === 'tarjeta' || medioPago === 'qr';
     const pedido = {
         p_id: nuevoId(),
         p_creado_en: new Date().toISOString(),
         p_total: Math.round(total || 0),
-        p_items: itemsParaBase(items),
+        p_items: itemsParaBase(medioPago === 'pedidosya_efectivo' ? escalarPrecios(items, total) : items),
         p_medio_pago: esTarjetaOQr ? 'posnet' : medioPago,
         p_unidad: getUnidad(),
         p_canal: getCanal(),

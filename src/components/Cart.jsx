@@ -63,6 +63,10 @@ function mediosDePago() {
         medios.push({ id: 'qr', icono: '📱', label: 'QR', sub: truck ? 'Mercado Pago' : 'código QR' });
         // Uber Eats ya no se carga acá (09/10): los pedidos de Uber entran solos
         // con el reporte semanal que se sube en BüBa Gestión, con su precio real.
+        // PedidosYa pagado en efectivo al repartidor (parte 45): la plata queda
+        // en la caja, así que se anota acá para que el cierre la espere. El
+        // informe de PeYa después lo reemplaza con el pedido real.
+        if (!truck) medios.push({ id: 'pedidosya_efectivo', icono: '🛵', label: 'PeYa en efectivo', sub: 'lo que te dio el repartidor' });
     }
     return medios;
 }
@@ -74,6 +78,9 @@ function mediosDePago() {
 function avisoDePago(medio) {
     const staff = esMostrador();
     const truck = getUnidad() === 'food_truck';
+    if (medio === 'pedidosya_efectivo') {
+        return { icono: '🛵', texto: 'Poné lo que te dio el repartidor (lo dice la app de PeYa): los precios de PeYa son distintos a los del menú.' };
+    }
     if (medio === 'efectivo') {
         return staff
             ? { icono: '💵', texto: 'Cobrá en efectivo antes de entregar.' }
@@ -122,6 +129,9 @@ function Cart() {
     const [salida, setSalida] = useState('local'); // 'local' | 'delivery'
     const [envioTexto, setEnvioTexto] = useState('');
     const [envioError, setEnvioError] = useState(false);
+    // PeYa en efectivo: se cobra lo que dice la app de PeYa, no el precio del menú.
+    const [montoPeyaTexto, setMontoPeyaTexto] = useState('');
+    const [montoPeyaError, setMontoPeyaError] = useState(false);
     const pagoRef = useRef(null);
     const [copiado, setCopiado] = useState(false);
     const copiadoRef = useRef(null);
@@ -139,10 +149,12 @@ function Cart() {
         ? { tipo: desc.tipo, valor: desc.tipo === 'tarjeta' ? lineaGratis.unitPrice : Number(desc.valor), nota: desc.nota.trim() }
         : null;
 
-    const delivery = aceptaDelivery() && salida === 'delivery';
+    const peya = paymentMethod === 'pedidosya_efectivo';
+    const delivery = !peya && aceptaDelivery() && salida === 'delivery';
     const envio = delivery ? aEntero(envioTexto) : 0;
-    // Lo que se cobra: con delivery incluye el envío; con descuento, ya descontado.
-    const total = totalProductos - descuento + envio;
+    // Lo que se cobra: con delivery incluye el envío; con descuento, ya
+    // descontado. Con PeYa en efectivo, lo que dio el repartidor.
+    const total = peya ? aEntero(montoPeyaTexto) : totalProductos - descuento + envio;
 
     useEffect(() => () => clearTimeout(copiadoRef.current), []);
 
@@ -204,10 +216,12 @@ function Cart() {
         const faltaNombre = !name.trim();
         const faltaPago = !paymentMethod;
         const faltaEnvio = delivery && envio <= 0;
+        const faltaMontoPeya = peya && total <= 0;
         setNameError(faltaNombre);
         setPaymentError(faltaPago);
         setEnvioError(faltaEnvio);
-        if (faltaNombre || faltaPago || faltaEnvio) return;
+        setMontoPeyaError(faltaMontoPeya);
+        if (faltaNombre || faltaPago || faltaEnvio || faltaMontoPeya) return;
 
         if (!esMostrador()) {
             try {
@@ -231,7 +245,7 @@ function Cart() {
         const firma = firmaPedido(items, total);
         if (!yaAnotado(firma)) {
             anotar(firma);
-            void registrarPedido({ items, total, medioPago: paymentMethod, envio, descuento: descuentoParaBase });
+            void registrarPedido({ items, total, medioPago: paymentMethod, envio, descuento: peya ? null : descuentoParaBase });
         }
 
         enviarWhatsApp();
@@ -267,6 +281,8 @@ function Cart() {
         setSalida('local');
         setEnvioTexto('');
         setEnvioError(false);
+        setMontoPeyaTexto('');
+        setMontoPeyaError(false);
         setDesc({ tipo: '', valor: '', linea: '', nota: '' });
         setCuponAbierto(false);
         setCheckout(false);
@@ -322,7 +338,9 @@ function Cart() {
                                 <h3>¡Pedido enviado!</h3>
                                 <p>
                                     {delivery ? 'El delivery' : 'Tu pedido'} a nombre de <strong>{name}</strong> ya viaja por WhatsApp.
-                                    {paymentMethod === 'efectivo'
+                                    {paymentMethod === 'pedidosya_efectivo'
+                                        ? ` PeYa en efectivo: ${formatPrice(total)} 🛵`
+                                        : paymentMethod === 'efectivo'
                                         ? ' Lo pagás en el mostrador 💵'
                                         : paymentMethod === 'tarjeta'
                                             ? ' Se cobra con tarjeta 💳'
@@ -396,7 +414,7 @@ function Cart() {
                                         {nameError && <span className="field-error">Necesitamos tu nombre para preparar el pedido</span>}
                                     </label>
 
-                                    {aceptaDelivery() && (
+                                    {aceptaDelivery() && !peya && (
                                         <div className="checkout-field">
                                             <span>¿Cómo sale? <em className="req">*</em></span>
                                             <div className="payment-method-group salida-group" role="radiogroup" aria-label="Cómo sale el pedido">
@@ -482,6 +500,26 @@ function Cart() {
                                             <span className="pago-aviso-icono" aria-hidden="true">{avisoDePago(paymentMethod).icono}</span>
                                             {avisoDePago(paymentMethod).texto}
                                         </p>
+                                    )}
+
+                                    {peya && (
+                                        <div className="checkout-field envio-field">
+                                            <span><label htmlFor="monto-peya">Lo que te dio el repartidor</label> <em className="req">*</em></span>
+                                            <div className={`envio-input ${montoPeyaError ? 'input-error' : ''}`}>
+                                                <span aria-hidden="true">$</span>
+                                                <input
+                                                    id="monto-peya"
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    placeholder="Ej: 16000"
+                                                    value={montoPeyaTexto}
+                                                    maxLength={7}
+                                                    autoFocus
+                                                    onChange={(e) => { setMontoPeyaTexto(e.target.value.replace(/\D/g, '')); setMontoPeyaError(false); }}
+                                                />
+                                            </div>
+                                            {montoPeyaError && <span className="field-error">Poné cuánto te dio el repartidor</span>}
+                                        </div>
                                     )}
 
                                     {paymentMethod === 'transferencia' && (

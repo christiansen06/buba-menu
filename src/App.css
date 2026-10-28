@@ -4772,6 +4772,8 @@ img.product-image.product-photo {
 
 /* ---------- Checkout (28/09): más corto, total en el botón ---------- */
 .payment-method-group.cuatro { grid-template-columns: repeat(4, 1fr); }
+/* PeYa en efectivo: quinto medio del mostrador, a lo ancho. */
+.payment-method-group.cuatro > .pedidosya_efectivo { grid-column: 1 / -1; }
 @media (max-width: 560px) {
   .payment-method-group.cuatro { grid-template-columns: repeat(2, 1fr); }
 }

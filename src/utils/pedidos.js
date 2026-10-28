@@ -38,23 +38,6 @@ export function itemsParaBase(items) {
 }
 
 /**
- * PeYa en efectivo: se cobra lo que dice la app de PeYa, que no es el precio
- * del menú. Se reparte ese total entre las líneas, en proporción, para que
- * la suma dé exacto (el redondeo va a la línea más cara de a uno).
- */
-export function escalarPrecios(items, total) {
-    const base = items.reduce((s, it) => s + (it.unitPrice || 0) * (it.quantity || 1), 0);
-    if (!base) return items;
-    const out = items.map((it) => ({ ...it, unitPrice: Math.round(((it.unitPrice || 0) * total) / base) }));
-    const resto = Math.round(total) - out.reduce((s, it) => s + it.unitPrice * (it.quantity || 1), 0);
-    if (resto) {
-        const k = out.reduce((m, it, i) => ((it.quantity || 1) === 1 && (m < 0 || it.unitPrice > out[m].unitPrice) ? i : m), -1);
-        if (k >= 0) out[k] = { ...out[k], unitPrice: out[k].unitPrice + resto };
-    }
-    return out;
-}
-
-/**
  * Huella de un carrito: mismo contenido → misma firma.
  *
  * Sirve para no anotar dos veces la misma venta. Cuando WhatsApp falla (pasa
@@ -216,7 +199,7 @@ export async function registrarPedido({ items, total, medioPago = null, envio = 
         p_id: nuevoId(),
         p_creado_en: new Date().toISOString(),
         p_total: Math.round(total || 0),
-        p_items: itemsParaBase(medioPago === 'pedidosya_efectivo' ? escalarPrecios(items, total) : items),
+        p_items: itemsParaBase(items),
         p_medio_pago: esTarjetaOQr ? 'posnet' : medioPago,
         p_unidad: getUnidad(),
         p_canal: getCanal(),

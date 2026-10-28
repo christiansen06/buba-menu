@@ -161,9 +161,6 @@ export function buildOrderMessage({ items, total, name, note, hasConsultarItems,
     } else if (paymentMethod === 'efectivo') {
         L.push('');
         L.push(getUnidad() === 'food_truck' ? '💵 *Pago:* Efectivo en el truck' : '💵 *Pago:* Efectivo en el local');
-    } else if (paymentMethod === 'pedidosya_efectivo') {
-        L.push('');
-        L.push(`🛵 *Pago:* PedidosYa, en efectivo por el repartidor (${formatPrice(total)})`);
     } else if (paymentMethod === 'tarjeta') {
         L.push('');
         L.push('💳 *Pago:* Tarjeta (posnet)');

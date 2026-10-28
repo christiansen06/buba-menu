@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { registrarPedido } from '../utils/pedidos.js';
 import { formatPrice } from '../utils/format.js';
 
@@ -34,7 +35,9 @@ export default function DeliveryPeya({ onAnotado }) {
     return (
         <>
             <button type="button" className="panel-delivery-btn" onClick={() => setAbierto(true)}>🛵 Delivery</button>
-            {abierto && (
+            {/* La hoja va directo al body: el botón vive en la cabecera del panel,
+                que es semitransparente, y la transparencia se hereda. */}
+            {abierto && createPortal(
                 <div className="delivery-fondo" onClick={cerrar}>
                     <div className="delivery-hoja" role="dialog" aria-modal="true" aria-labelledby="delivery-titulo" onClick={(e) => e.stopPropagation()}>
                         <div className="delivery-cab">
@@ -75,7 +78,8 @@ export default function DeliveryPeya({ onAnotado }) {
                             )}
                         </section>
                     </div>
-                </div>
+                </div>,
+                document.body,
             )}
         </>
     );

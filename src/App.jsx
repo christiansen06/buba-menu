@@ -10,7 +10,6 @@ import Cart from './components/Cart';
 import StickyNav from './components/StickyNav';
 import PanelPedidos from './components/PanelPedidos.jsx';
 import AvisoVersion from './components/AvisoVersion.jsx';
-import DeliveryPeya from './components/DeliveryPeya.jsx';
 import { CartProvider } from './context/CartContext';
 import { DisponibilidadProvider } from './context/DisponibilidadContext.jsx';
 import { esMostrador, getUnidad, UNIDAD_LABEL } from './config/unidad.js';
@@ -36,8 +35,6 @@ function IndicadorMostrador() {
             {pendientes > 0 && (
                 <span className="indicador-mostrador-cola">⏳ {pendientes} sin subir</span>
             )}
-            {/* PedidosYa pagado en efectivo al repartidor: sólo el importe (parte 45). */}
-            {getUnidad() === 'local' && <DeliveryPeya />}
             {/* El único acceso visible al panel: sólo en el aparato del local. */}
             <a className="indicador-mostrador-link" href="#pedidos">Pedidos</a>
         </div>

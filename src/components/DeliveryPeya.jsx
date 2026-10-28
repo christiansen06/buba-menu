@@ -3,12 +3,12 @@ import { registrarPedido } from '../utils/pedidos.js';
 import { formatPrice } from '../utils/format.js';
 
 /**
- * "🛵 Delivery" del mostrador del local: cuando un repartidor de PedidosYa
+ * "🛵 Delivery" del panel de pedidos (mostrador del local): cuando un repartidor de PedidosYa
  * paga en efectivo, se anota sólo lo que dio. Sin nombre ni productos: los
  * trae el informe de PedidosYa, que después reemplaza este registro por el
  * pedido real (parte 45). Mientras tanto el cierre ya cuenta esa plata.
  */
-export default function DeliveryPeya() {
+export default function DeliveryPeya({ onAnotado }) {
     const [abierto, setAbierto] = useState(false);
     const [texto, setTexto] = useState('');
     const [error, setError] = useState('');
@@ -28,11 +28,12 @@ export default function DeliveryPeya() {
         });
         setAnotado(monto);
         setTexto('');
+        onAnotado?.();
     };
 
     return (
         <>
-            <button type="button" className="indicador-mostrador-link indicador-delivery" onClick={() => setAbierto(true)}>🛵 Delivery</button>
+            <button type="button" className="panel-delivery-btn" onClick={() => setAbierto(true)}>🛵 Delivery</button>
             {abierto && (
                 <div className="delivery-fondo" onClick={cerrar}>
                     <div className="delivery-hoja" role="dialog" aria-modal="true" aria-labelledby="delivery-titulo" onClick={(e) => e.stopPropagation()}>

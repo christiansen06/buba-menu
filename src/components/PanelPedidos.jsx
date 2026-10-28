@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import EditarPedido from './EditarPedido.jsx';
+import DeliveryPeya from './DeliveryPeya.jsx';
 import { textoDescuento } from '../utils/descuento.js';
 import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
 
@@ -565,7 +566,7 @@ function PanelPedidos() {
 
     return (
         <main className="panel">
-            <Cabecera />
+            <Cabecera conDelivery onAnotado={recargar} />
 
             <nav className="panel-dia" aria-label="Día">
                 <button type="button" className="panel-btn-sec" onClick={() => moverDia(-1)} aria-label="Día anterior">‹</button>
@@ -660,12 +661,16 @@ function PanelPedidos() {
     );
 }
 
-function Cabecera() {
+function Cabecera({ conDelivery = false, onAnotado }) {
     return (
         <header className="panel-cab">
             <button type="button" className="panel-link panel-volver" onClick={volverAlMenu}>← Menú</button>
             <h2 className="panel-titulo">Pedidos</h2>
-            <span className="panel-unidad">{esMostrador() ? `${UNIDAD_LABEL[getUnidad()]} · Mostrador` : ''}</span>
+            <span className="panel-unidad">
+                {esMostrador() ? `${UNIDAD_LABEL[getUnidad()]} · Mostrador` : ''}
+                {/* PedidosYa pagado en efectivo (parte 45): escondido acá, se usa poco. */}
+                {conDelivery && esMostrador() && getUnidad() === 'local' && <DeliveryPeya onAnotado={onAnotado} />}
+            </span>
         </header>
     );
 }

@@ -4382,9 +4382,20 @@ img.product-image.product-photo {
   align-items: center;
 }
 
-button.indicador-mostrador-link { border: 0; font: inherit; font-weight: 800; cursor: pointer; }
-
-/* 🛵 Delivery: hoja chica para anotar un PedidosYa pagado en efectivo. */
+/* 🛵 Delivery: botón discreto bajo "Local · Mostrador" en el panel de pedidos,
+   y la hoja chica para anotar un PedidosYa pagado en efectivo. */
+.panel-delivery-btn {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  min-height: 30px;
+  cursor: pointer;
+}
 .delivery-fondo {
   position: fixed;
   inset: 0;
@@ -4466,6 +4477,10 @@ button.indicador-mostrador-link { border: 0; font: inherit; font-weight: 800; cu
 
 .panel-unidad {
   justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
   font-size: 0.78rem;
   font-weight: 750;
   opacity: 0.75;

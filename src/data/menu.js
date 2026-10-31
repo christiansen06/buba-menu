@@ -850,6 +850,12 @@ export const edicionEspecial = {
   tema: 'halloween',          // estilo de la sección (App.css: .edicion-halloween)
   subtitulo: 'Sólo por estos días',
   description: 'Bubble teas y waffles de terror, sólo por Halloween',
+  // Los batidos se piensan fríos, pero también salen calientes (+$1.000, como
+  // los de la carta). Los waffles no cambian: llevan sinPresentacion.
+  presentaciones: [
+    { id: 'frio', label: 'Fríos', emoji: '🧊', priceDelta: 0, porDefecto: true },
+    { id: 'caliente', label: 'Calientes', emoji: '🔥', priceDelta: 1000, sufijoNombre: 'Caliente' },
+  ],
   items: [
     {
       id: 'bubastein',
@@ -863,9 +869,11 @@ export const edicionEspecial = {
     {
       id: 'calabuba',
       name: 'CalaBüBa',
-      description: 'Leche, hielo, café y foam. Perlas opcionales',
+      // Las perlas ya están en el precio (el cliente puede pedirlo sin); acá
+      // se ofrecen las extra, como en el resto.
+      description: 'Leche, hielo, café y foam. Con perlas (si no las querés, avisá)',
       featured: false,
-      extras: [{ id: 'perlas', label: 'Perlas', emoji: '🧋', price: 1000, insumo: 'perlas', max: 3 }],
+      extras: [{ id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1000, insumo: 'perlas', max: 3 }],
       sizes: { medium: '$10.000', large: '$11.000' },
     },
     {
@@ -873,14 +881,18 @@ export const edicionEspecial = {
       name: 'Waffle Halloween',
       description: 'Helado americana, gomitas de araña, Rocklets naranjas y negros y salsa de caramelo',
       featured: false,
-      sizes: { medium: 'Consultar', large: 'N/A' },
+      sinPresentacion: true,
+      // Mismo precio que un waffle mixto.
+      sizes: { medium: '$11.000', large: 'N/A' },
     },
     {
       id: 'waffle-zombie',
       name: 'Waffle Zombie',
       description: 'Helado americana, gomitas de dientes zombie, Oreos picadas, una gomita de ojo y salsa de frutilla',
       featured: false,
-      sizes: { medium: 'Consultar', large: 'N/A' },
+      sinPresentacion: true,
+      // Mismo precio que un waffle mixto.
+      sizes: { medium: '$11.000', large: 'N/A' },
     },
   ],
 };

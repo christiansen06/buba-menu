@@ -46,7 +46,9 @@ function ProductosDeCategoria({ category, soloProducto = null, inicial = null })
                     <ProductCard
                         item={item}
                         category={category}
-                        presentacion={presentacion}
+                        // Un producto con sinPresentacion (los waffles de la edición
+                        // especial) no cambia entre frío y caliente.
+                        presentacion={item.sinPresentacion ? null : presentacion}
                         inicial={soloProducto ? inicial : null}
                         // La key incluye la presentación para que al cambiar de
                         // pestaña las tarjetas se rearmen: si no, el tamaño y las

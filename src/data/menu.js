@@ -829,6 +829,62 @@ const WAFFLE_SIMPLE = {
   ],
 };
 
+// =====================================================================
+// EDICIÓN ESPECIAL (31/10/2026)
+//
+// Productos de temporada: Halloween, Navidad, el cumpleaños de BüBa... Van
+// en una sección propia ARRIBA de los destacados, con su estilo. No es una
+// categoría más de la carta: no aparece en la grilla ni en la barra salvo
+// que esté prendida.
+//
+// Se prende y se apaga desde el panel de stock del mostrador (el que se abre
+// manteniendo apretado el logo): "🎃 Mostrar la edición especial". Para la
+// próxima edición se cambian nombre, tema y productos acá; el id sigue
+// siendo 'especiales' así las ventas quedan juntas en Gestión.
+// =====================================================================
+export const edicionEspecial = {
+  id: 'especiales',
+  name: 'Edición Halloween',
+  icon: '🎃',
+  accent: 'pink',
+  tema: 'halloween',          // estilo de la sección (App.css: .edicion-halloween)
+  subtitulo: 'Sólo por estos días',
+  description: 'Bubble teas y waffles de terror, sólo por Halloween',
+  items: [
+    {
+      id: 'bubastein',
+      name: 'BüBastein',
+      description: 'Pistacho, leche, hielo, perlas y foam',
+      featured: false,
+      // Los bubble teas de la edición admiten perlas extra, como los de la carta.
+      extras: [{ id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1000, insumo: 'perlas', max: 3 }],
+      sizes: { medium: '$10.000', large: '$11.000' },
+    },
+    {
+      id: 'calabuba',
+      name: 'CalaBüBa',
+      description: 'Leche, hielo, café y foam. Perlas opcionales',
+      featured: false,
+      extras: [{ id: 'perlas', label: 'Perlas', emoji: '🧋', price: 1000, insumo: 'perlas', max: 3 }],
+      sizes: { medium: '$10.000', large: '$11.000' },
+    },
+    {
+      id: 'waffle-halloween',
+      name: 'Waffle Halloween',
+      description: 'Helado americana, gomitas de araña, Rocklets naranjas y negros y salsa de caramelo',
+      featured: false,
+      sizes: { medium: 'Consultar', large: 'N/A' },
+    },
+    {
+      id: 'waffle-zombie',
+      name: 'Waffle Zombie',
+      description: 'Helado americana, gomitas de dientes zombie, Oreos picadas, una gomita de ojo y salsa de frutilla',
+      featured: false,
+      sizes: { medium: 'Consultar', large: 'N/A' },
+    },
+  ],
+};
+
 export const promociones = [
   {
     id: 'promo-cafe-medialunas',

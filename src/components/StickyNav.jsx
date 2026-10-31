@@ -1,12 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
-import { menuCategories } from '../data/menu';
+import { menuCategories, edicionEspecial } from '../data/menu';
+import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
 
-const navItems = [
+const navBase = [
     { id: 'destacados', name: 'Destacados', icon: '✨' },
     ...menuCategories.map((c) => ({ id: c.id, name: c.name, icon: c.icon })),
 ];
+// Con la edición especial prendida, va primera.
+const navConEdicion = [{ id: edicionEspecial.id, name: edicionEspecial.name.replace(/^Edición\s+/, ''), icon: edicionEspecial.icon }, ...navBase];
 
 function StickyNav() {
+    const { edicionVisible } = useDisponibilidad();
+    const navItems = edicionVisible ? navConEdicion : navBase;
     const [visible, setVisible] = useState(false);
     const [activeId, setActiveId] = useState(navItems[0].id);
     const navRef = useRef(null);
@@ -24,7 +29,7 @@ function StickyNav() {
         window.addEventListener('scroll', onScroll, { passive: true });
         onScroll();
         return () => window.removeEventListener('scroll', onScroll);
-    }, []);
+    }, [navItems]);
 
     useEffect(() => {
         if (!activeId || !navRef.current) return;

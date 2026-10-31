@@ -189,6 +189,15 @@ export const EN_CARTA = {
         flan: ['leche', 'flan', 'salsa-caramelo'],
     },
 
+    // Edición especial (Halloween). Las gomitas y los Rocklets no tienen
+    // insumo: se apagan a mano desde "Productos" si se terminan.
+    especiales: {
+        bubastein: ['leche'],
+        calabuba: ['leche'],
+        'waffle-halloween': ['helado-americana', 'salsa-caramelo'],
+        'waffle-zombie': ['helado-americana', 'oreo', 'pulpa-frutilla'],
+    },
+
     // El café negro es lo único que sobrevive sin leche.
     cafe: {
         'cafe-cortado': ['leche'],

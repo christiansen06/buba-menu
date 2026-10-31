@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { menuCategories } from '../data/menu';
+import { menuCategories, edicionEspecial } from '../data/menu';
+import { esMostrador } from '../config/unidad.js';
 import { INSUMOS_POR_GRUPO } from '../data/insumos.js';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
@@ -12,7 +13,7 @@ import { useDisponibilidad } from '../context/DisponibilidadContext.jsx';
  * puede entrar ni cambiar nada sin la contraseña real.
  */
 function AdminPanel({ onClose }) {
-    const { agotados, insumosAgotados, marcar, marcarInsumo, recargar } = useDisponibilidad();
+    const { agotados, insumosAgotados, marcar, marcarInsumo, recargar, edicionVisible, mostrarEdicion } = useDisponibilidad();
     const [vista, setVista] = useState('insumos');   // insumos | productos
     const [sesion, setSesion] = useState(null);
     const [email, setEmail] = useState('');
@@ -56,6 +57,13 @@ function AdminPanel({ onClose }) {
         else setError('');
     };
 
+    const toggleEdicion = async () => {
+        setGuardando('edicion');
+        const { error } = await mostrarEdicion(!edicionVisible);
+        setGuardando(null);
+        setError(error ? `No se pudo cambiar la edición especial: ${error}` : '');
+    };
+
     if (!hayBase) {
         return (
             <div className="admin-overlay" onClick={onClose}>
@@ -92,6 +100,19 @@ function AdminPanel({ onClose }) {
                     </form>
                 ) : (
                     <>
+                        {/* Edición especial (Halloween, Navidad...): sólo desde el mostrador. */}
+                        {esMostrador() && (
+                            <button
+                                type="button"
+                                className={`admin-item admin-edicion ${edicionVisible ? 'prendida' : 'sin-stock'}`}
+                                onClick={toggleEdicion}
+                                disabled={guardando === 'edicion'}
+                            >
+                                <span>{edicionEspecial.icon} Mostrar «{edicionEspecial.name}» en el menú</span>
+                                <span className="admin-estado">{guardando === 'edicion' ? '…' : edicionVisible ? 'Visible' : 'Oculta'}</span>
+                            </button>
+                        )}
+
                         <div className="admin-tabs">
                             <button
                                 className={`admin-tab ${vista === 'insumos' ? 'activa' : ''}`}
@@ -146,7 +167,7 @@ function AdminPanel({ onClose }) {
 
                         {vista === 'productos' && (
                         <div className="admin-lista">
-                            {menuCategories.map((cat) => {
+                            {[...(edicionVisible ? [edicionEspecial] : []), ...menuCategories].map((cat) => {
                                 // Cada categoría guarda sus productos con un nombre distinto:
                                 // items (carta común), presets (waffles armados) y products
                                 // (Medialunas y Pastelería, que se venden por unidad).

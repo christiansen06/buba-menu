@@ -5,6 +5,9 @@ import { getUnidad } from '../config/unidad.js';
 
 const DisponibilidadContext = createContext(null);
 
+// La fila de disponibilidad que prende o apaga la edición especial.
+const EDICION = { categoria: 'especiales', producto: '_visible' };
+
 /**
  * Qué productos están sin stock.
  *
@@ -24,6 +27,9 @@ export function DisponibilidadProvider({ children }) {
     const [agotados, setAgotados] = useState(() => new Set());
     const [insumosAgotados, setInsumosAgotados] = useState(() => new Set());
     const [cargando, setCargando] = useState(hayBase);
+    // La edición especial (Halloween, Navidad...) arranca apagada: se ve sólo
+    // si en disponibilidad hay una fila especiales/_visible con disponible = true.
+    const [edicionVisible, setEdicionVisible] = useState(false);
 
     const cargar = useCallback(async () => {
         if (!hayBase) return;
@@ -36,10 +42,16 @@ export function DisponibilidadProvider({ children }) {
             if (prod.error) throw prod.error;
 
             const set = new Set();
+            let edicion = false;
             (prod.data || []).forEach((fila) => {
+                if (fila.categoria_id === EDICION.categoria && fila.producto_id === EDICION.producto) {
+                    edicion = fila.disponible === true;
+                    return;
+                }
                 if (fila.disponible === false) set.add(claveProducto(fila.categoria_id, fila.producto_id));
             });
             setAgotados(set);
+            setEdicionVisible(edicion);
 
             // Si la tabla de insumos todavía no existe, seguimos sin ella.
             if (!ins.error) {
@@ -120,6 +132,17 @@ export function DisponibilidadProvider({ children }) {
             recargar: cargar,
             marcar,
             marcarInsumo,
+            edicionVisible,
+            /** Prende o apaga la sección de la edición especial (requiere sesión, como el stock). */
+            mostrarEdicion: async (mostrar) => {
+                if (!hayBase) return { error: 'Sin conexión a la base' };
+                const { error } = await supabase.from('disponibilidad').upsert(
+                    { unidad: getUnidad(), categoria_id: EDICION.categoria, producto_id: EDICION.producto, disponible: mostrar, actualizado_en: new Date().toISOString() },
+                    { onConflict: 'unidad,categoria_id,producto_id' }
+                );
+                if (!error) setEdicionVisible(mostrar);
+                return { error: error?.message };
+            },
             insumoFalta,
 
             /** Una opción de armable (relleno, topping, salsa, sabor...). */
@@ -135,7 +158,7 @@ export function DisponibilidadProvider({ children }) {
                 agotados.has(claveProducto(categoriaId, productoId)) ||
                 insumosDeProducto(categoriaId, productoId).some(insumoFalta),
         };
-    }, [agotados, insumosAgotados, cargando, cargar, marcar, marcarInsumo]);
+    }, [agotados, insumosAgotados, cargando, cargar, marcar, marcarInsumo, edicionVisible]);
 
     return (
         <DisponibilidadContext.Provider value={valor}>

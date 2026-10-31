@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { menuCategories, getFeaturedProducts, parsePrice } from '../data/menu';
+import { menuCategories, getFeaturedProducts, parsePrice, edicionEspecial } from '../data/menu';
 import { useCart } from '../context/CartContext';
 import IceCreamBuilder from './IceCreamBuilder';
 import MedialunasSelector from './MedialunasSelector';
@@ -148,8 +148,31 @@ function FeaturedCard({ item }) {
     );
 }
 
+/**
+ * La edición especial (Halloween, Navidad, el cumpleaños...): arriba de los
+ * destacados, con los colores del tema. Sólo si está prendida desde el panel
+ * de stock del mostrador.
+ */
+function EdicionEspecial() {
+    const c = edicionEspecial;
+    return (
+        <section className={`edicion-especial edicion-${c.tema}`} id={c.id}>
+            <div className="edicion-header">
+                <span className="edicion-icono" aria-hidden="true">{c.icon}</span>
+                <div>
+                    <h3>{c.name}</h3>
+                    <p>{c.subtitulo}</p>
+                </div>
+            </div>
+            {c.description && <p className="edicion-descripcion">{c.description}</p>}
+            <ProductosDeCategoria category={c} />
+        </section>
+    );
+}
+
 function MenuSection() {
     const featuredProducts = getFeaturedProducts();
+    const { edicionVisible } = useDisponibilidad();
 
     const renderCategoryContent = (category) => {
         if (category.builderType === 'icecream') return <IceCreamBuilder category={category} />;
@@ -176,6 +199,8 @@ function MenuSection() {
             <div className="section-heading">
                 <h2>Elegidos de la casa</h2>
             </div>
+
+            {edicionVisible && <EdicionEspecial />}
 
             {featuredProducts.length > 0 && (
                 <section className="featured-section" id="destacados">

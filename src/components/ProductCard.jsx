@@ -43,7 +43,10 @@ function ProductCard({ item, category, presentacion = null, inicial = null }) {
 
     // `inicial` sólo lo usa el panel al editar un pedido: arranca con lo que ya tenía.
     const [extrasElegidos, setExtrasElegidos] = useState(inicial?.extras || []);
-    const extras = resumenExtras(category.extras, extrasElegidos);
+    // Un producto puede declarar sus propios adicionales (los bubble teas de la
+    // edición especial); si no, valen los de la categoría.
+    const extrasDe = item.extras ?? category.extras;
+    const extras = resumenExtras(extrasDe, extrasElegidos);
 
 
     const handleAdd = () => {
@@ -121,7 +124,7 @@ function ProductCard({ item, category, presentacion = null, inicial = null }) {
 
                 {!agotado && (
                     <ExtrasPicker
-                        extras={category.extras}
+                        extras={extrasDe}
                         seleccionados={extrasElegidos}
                         onChange={setExtrasElegidos}
                     />

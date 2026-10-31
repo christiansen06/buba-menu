@@ -474,6 +474,47 @@ a {
   border: 1px solid hsl(var(--buba-cyan-h) 79.9% 61% / 0.12);
 }
 
+/* =============================================
+   Edición especial (Halloween, Navidad, cumpleaños…): arriba de los
+   destacados. El tema cambia los colores con .edicion-<tema>.
+   ============================================= */
+.edicion-especial {
+  scroll-margin-top: 72px;
+  max-width: 940px;
+  margin: 0 auto 2rem;
+  border-radius: 30px;
+  padding: 1.5rem;
+}
+.edicion-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.4rem; }
+.edicion-icono { font-size: 2.4rem; line-height: 1; }
+.edicion-header h3 { margin: 0; font-size: 1.5rem; }
+.edicion-header p { margin: 0.1rem 0 0; font-weight: 700; }
+.edicion-descripcion { margin: 0 0 1rem; }
+
+/* Halloween: noche violeta, naranja calabaza y un toque de verde. */
+.edicion-halloween {
+  background:
+    radial-gradient(circle at 90% 0%, rgba(255, 140, 0, 0.35), transparent 45%),
+    linear-gradient(160deg, #1b1026 0%, #2c1440 55%, #12091b 100%);
+  border: 2px solid #ff8c1a;
+  box-shadow: 0 10px 30px rgba(44, 20, 64, 0.35);
+  color: #fbe9d7;
+}
+.edicion-halloween .edicion-header h3 { color: #ff9a2e; letter-spacing: 0.02em; }
+.edicion-halloween .edicion-header p { color: #9be564; }
+.edicion-halloween .edicion-descripcion { color: #e8d6f5; }
+.edicion-halloween .product-card {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(255, 140, 26, 0.5);
+  color: #2a1a33;
+}
+.edicion-halloween .product-card h3,
+.edicion-halloween .product-card h4 { color: #2c1440; }
+.edicion-halloween .product-add-btn {
+  background: linear-gradient(135deg, #ff8c1a, #ff5e00);
+  color: #1b1026;
+}
+
 .featured-header {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -3848,6 +3889,10 @@ img.product-image.product-photo {
   text-align: left;
   cursor: pointer;
 }
+
+.admin-item.admin-edicion { margin-bottom: 0.8rem; font-weight: 800; }
+.admin-item.admin-edicion.prendida { background: #2c1440; border-color: #ff8c1a; color: #fbe9d7; }
+.admin-item.admin-edicion.prendida .admin-estado { background: #ff8c1a; color: #1b1026; }
 
 .admin-item.sin-stock {
   background: hsl(var(--buba-pink-h) 60% 96%);

@@ -4587,6 +4587,39 @@ img.product-image.product-photo {
 .panel-resumen-cancelados { font-size: 0.85rem; opacity: 0.7; }
 .panel-resumen > .panel-btn-sec { margin-left: auto; }
 
+/* Filtros por medio de pago: una fila que se desliza en el celular. */
+.panel-filtros {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.9rem;
+  scrollbar-width: thin;
+}
+.panel-filtro {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
+  border: 1.5px solid hsl(var(--buba-cyan-h) 60% 45% / 0.35);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.panel-filtro-total { font-size: 0.8rem; opacity: 0.75; }
+.panel-filtro.activo {
+  background: hsl(var(--buba-cyan-h) 70% 40%);
+  border-color: hsl(var(--buba-cyan-h) 70% 40%);
+  color: #fff;
+}
+.panel-filtro.activo .panel-filtro-total { opacity: 0.9; }
+.panel-filtro.alerta:not(.activo) { border-color: #d97706; }
+
 /* --- botones --- */
 
 .panel-btn-sec,

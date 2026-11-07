@@ -79,6 +79,68 @@ const diaLindo = (dia) => new Date(`${dia}T12:00:00-03:00`).toLocaleDateString('
  */
 const medioEfectivo = (pedido) => pedido.medio_pago_cobro || pedido.medio_pago || null;
 
+/**
+ * Filtros del panel: en qué "pila" cae cada pedido. Tarjeta y QR se separan
+ * (posnet_tipo); el efectivo de PeYa va aparte del efectivo del mostrador
+ * aunque para la caja sea efectivo; los cancelados no cuentan en ningún medio.
+ */
+const FILTROS = [
+    { id: 'todos', label: 'Todos' },
+    { id: 'efectivo', label: '💵 Efectivo' },
+    { id: 'transferencia', label: '🏦 Transferencia' },
+    { id: 'tarjeta', label: '💳 Tarjeta' },
+    { id: 'qr', label: '📱 QR' },
+    { id: 'posnet', label: '💳 Posnet (sin aclarar)' },
+    { id: 'peya', label: '🛵 PeYa efectivo' },
+    { id: 'uber', label: '🛵 Uber Eats' },
+    { id: 'otro', label: 'Otro' },
+    { id: 'sin', label: '⚠️ Sin medio' },
+    { id: 'cancelado', label: 'Cancelados' },
+];
+
+function pilaDe(pedido) {
+    if (pedido.estado === 'cancelado') return 'cancelado';
+    if (pedido.peya_efectivo) return 'peya';
+    const medio = medioEfectivo(pedido);
+    if (!medio) return 'sin';
+    if (medio === 'posnet') return pedido.posnet_tipo === 'qr' ? 'qr' : pedido.posnet_tipo === 'tarjeta' ? 'tarjeta' : 'posnet';
+    if (FILTROS.some((f) => f.id === medio)) return medio;
+    return 'otro';
+}
+
+/** Chips con cantidad y plata de cada medio. Sólo aparecen los que tienen algo (y el elegido). */
+function FiltroMedios({ pedidos, filtro, onFiltro }) {
+    const pilas = {};
+    pedidos.forEach((p) => {
+        const k = pilaDe(p);
+        pilas[k] = pilas[k] || { n: 0, total: 0 };
+        pilas[k].n += 1;
+        pilas[k].total += Number(p.total) || 0;
+    });
+    const activos = pedidos.filter((p) => p.estado !== 'cancelado');
+    pilas.todos = { n: activos.length, total: activos.reduce((a, p) => a + (Number(p.total) || 0), 0) };
+    const visibles = FILTROS.filter((f) => f.id === 'todos' || f.id === filtro || pilas[f.id]);
+    return (
+        <div className="panel-filtros" role="group" aria-label="Filtrar por medio de pago">
+            {visibles.map((f) => {
+                const d = pilas[f.id] || { n: 0, total: 0 };
+                return (
+                    <button
+                        key={f.id}
+                        type="button"
+                        className={`panel-filtro ${filtro === f.id ? 'activo' : ''} ${f.id === 'sin' ? 'alerta' : ''}`}
+                        aria-pressed={filtro === f.id}
+                        onClick={() => onFiltro(filtro === f.id ? 'todos' : f.id)}
+                    >
+                        <span className="panel-filtro-nombre">{f.label} <strong>{d.n}</strong></span>
+                        {f.id !== 'cancelado' && <span className="panel-filtro-total">{formatPrice(d.total)}</span>}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
 /* ------------------------------------------------------------------ */
 
 function Login({ onEntro }) {
@@ -445,6 +507,7 @@ function PanelPedidos() {
     const [listo, setListo] = useState(false);          // ya se consultó la sesión guardada
     const [dia, setDia] = useState(() => new Date());
     const [pedidos, setPedidos] = useState(null);       // null = todavía no cargó
+    const [filtro, setFiltro] = useState('todos');     // medio de pago (FILTROS)
     const [hayPin, setHayPin] = useState(null);         // null = no se sabe todavía
     const [modal, setModal] = useState(null);           // { tipo: 'cancelar', pedido } | { tipo: 'pin' }
     const [ocupado, setOcupado] = useState(null);       // id del pedido con una acción en curso
@@ -563,6 +626,7 @@ function PanelPedidos() {
 
     const confirmados = (pedidos || []).filter((p) => p.estado !== 'cancelado');
     const cancelados = (pedidos || []).length - confirmados.length;
+    const filtrados = filtro === 'todos' ? (pedidos || []) : (pedidos || []).filter((p) => pilaDe(p) === filtro);
 
     return (
         <main className="panel">
@@ -594,8 +658,16 @@ function PanelPedidos() {
             ) : pedidos.length === 0 ? (
                 <p className="panel-ayuda panel-vacio">No hay pedidos ese día.</p>
             ) : (
+                <>
+                <FiltroMedios pedidos={pedidos} filtro={filtro} onFiltro={setFiltro} />
+                {filtrados.length === 0 && (
+                    <p className="panel-ayuda panel-vacio">
+                        No hay pedidos con ese medio este día.{' '}
+                        <button type="button" className="panel-link" onClick={() => setFiltro('todos')}>Ver todos</button>
+                    </p>
+                )}
                 <div className="panel-lista">
-                    {pedidos.map((p) => (
+                    {filtrados.map((p) => (
                         <TarjetaPedido
                             key={p.id}
                             pedido={p}
@@ -608,6 +680,7 @@ function PanelPedidos() {
                         />
                     ))}
                 </div>
+                </>
             )}
 
             <footer className="panel-pie">

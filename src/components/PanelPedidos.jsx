@@ -108,6 +108,72 @@ function pilaDe(pedido) {
     return 'otro';
 }
 
+/**
+ * "Para el cierre": lo que el menú dice que se cobró ese día, agrupado como
+ * se carga el cierre. El efectivo de PeYa va junto con el efectivo porque
+ * está en la caja. Uber no se muestra: no pasa por la caja.
+ */
+function ParaElCierre({ pedidos, unidad, dia }) {
+    const [copiado, setCopiado] = useState(false);
+    const suma = (claves) => pedidos.filter((p) => claves.includes(pilaDe(p))).reduce((a, p) => a + (Number(p.total) || 0), 0);
+    const efectivo = suma(['efectivo', 'peya']);
+    const peya = suma(['peya']);
+    const filas = [
+        { id: 'efectivo', label: '💵 Efectivo cobrado', monto: efectivo, nota: peya > 0 ? `incluye ${formatPrice(peya)} de PeYa` : null },
+        { id: 'transferencia', label: '🏦 Transferencias', monto: suma(['transferencia']) },
+        { id: 'qr', label: '📱 QR', monto: suma(['qr']) },
+        { id: 'tarjeta', label: '💳 Tarjeta', monto: suma(['tarjeta']) },
+        { id: 'posnet', label: '💳 Posnet sin aclarar', monto: suma(['posnet']), soloSiHay: true },
+        { id: 'sin', label: '⚠️ Sin medio de pago', monto: suma(['sin']), soloSiHay: true },
+        { id: 'otro', label: 'Otros', monto: suma(['otro', 'uber']), soloSiHay: true },
+    ].filter((f) => !f.soloSiHay || f.monto > 0);
+    const total = pedidos.filter((p) => p.estado !== 'cancelado').reduce((a, p) => a + (Number(p.total) || 0), 0);
+
+    const copiar = async () => {
+        const texto = [
+            `Cierre ${UNIDAD_LABEL[unidad]} · ${etiquetaDia(dia)}`,
+            ...filas.map((f) => `${f.label}: ${formatPrice(f.monto)}${f.nota ? ` (${f.nota})` : ''}`),
+            `Total menú: ${formatPrice(total)}`,
+        ].join('\n');
+        try {
+            await navigator.clipboard.writeText(texto);
+            setCopiado(true);
+            setTimeout(() => setCopiado(false), 2000);
+        } catch { /* sin portapapeles: se lee en pantalla */ }
+    };
+
+    return (
+        <section className="panel-cierre" aria-label="Para el cierre">
+            <div className="panel-cierre-cab">
+                <h3>🧮 Para el cierre</h3>
+                <button type="button" className="panel-btn-sec" onClick={copiar}>{copiado ? '✓ Copiado' : 'Copiar'}</button>
+            </div>
+            <dl className="panel-cierre-filas">
+                {filas.map((f) => (
+                    <div key={f.id} className={f.id === 'efectivo' ? 'principal' : ''}>
+                        <dt>{f.label}{f.nota && <small>{f.nota}</small>}</dt>
+                        <dd>{formatPrice(f.monto)}</dd>
+                    </div>
+                ))}
+                <div className="total"><dt>Total del menú</dt><dd>{formatPrice(total)}</dd></div>
+            </dl>
+        </section>
+    );
+}
+
+/** Pedidos sin medio de pago: son los que después hacen que la caja no cuadre. */
+function AvisoSinMedio({ pedidos, onVer }) {
+    const sin = pedidos.filter((p) => pilaDe(p) === 'sin');
+    if (!sin.length) return null;
+    const monto = sin.reduce((a, p) => a + (Number(p.total) || 0), 0);
+    return (
+        <p className="panel-aviso-sin" role="alert">
+            <span>⚠️ <strong>{sin.length} {sin.length === 1 ? 'pedido' : 'pedidos'} sin medio de pago</strong> ({formatPrice(monto)}). Marcá con qué se cobró antes de cerrar.</span>
+            <button type="button" className="panel-btn-sec" onClick={onVer}>Ver</button>
+        </p>
+    );
+}
+
 /** Chips con cantidad y plata de cada medio. Sólo aparecen los que tienen algo (y el elegido). */
 function FiltroMedios({ pedidos, filtro, onFiltro }) {
     const pilas = {};
@@ -714,6 +780,8 @@ function PanelPedidos() {
                 <p className="panel-ayuda panel-vacio">No hay pedidos ese día.</p>
             ) : (
                 <>
+                <AvisoSinMedio pedidos={pedidos} onVer={() => setFiltro('sin')} />
+                <ParaElCierre pedidos={pedidos} unidad={vista} dia={dia} />
                 <FiltroMedios pedidos={pedidos} filtro={filtro} onFiltro={setFiltro} />
                 {filtrados.length === 0 && (
                     <p className="panel-ayuda panel-vacio">

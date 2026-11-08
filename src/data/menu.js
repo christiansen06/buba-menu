@@ -755,8 +755,9 @@ export const menuCategories = [
           large: 'N/A',
         },
       },
-      // Sólo se ve en el mostrador (el cliente del QR no lo ve): el agua caliente
-      // para el mate se vendía sin poder registrarla y descuadraba la caja.
+      // El agua caliente para el mate se vendía sin poder registrarla y
+      // descuadraba la caja. Desde el 08/11 se ve en todos los aparatos
+      // (antes era sólo del mostrador).
       {
         id: 'agua-caliente',
         name: 'Agua caliente',
@@ -764,7 +765,6 @@ export const menuCategories = [
         image: 'Agua caliente',
         badge: null,
         featured: false,
-        soloMostrador: true,
         sizes: {
           medium: '$500',
           large: 'N/A',

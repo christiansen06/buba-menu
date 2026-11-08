@@ -846,7 +846,26 @@ const WAFFLE_SIMPLE = {
 // siendo 'especiales' así las ventas quedan juntas en Gestión.
 // =====================================================================
 // El food truck tiene sus propios precios (data/preciosTruck.js).
+// BASE_LOCAL guarda la carta con precios del local antes de tocarla, para
+// poder armar la de la otra unidad (el panel edita pedidos de las dos).
+const BASE_LOCAL = structuredClone(menuCategories);
 if (getUnidad() === 'food_truck') aplicarPreciosTruck(menuCategories);
+
+const cartas = {};
+/**
+ * La carta con los precios de una unidad. El panel de pedidos la usa para
+ * editar un pedido del truck desde el iPad del local (y al revés) con los
+ * precios que corresponden a ese pedido.
+ */
+export function menuDeUnidad(unidad) {
+  if (!unidad || unidad === getUnidad()) return menuCategories;
+  if (!cartas[unidad]) {
+    const carta = structuredClone(BASE_LOCAL);
+    if (unidad === 'food_truck') aplicarPreciosTruck(carta);
+    cartas[unidad] = carta;
+  }
+  return cartas[unidad];
+}
 
 export const edicionEspecial = {
   id: 'especiales',

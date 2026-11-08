@@ -141,6 +141,51 @@ function FiltroMedios({ pedidos, filtro, onFiltro }) {
     );
 }
 
+/*
+ * Switch Local / Food Truck: qué pedidos se ven en el panel (para hacer los
+ * dos cierres sin salir de acá). Sólo cambia lo que se MIRA: el aparato sigue
+ * siendo lo que era y lo que se cargue en él sigue saliendo de su unidad.
+ * La tablet del truck no lo tiene: ahí se ven sólo los del truck.
+ */
+const VISTA_KEY = 'buba-panel-vista';
+const SWITCH_OPCIONES = [
+    { id: 'local', icono: '🏠', nombre: 'Local' },
+    { id: 'food_truck', icono: '🚐', nombre: 'Food Truck' },
+];
+const puedeCambiarVista = () => !(esMostrador() && getUnidad() === 'food_truck');
+
+function vistaInicial() {
+    if (!puedeCambiarVista()) return getUnidad();
+    try {
+        const v = sessionStorage.getItem(VISTA_KEY);
+        if (v === 'local' || v === 'food_truck') return v;
+    } catch { /* sigue */ }
+    return getUnidad();
+}
+
+function guardarVista(v) {
+    try { sessionStorage.setItem(VISTA_KEY, v); } catch { /* sigue */ }
+}
+
+function SwitchUnidad({ vista, onCambiar }) {
+    return (
+        <div className="panel-switch" role="radiogroup" aria-label="Pedidos de">
+            {SWITCH_OPCIONES.map((o) => (
+                <button
+                    key={o.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={vista === o.id}
+                    className={`panel-switch-op ${vista === o.id ? 'activa' : ''}`}
+                    onClick={() => onCambiar(o.id)}
+                >
+                    <span className="panel-switch-icono" aria-hidden="true">{o.icono}</span> {o.nombre}
+                </button>
+            ))}
+        </div>
+    );
+}
+
 /* ------------------------------------------------------------------ */
 
 function Login({ onEntro }) {
@@ -236,7 +281,7 @@ function EsteAparato({ onCerrar }) {
             <div className="panel-acciones-fila">
                 <button type="button" className="panel-btn-sec" onClick={onCerrar}>Volver</button>
                 <button type="button" className="builder-add-btn" disabled={elegida === actual} onClick={() => configurarAparato(elegida)}>
-                    Cambiar y volver al menú
+                    Cambiar
                 </button>
             </div>
         </div>
@@ -429,7 +474,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     <span className="solo-lector"> — cambiar día u hora</span>
                 </button>
                 <span className="panel-pedido-canal">
-                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.peya_efectivo ? '🛵 PeYa en efectivo' : pedido.canal === 'mostrador' ? '🏠 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
+                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.peya_efectivo ? '🛵 PeYa en efectivo' : pedido.canal === 'mostrador' ? '🧾 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
                 </span>
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
@@ -508,6 +553,7 @@ function PanelPedidos() {
     const [dia, setDia] = useState(() => new Date());
     const [pedidos, setPedidos] = useState(null);       // null = todavía no cargó
     const [filtro, setFiltro] = useState('todos');     // medio de pago (FILTROS)
+    const [vista, setVista] = useState(vistaInicial);   // de qué unidad se ven los pedidos
     const [hayPin, setHayPin] = useState(null);         // null = no se sabe todavía
     const [modal, setModal] = useState(null);           // { tipo: 'cancelar', pedido } | { tipo: 'pin' }
     const [ocupado, setOcupado] = useState(null);       // id del pedido con una acción en curso
@@ -535,7 +581,7 @@ function PanelPedidos() {
         supabase
             .from('pedidos')
             .select('id, creado_en, total, envio, peya_efectivo, descuento, descuento_tipo, descuento_valor, descuento_nota, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
-            .eq('unidad', getUnidad())      // la tablet del truck no ve (ni cancela) los del local
+            .eq('unidad', vista)            // la tablet del truck no ve (ni cancela) los del local: ver vistaInicial
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)
             .lt('creado_en', fin)
@@ -547,7 +593,7 @@ function PanelPedidos() {
                 setPedidos(data || []);
             });
         return () => { vigente = false; };
-    }, [sesion, dia, version]);
+    }, [sesion, dia, version, vista]);
 
     // Al entrar con sesión: ¿hay PIN?
     useEffect(() => {
@@ -628,9 +674,18 @@ function PanelPedidos() {
     const cancelados = (pedidos || []).length - confirmados.length;
     const filtrados = filtro === 'todos' ? (pedidos || []) : (pedidos || []).filter((p) => pilaDe(p) === filtro);
 
+    const cambiarVista = (u) => {
+        if (u === vista) return;
+        guardarVista(u);
+        setPedidos(null);
+        setVista(u);
+    };
+
     return (
-        <main className="panel">
-            <Cabecera conDelivery onAnotado={recargar} />
+        <main className={`panel ${vista === 'food_truck' ? 'panel-vista-truck' : ''}`}>
+            <Cabecera conDelivery={vista === 'local'} onAnotado={recargar} />
+
+            {puedeCambiarVista() && <SwitchUnidad vista={vista} onCambiar={cambiarVista} />}
 
             <nav className="panel-dia" aria-label="Día">
                 <button type="button" className="panel-btn-sec" onClick={() => moverDia(-1)} aria-label="Día anterior">‹</button>

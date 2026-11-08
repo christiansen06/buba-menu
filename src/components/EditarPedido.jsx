@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import { itemsParaBase } from '../utils/pedidos.js';
 import { TIPOS_DESCUENTO, calcularDescuento } from '../utils/descuento.js';
-import { menuCategories } from '../data/menu.js';
+import { menuDeUnidad } from '../data/menu.js';
 import { CartContext } from '../context/CartContext.jsx';
 import { DisponibilidadProvider } from '../context/DisponibilidadContext.jsx';
 import IceCreamBuilder from './IceCreamBuilder.jsx';
@@ -24,7 +24,8 @@ import PromoSection from './PromoSection.jsx';
  * cálculo. Sumar no pide PIN; si el total baja sí, igual que cancelar.
  */
 
-const CATEGORIAS = menuCategories.filter((c) => c.items?.length || c.builderType);
+/** Las categorías que se pueden agregar, con los precios de la unidad del pedido. */
+const categoriasDe = (unidad) => menuDeUnidad(unidad).filter((c) => c.items?.length || c.builderType);
 
 function Armable({ category, linea }) {
     if (category.builderType === 'icecream') return <IceCreamBuilder category={category} />;
@@ -45,8 +46,8 @@ function Armable({ category, linea }) {
 }
 
 /** El item de carrito que corresponde a una línea ya guardada (para que el armable la cargue). */
-function itemDeLinea(l) {
-    const cat = menuCategories.find((c) => c.id === l.categoria_id);
+function itemDeLinea(l, carta) {
+    const cat = carta.find((c) => c.id === l.categoria_id);
     return {
         id: l.clave,
         categoryId: l.categoria_id,
@@ -61,6 +62,7 @@ function itemDeLinea(l) {
 }
 
 export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
+    const [CATEGORIAS] = useState(() => categoriasDe(pedido.unidad));
     const [lineas, setLineas] = useState(() => (pedido.pedido_items || []).map((it) => ({
         clave: `id:${it.id}`, id: it.id, nombre: it.nombre, cantidad: it.cantidad, precio: it.precio_unitario, antes: it.cantidad,
         categoria_id: it.categoria_id, producto_id: it.producto_id, variante: it.variante, detalle: it.detalle,
@@ -132,9 +134,9 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
     const carritoFalso = {
         items: [], total: 0, count: 0, hasConsultarItems: false,
         addItem: (item) => aplicarItem(item, reemplaza),
-        updateItem: (_id, campos) => aplicarItem({ ...itemDeLinea(reemplaza), ...campos }, reemplaza),
+        updateItem: (_id, campos) => aplicarItem({ ...itemDeLinea(reemplaza, CATEGORIAS), ...campos }, reemplaza),
         setQuantity: () => {}, removeItem: () => {}, clearCart: () => {},
-        editingItem: reemplaza && CATEGORIAS.find((c) => c.id === reemplaza.categoria_id)?.builderType ? itemDeLinea(reemplaza) : null,
+        editingItem: reemplaza && CATEGORIAS.find((c) => c.id === reemplaza.categoria_id)?.builderType ? itemDeLinea(reemplaza, CATEGORIAS) : null,
         startEdit: () => {},
         clearEdit: () => { if (reemplaza) setPicker(null); },
         theme: 'light', toggleTheme: () => {},

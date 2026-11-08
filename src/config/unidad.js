@@ -132,8 +132,9 @@ export const getUnidad = () => actual.unidad;
  * Cambiar qué es este aparato sin tocar links (panel de pedidos, con la
  * sesión del dueño). unidad = 'local' | 'food_truck' lo deja como mostrador
  * de esa unidad; null lo vuelve un aparato cualquiera (cuenta como QR).
- * Recarga en "/" sin parámetros: si recargara la URL actual, un
- * ?unidad=...&mostrador=1 viejo volvería a pisar lo elegido.
+ * Recarga en "/" sin parámetros (si recargara la URL actual, un
+ * ?unidad=...&mostrador=1 viejo volvería a pisar lo elegido), pero
+ * conservando el #pedidos: se sigue en el panel.
  */
 export function configurarAparato(unidad) {
     if (unidad && UNIDADES.includes(unidad)) {
@@ -143,7 +144,9 @@ export function configurarAparato(unidad) {
         borrar(CANAL_KEY);
         borrar(UNIDAD_KEY);
     }
-    window.location.replace(window.location.pathname);
+    // Sin parámetros en la URL, cambiar sólo el # no recarga: hay que pedirlo.
+    if (window.location.search) window.location.replace(window.location.pathname + window.location.hash);
+    else window.location.reload();
 }
 export const getCanal = () => actual.canal;
 export const esMostrador = () => actual.canal === 'mostrador';

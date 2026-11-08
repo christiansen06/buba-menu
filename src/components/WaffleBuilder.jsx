@@ -50,7 +50,7 @@ function WaffleBuilder({ category }) {
     // no se ofrecen para armar.
     const toppingsDelArmador = category.toppings.filter((t) => !t.soloPreset);
     const { addItem, updateItem, editingItem, clearEdit } = useCart();
-    const { opcionAgotada } = useDisponibilidad();
+    const { opcionAgotada, estaAgotado } = useDisponibilidad();
 
     const [mode, setMode] = useState('preset');
     const [selectedRellenos, setSelectedRellenos] = useState([]);
@@ -252,8 +252,11 @@ function WaffleBuilder({ category }) {
                         // existen en Bubble Tea. Buscamos SOLO por nombre completo ("Waffle
                         // Oreo") para no terminar mostrando por error la foto del bubble tea.
                         const presetPhoto = getProductImage({ name: preset.name }, category.id);
+                        // Marcado sin stock a mano (panel de stock) o le falta un insumo.
+                        const agotado = estaAgotado(category.id, preset.id, preset);
                         return (
-                        <article className="preset-card" key={preset.id}>
+                        <article className={`preset-card ${agotado ? 'agotado' : ''}`} key={preset.id}>
+                            {agotado && <span className="agotado-tag">Sin stock</span>}
                             <div className="preset-top">
                                 {presetPhoto ? (
                                     <img className="preset-image product-photo" src={presetPhoto} alt={preset.name} loading="lazy" />
@@ -268,8 +271,8 @@ function WaffleBuilder({ category }) {
                   </span>
                                 </div>
                             </div>
-                            <button className="product-add-btn preset-add" onClick={() => addPreset(preset)}>
-                                Agregar 🛒
+                            <button className="product-add-btn preset-add" onClick={() => addPreset(preset)} disabled={agotado}>
+                                {agotado ? 'Sin stock' : 'Agregar 🛒'}
                             </button>
                         </article>
                         );

@@ -3756,17 +3756,20 @@ img.product-image.product-photo {
    26. PRODUCTOS AGOTADOS
    ============================================= */
 .product-card.agotado,
-.featured-card.agotado {
+.featured-card.agotado,
+.preset-card.agotado {
   opacity: 0.55;
 }
 
 .product-card.agotado .product-image,
-.featured-card.agotado .featured-image {
+.featured-card.agotado .featured-image,
+.preset-card.agotado .preset-image {
   filter: grayscale(0.85);
 }
 
 .product-badge-wrapper,
-.featured-card { position: relative; }
+.featured-card,
+.preset-card { position: relative; }
 
 .agotado-tag {
   position: absolute;

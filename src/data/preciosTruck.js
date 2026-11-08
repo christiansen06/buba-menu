@@ -2,8 +2,9 @@
 // src/data/preciosTruck.js
 //
 // Precios del FOOD TRUCK (cartel del truck, 08/11/2026). Sólo lo que cambia
-// respecto del local: todo lo que no está acá (cafés calientes, waffles,
-// tostados, pastelería, bebidas, promos) sale al mismo precio.
+// respecto del local: todo lo que no está acá (cafés calientes, waffles
+// —básico incluido—, tostados, pastelería, bebidas y promos) sale al mismo
+// precio que en el local.
 //
 // Se aplica una sola vez al cargar la página, si el aparato es del truck
 // (QR del truck o tablet del truck): ver getUnidad() en config/unidad.js.
@@ -48,6 +49,13 @@ export const SIZES_TRUCK = {
 export const PRECIOS_TRUCK = {
     licuados: { price: { simple: 7000, mixto: 7500 } },
     // En el truck: 1 bocha $3.000, 2 bochas $4.000. No hay de 3.
+    // 1 a $1.500; 6 a $8.000 (en el local, 6 a $8.500).
+    medialunas: {
+        products: [
+            { id: 'manteca', label: 'Medialuna de Manteca', pricePerUnit: 1500, discountAt: 6, discountAmount: 1000 },
+            { id: 'jyq', label: 'Medialuna de Jamón y Queso', pricePerUnit: 2000 },
+        ],
+    },
     helados: { sizes: [{ id: '1', label: '1 bocha', price: 3000 }, { id: '2', label: '2 bochas', price: 4000 }] },
 };
 

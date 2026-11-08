@@ -1,0 +1,66 @@
+// =============================================
+// src/data/preciosTruck.js
+//
+// Precios del FOOD TRUCK (cartel del truck, 08/11/2026). Sólo lo que cambia
+// respecto del local: todo lo que no está acá (cafés calientes, waffles,
+// tostados, pastelería, bebidas, promos) sale al mismo precio.
+//
+// Se aplica una sola vez al cargar la página, si el aparato es del truck
+// (QR del truck o tablet del truck): ver getUnidad() en config/unidad.js.
+// Cambiar un precio del truck = cambiarlo acá.
+// =============================================
+
+const tam = (medium, large) => ({ medium, large });
+
+/** categoria → producto → { medium, large } (mismo formato que menu.js). */
+export const SIZES_TRUCK = {
+    'bubble-tea': {
+        'brown-sugar': tam('$9.000', '$10.000'),
+        matcha: tam('$9.000', '$10.000'),
+        frutilla: tam('$9.000', '$10.000'),
+        thai: tam('$9.000', '$10.000'),
+        oreo: tam('$9.000', '$10.000'),
+        taro: tam('$9.000', '$10.000'),
+        flan: tam('$9.000', '$10.000'),
+        chocolate: tam('$9.000', '$10.000'),
+    },
+    frappuccinos: {
+        'chocolate-moca': tam('$7.500', '$8.000'),
+        'oreo-frappe': tam('$7.500', '$8.000'),
+        ddl: tam('$7.500', '$8.000'),
+        'frutilla-frappe': tam('$7.500', '$8.000'),
+        'matcha-frappe': tam('$7.500', '$8.000'),
+    },
+    'iced-coffee': {
+        americano: tam('$7.000', '$7.500'),
+        latte: tam('$7.000', '$7.500'),
+        'dark-moca': tam('$7.000', '$7.500'),
+        'caramel-latte': tam('$7.000', '$7.500'),
+        'matcha-latte': tam('$7.000', '$7.500'),
+    },
+    postres: {
+        chocotorta: tam('$6.000', 'N/A'),
+        'postre-oreo': tam('$6.000', 'N/A'),
+    },
+};
+
+/** Otros precios del truck, por categoría (se mezclan sobre los del local). */
+export const PRECIOS_TRUCK = {
+    licuados: { price: { simple: 7000, mixto: 7500 } },
+    // En el truck: 1 bocha $3.000, 2 bochas $4.000. No hay de 3.
+    helados: { sizes: [{ id: '1', label: '1 bocha', price: 3000 }, { id: '2', label: '2 bochas', price: 4000 }] },
+};
+
+/** Pisa en el lugar los precios del menú con los del truck. */
+export function aplicarPreciosTruck(categorias) {
+    categorias.forEach((cat) => {
+        const sizes = SIZES_TRUCK[cat.id];
+        if (sizes) {
+            (cat.items || []).forEach((item) => {
+                if (sizes[item.id]) item.sizes = { ...item.sizes, ...sizes[item.id] };
+            });
+        }
+        const otros = PRECIOS_TRUCK[cat.id];
+        if (otros) Object.assign(cat, otros);
+    });
+}

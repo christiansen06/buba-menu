@@ -1,3 +1,6 @@
+import { getUnidad } from '../config/unidad.js';
+import { aplicarPreciosTruck } from './preciosTruck.js';
+
 /**
  * MENU SISTEMA DE BUBA
  *
@@ -842,6 +845,9 @@ const WAFFLE_SIMPLE = {
 // próxima edición se cambian nombre, tema y productos acá; el id sigue
 // siendo 'especiales' así las ventas quedan juntas en Gestión.
 // =====================================================================
+// El food truck tiene sus propios precios (data/preciosTruck.js).
+if (getUnidad() === 'food_truck') aplicarPreciosTruck(menuCategories);
+
 export const edicionEspecial = {
   id: 'especiales',
   name: 'Edición Halloween',

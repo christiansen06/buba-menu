@@ -513,6 +513,57 @@ function ModalHora({ pedido, onCerrar, onListo }) {
     );
 }
 
+/**
+ * Pasar un pedido a la otra unidad (se cargó en el iPad equivocado). Los
+ * precios no cambian: queda lo que se cobró. Cuenta en el cierre de la otra
+ * unidad, así que si ese día ya hay un cierre cargado se avisa.
+ */
+const OTRA_UNIDAD = (u) => (u === 'food_truck' ? 'local' : 'food_truck');
+
+/** ¿Se puede pasar este pedido a la otra unidad? El truck no hace delivery ni PeYa. */
+const puedeMoverse = (pedido) => OTRA_UNIDAD(pedido.unidad) !== 'food_truck' || !(pedido.envio > 0 || pedido.peya_efectivo);
+
+function ModalUnidad({ pedido, onCerrar, onListo }) {
+    const destino = OTRA_UNIDAD(pedido.unidad);
+    const [enviando, setEnviando] = useState(false);
+    const [error, setError] = useState('');
+
+    const mover = async () => {
+        setEnviando(true);
+        const { data, error } = await supabase.rpc('mover_pedido_unidad', { p_id: pedido.id, p_unidad: destino });
+        setEnviando(false);
+        if (error) { setError(error.message); return; }
+        onListo(destino, Boolean(data));
+    };
+
+    return (
+        <div className="admin-overlay" onClick={onCerrar}>
+            <div className="admin-panel panel-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+                <div className="admin-header">
+                    <h3>Pasar al {UNIDAD_LABEL[destino]}</h3>
+                    <button className="cart-close-btn" type="button" onClick={onCerrar} aria-label="Cerrar">✕</button>
+                </div>
+                <p className="panel-modal-resumen">
+                    <strong>{hora(pedido.creado_en)}</strong> · {formatPrice(pedido.total)}
+                    <br />
+                    {resumenItems(pedido)}
+                </p>
+                <p className="panel-ayuda">
+                    Se cargó en {UNIDAD_LABEL[pedido.unidad]} y va a pasar a {UNIDAD_LABEL[destino]}: cuenta en el cierre y en las ventas de esa unidad.
+                    El precio no cambia: queda lo que se cobró.
+                </p>
+                {error && <p className="field-error">{error}</p>}
+                <div className="panel-acciones-fila">
+                    <button type="button" className="panel-btn-sec" onClick={onCerrar}>Volver</button>
+                    <button type="button" className="builder-add-btn" disabled={enviando} onClick={mover}>
+                        {enviando ? 'Pasando…' : `Pasar al ${UNIDAD_LABEL[destino]}`}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function resumenItems(pedido) {
     // Las líneas que se sacaron al editar quedan con cantidad 0: no se muestran.
     const items = (pedido.pedido_items || []).filter((it) => it.cantidad > 0);
@@ -523,7 +574,7 @@ function resumenItems(pedido) {
 
 /* ------------------------------------------------------------------ */
 
-function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar }) {
+function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar, onMover }) {
     const cancelado = pedido.estado === 'cancelado';
     const medio = medioEfectivo(pedido);
     return (
@@ -597,6 +648,16 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     >
                         ✏️ Editar
                     </button>
+                    {puedeMoverse(pedido) && (
+                        <button
+                            type="button"
+                            className="panel-btn-sec"
+                            onClick={() => onMover(pedido)}
+                            disabled={ocupado}
+                        >
+                            {OTRA_UNIDAD(pedido.unidad) === 'food_truck' ? '🚐 Pasar al Truck' : '🏠 Pasar al Local'}
+                        </button>
+                    )}
                     <button
                         type="button"
                         className="panel-btn-cancelar"
@@ -800,6 +861,7 @@ function PanelPedidos() {
                             onReactivar={reactivar}
                             onCambiarHora={(pedido) => setModal({ tipo: 'hora', pedido })}
                             onEditar={(pedido) => setModal({ tipo: 'editar', pedido })}
+                            onMover={(pedido) => setModal({ tipo: 'unidad', pedido })}
                         />
                     ))}
                 </div>
@@ -835,6 +897,17 @@ function PanelPedidos() {
                         setModal(null);
                         const antes = diaAR(modal.pedido.creado_en);
                         setAvisoPanel(diaNuevo !== antes ? `Pedido movido al ${diaLindo(diaNuevo)}.` : 'Hora cambiada.');
+                        recargar();
+                    }}
+                />
+            )}
+            {modal?.tipo === 'unidad' && (
+                <ModalUnidad
+                    pedido={modal.pedido}
+                    onCerrar={() => setModal(null)}
+                    onListo={(destino, hayCierre) => {
+                        setModal(null);
+                        setAvisoPanel(`Pedido pasado al ${UNIDAD_LABEL[destino]}.${hayCierre ? ' Ese día ya tiene un cierre cargado: revisalo en Gestión.' : ''}`);
                         recargar();
                     }}
                 />

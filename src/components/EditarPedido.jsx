@@ -9,6 +9,7 @@ import { DisponibilidadProvider } from '../context/DisponibilidadContext.jsx';
 import IceCreamBuilder from './IceCreamBuilder.jsx';
 import MedialunasSelector from './MedialunasSelector.jsx';
 import LicuadoBuilder from './LicuadoBuilder.jsx';
+import MilkshakeBuilder from './MilkshakeBuilder.jsx';
 import WaffleBuilder from './WaffleBuilder.jsx';
 import ProductosDeCategoria from './ProductosDeCategoria.jsx';
 import PromoSection from './PromoSection.jsx';
@@ -31,6 +32,7 @@ function Armable({ category, linea }) {
     if (category.builderType === 'icecream') return <IceCreamBuilder category={category} />;
     if (category.builderType === 'medialunas') return <MedialunasSelector category={category} />;
     if (category.builderType === 'licuado') return <LicuadoBuilder category={category} />;
+    if (category.builderType === 'milkshake') return <MilkshakeBuilder category={category} />;
     if (category.builderType === 'waffle') return <WaffleBuilder category={category} />;
     if (category.items?.length) {
         const det = linea?.detalle || {};

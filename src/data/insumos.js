@@ -165,6 +165,9 @@ export const USOS = {
     },
 };
 
+// Los milkshakes usan los mismos sabores y salsas que el helado: gastan el mismo stock.
+USOS.milkshakes = { flavors: USOS.helados.flavors, sauces: USOS.helados.sauces };
+
 /**
  * Productos TERMINADOS de la carta que dependen de un insumo.
  * Si falta cualquiera de los que se listan, el producto sale sin stock.

@@ -852,8 +852,35 @@ const WAFFLE_SIMPLE = {
 // El food truck tiene sus propios precios (data/preciosTruck.js).
 // BASE_LOCAL guarda la carta con precios del local antes de tocarla, para
 // poder armar la de la otra unidad (el panel edita pedidos de las dos).
+// ===== MILKSHAKES (sólo food truck, 09/11/2026) =====
+// Batido con helado y salsa, a elección. Los sabores y las salsas son los
+// mismos que los del helado (y gastan el mismo stock): se toman de ahí.
+{
+  const i = menuCategories.findIndex((c) => c.id === 'helados');
+  menuCategories.splice(i + 1, 0, {
+    id: 'milkshakes',
+    name: 'Milkshakes',
+    icon: '🥛',
+    accent: 'lilac',
+    soloUnidad: 'food_truck',
+    description: 'Batido con helado y salsa. Elegís vos cómo lo querés',
+    type: 'builder',
+    builderType: 'milkshake',
+    sizes: [
+      { id: 'mediano', label: 'Mediano', price: 7000 },
+      { id: 'grande', label: 'Grande', price: 8000 },
+    ],
+    flavors: menuCategories[i].flavors,
+    sauces: menuCategories[i].sauces,
+  });
+}
+
+// Categorías que existen sólo en una unidad (soloUnidad).
+const deUnidad = (carta, unidad) => carta.filter((c) => !c.soloUnidad || c.soloUnidad === unidad);
+
 const BASE_LOCAL = structuredClone(menuCategories);
 if (getUnidad() === 'food_truck') aplicarPreciosTruck(menuCategories);
+else menuCategories.splice(0, menuCategories.length, ...deUnidad(menuCategories, 'local'));
 
 const cartas = {};
 /**
@@ -866,7 +893,7 @@ export function menuDeUnidad(unidad) {
   if (!cartas[unidad]) {
     const carta = structuredClone(BASE_LOCAL);
     if (unidad === 'food_truck') aplicarPreciosTruck(carta);
-    cartas[unidad] = carta;
+    cartas[unidad] = deUnidad(carta, unidad);
   }
   return cartas[unidad];
 }

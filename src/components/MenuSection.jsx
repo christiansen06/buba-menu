@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import IceCreamBuilder from './IceCreamBuilder';
 import MedialunasSelector from './MedialunasSelector';
 import LicuadoBuilder from './LicuadoBuilder';
+import MilkshakeBuilder from './MilkshakeBuilder';
 import WaffleBuilder from './WaffleBuilder';
 import ProductosDeCategoria from './ProductosDeCategoria';
 import PromoSection from './PromoSection';
@@ -178,6 +179,7 @@ function MenuSection() {
         if (category.builderType === 'icecream') return <IceCreamBuilder category={category} />;
         if (category.builderType === 'medialunas') return <MedialunasSelector category={category} />;
         if (category.builderType === 'licuado') return <LicuadoBuilder category={category} />;
+        if (category.builderType === 'milkshake') return <MilkshakeBuilder category={category} />;
         if (category.builderType === 'waffle') return <WaffleBuilder category={category} />;
 
         if (category.items?.length > 0) {

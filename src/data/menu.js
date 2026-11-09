@@ -540,7 +540,11 @@ export const menuCategories = [
     description: 'Licuados frescos. Elegís vos cómo los querés',
     type: 'builder',
     builderType: 'licuado',
-    price: { simple: 7500, mixto: 8000 },
+    // Dos tamaños (09/11/2026), mismos precios en el local y en el truck.
+    sizes: [
+      { id: 'mediano', label: 'Mediano', price: { simple: 7000, mixto: 7500 } },
+      { id: 'grande', label: 'Grande', price: { simple: 8000, mixto: 8500 } },
+    ],
     fruits: [
       { id: 'frutilla', label: 'Frutilla' },
       { id: 'banana', label: 'Banana' },

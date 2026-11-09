@@ -1302,6 +1302,8 @@ a {
 }
 
 /* --- Licuado builder --- */
+.licuado-size-grupo + .licuado-size-grupo { margin-top: 0.9rem; }
+.licuado-size-titulo { margin: 0 0 0.4rem; font-weight: 800; font-size: 0.95rem; opacity: 0.8; }
 .licuado-type-chips {
   display: grid;
   grid-template-columns: 1fr 1fr;

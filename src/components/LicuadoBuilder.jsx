@@ -19,6 +19,7 @@ function LicuadoBuilder({ category }) {
 
     const [step, setStep] = useState(1);
     const [selectedType, setSelectedType] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
     const [selectedFruits, setSelectedFruits] = useState([]);
     const [selectedBase, setSelectedBase] = useState(null);
     const [selectedSugar, setSelectedSugar] = useState(null);
@@ -31,10 +32,12 @@ function LicuadoBuilder({ category }) {
         if (isEditing && editingItem.config) {
             const cfg = editingItem.config;
             setSelectedType(types.find((t) => t.id === cfg.typeId) || null);
+            // Los pedidos anteriores a los tamaños no lo traen: hay que elegirlo de nuevo.
+            setSelectedSize(category.sizes.find((z) => z.id === cfg.sizeId) || null);
             setSelectedFruits(category.fruits.filter((f) => cfg.fruitIds.includes(f.id)));
             setSelectedBase(category.bases.find((b) => b.id === cfg.baseId) || null);
             setSelectedSugar(cfg.sugar);
-            setStep(4);
+            setStep(category.sizes.some((z) => z.id === cfg.sizeId) ? 4 : 1);
         }
     }, [editingItem]); // eslint-disable-line
 
@@ -46,12 +49,16 @@ function LicuadoBuilder({ category }) {
     const reset = () => {
         setStep(1);
         setSelectedType(null);
+        setSelectedSize(null);
         setSelectedFruits([]);
         setSelectedBase(null);
         setSelectedSugar(null);
     };
 
-    const handleTypeSelect = (type) => {
+    const precio = selectedSize && selectedType ? selectedSize.price[selectedType.id] : null;
+
+    const handleTypeSelect = (size, type) => {
+        setSelectedSize(size);
         setSelectedType(type);
         setSelectedFruits([]);
         setStep(2);
@@ -71,16 +78,17 @@ function LicuadoBuilder({ category }) {
     };
 
     const handleSave = () => {
-        const label = `Licuado ${selectedType.label} · ${selectedFruits.map((f) => f.label).join(', ')} · ${selectedBase.label} · ${selectedSugar}`;
+        const label = `Licuado ${selectedType.label} ${selectedSize.label} · ${selectedFruits.map((f) => f.label).join(', ')} · ${selectedBase.label} · ${selectedSugar}`;
         const config = {
             typeId: selectedType.id,
+            sizeId: selectedSize.id,
             fruitIds: selectedFruits.map((f) => f.id),
             baseId: selectedBase.id,
             sugar: selectedSugar,
         };
 
         if (isEditing) {
-            updateItem(editingItem.id, { label, unitPrice: category.price[selectedType.id], config });
+            updateItem(editingItem.id, { label, unitPrice: precio, config });
             clearEdit();
             showToast('¡Pedido actualizado! 🍓');
         } else {
@@ -89,9 +97,9 @@ function LicuadoBuilder({ category }) {
                 categoryName: category.name,
                 builderType: 'licuado',
                 productId: 'armado',
-                variante: selectedType.id,
+                variante: `${selectedSize.id}-${selectedType.id}`,
                 label,
-                unitPrice: category.price[selectedType.id],
+                unitPrice: precio,
                 config,
             });
             showToast('¡Agregado al pedido! 🍓');
@@ -105,7 +113,7 @@ function LicuadoBuilder({ category }) {
     };
 
     const isStepComplete = (s) => {
-        if (s === 1) return selectedType !== null;
+        if (s === 1) return selectedType !== null && selectedSize !== null;
         if (s === 2) return selectedFruits.length === maxFruits;
         if (s === 3) return selectedBase !== null;
         if (s === 4) return selectedSugar !== null;
@@ -135,25 +143,30 @@ function LicuadoBuilder({ category }) {
                 <div className="builder-step-header" onClick={() => canProceedTo(1) && setStep(1)}>
                     <div className="builder-step-title">
                         <span className="builder-step-number">{isStepComplete(1) && step !== 1 ? '✓' : '1'}</span>
-                        <span>Tipo</span>
+                        <span>Tamaño y tipo</span>
                     </div>
                     {isStepComplete(1) && step !== 1 && (
-                        <span className="builder-step-summary">{selectedType.label} · {formatPrice(category.price[selectedType.id])}</span>
+                        <span className="builder-step-summary">{selectedSize.label} · {selectedType.label} · {formatPrice(precio)}</span>
                     )}
                 </div>
                 {step === 1 && (
                     <div className="builder-step-body">
-                        <div className="licuado-type-chips">
-                            {types.map((type) => (
-                                <button key={type.id}
-                                        className={`licuado-type-chip ${selectedType?.id === type.id ? 'selected' : ''}`}
-                                        onClick={() => handleTypeSelect(type)}>
-                                    <span className="licuado-type-name">{type.label}</span>
-                                    <span className="licuado-type-price">{type.frutas}</span>
-                                    <span className="licuado-type-price">{formatPrice(category.price[type.id])}</span>
-                                </button>
-                            ))}
-                        </div>
+                        {category.sizes.map((size) => (
+                            <div key={size.id} className="licuado-size-grupo">
+                                <p className="licuado-size-titulo">{size.label}</p>
+                                <div className="licuado-type-chips">
+                                    {types.map((type) => (
+                                        <button key={type.id}
+                                                className={`licuado-type-chip ${selectedSize?.id === size.id && selectedType?.id === type.id ? 'selected' : ''}`}
+                                                onClick={() => handleTypeSelect(size, type)}>
+                                            <span className="licuado-type-name">{type.label}</span>
+                                            <span className="licuado-type-price">{type.frutas}</span>
+                                            <span className="licuado-type-price">{formatPrice(size.price[type.id])}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

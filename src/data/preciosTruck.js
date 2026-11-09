@@ -49,7 +49,6 @@ export const SIZES_TRUCK = {
 export const PRECIOS_TRUCK = {
     // En el truck hay menos perlas: la porción extra sale más.
     'bubble-tea': { extras: [{ id: 'perlas', label: 'Perlas extra', emoji: '🧋', price: 1500, insumo: 'perlas', max: 3 }] },
-    licuados: { price: { simple: 7000, mixto: 7500 } },
     // En el truck: 1 bocha $3.000, 2 bochas $4.000. No hay de 3.
     // 1 a $1.500; 6 a $8.000 (en el local, 6 a $8.500).
     medialunas: {

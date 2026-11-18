@@ -23,10 +23,13 @@ import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../conf
 
 const OWNER_HINT = 'Entrá con el mail y la contraseña del dueño. Queda guardado en este aparato.';
 
+// Tarjeta y QR son el mismo posnet, pero se marcan aparte (parte 49): la
+// tarjeta llega a la cuenta otro día y el QR al instante.
 const MEDIOS = [
     { id: 'efectivo', label: 'Efectivo' },
     { id: 'transferencia', label: 'Transf.' },
-    { id: 'posnet', label: 'Tarjeta/QR' },
+    { id: 'tarjeta', label: 'Tarjeta' },
+    { id: 'qr', label: 'QR' },
     // Uber Eats ya no se marca a mano: entra con el reporte semanal (parte 27).
 ];
 
@@ -78,6 +81,12 @@ const diaLindo = (dia) => new Date(`${dia}T12:00:00-03:00`).toLocaleDateString('
  * pedido ya aparece marcado, y sólo se toca si cambió.
  */
 const medioEfectivo = (pedido) => pedido.medio_pago_cobro || pedido.medio_pago || null;
+
+/** El botón de cobro que va marcado: efectivo, transferencia, tarjeta o qr (posnet sin aclarar = ninguno). */
+const botonCobro = (pedido) => {
+    const m = medioEfectivo(pedido);
+    return m === 'posnet' ? pedido.posnet_tipo || 'posnet' : m;
+};
 
 /**
  * Filtros del panel: en qué "pila" cae cada pedido. Tarjeta y QR se separan
@@ -591,7 +600,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     <span className="solo-lector"> — cambiar día u hora</span>
                 </button>
                 <span className="panel-pedido-canal">
-                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.peya_efectivo ? '🛵 PeYa en efectivo' : pedido.canal === 'mostrador' ? '🧾 Mostrador' : pedido.canal === 'qr' ? '📱 QR' : '—'}
+                    {medio === 'uber' ? '🛵 Uber Eats' : pedido.peya_efectivo ? '🛵 PeYa en efectivo' : pedido.canal === 'mostrador' ? '🧾 Mostrador' : pedido.canal === 'qr' ? '📲 Menú QR' : '—'}
                 </span>
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
@@ -630,15 +639,18 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                                 <button
                                     key={m.id}
                                     type="button"
-                                    className={`panel-chip panel-chip-${m.id} ${medio === m.id ? 'activo' : ''}`}
+                                    className={`panel-chip panel-chip-${m.id} ${botonCobro(pedido) === m.id ? 'activo' : ''}`}
                                     onClick={() => onCobro(pedido, m.id)}
                                     disabled={ocupado}
-                                    aria-pressed={medio === m.id}
+                                    aria-pressed={botonCobro(pedido) === m.id}
                                 >
                                     {m.label}
                                 </button>
                             ))}
                         </div>
+                        {botonCobro(pedido) === 'posnet' && (
+                            <span className="panel-cobro-aviso">¿Tarjeta o QR? Tocá el que fue.</span>
+                        )}
                     </div>
                     <button
                         type="button"
@@ -756,7 +768,10 @@ function PanelPedidos() {
     const cobro = (pedido, medio) => {
         // El marcado ya viene del checkout: tocarlo de nuevo no cambia nada.
         // Tocar otro lo corrige (queda anotado como cobrado con ese).
-        if (medioEfectivo(pedido) === medio) return undefined;
+        if (botonCobro(pedido) === medio) return undefined;
+        if (medio === 'tarjeta' || medio === 'qr') {
+            return accion(pedido, () => supabase.rpc('registrar_cobro_posnet', { p_id: pedido.id, p_tipo: medio }), 'No se pudo anotar el cobro');
+        }
         return accion(pedido, () => supabase.rpc('registrar_cobro', { p_id: pedido.id, p_medio: medio }), 'No se pudo anotar el cobro');
     };
 

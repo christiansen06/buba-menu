@@ -461,22 +461,22 @@ export const menuCategories = [
       {
         id: 'cookie-doble-choco',
         label: 'Cookie Doble Chocolate',
-        pricePerUnit: 5000,
+        pricePerUnit: 6000,
       },
       {
         id: 'cookie-red-velvet',
         label: 'Cookie Red Velvet',
-        pricePerUnit: 5000,
+        pricePerUnit: 6000,
       },
       {
         id: 'cookie-chips',
         label: 'Cookie Chips de Chocolate',
-        pricePerUnit: 5000,
+        pricePerUnit: 6000,
       },
       {
         id: 'cookie-pistacho',
         label: 'Cookie de Pistacho',
-        pricePerUnit: 5000,
+        pricePerUnit: 6000,
       },
       {
         id: 'budin-chips',

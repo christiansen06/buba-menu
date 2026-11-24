@@ -225,13 +225,13 @@ function Cart() {
         //
         // Si esta misma venta ya se anotó, se saltea: es un reintento porque
         // WhatsApp falló, no una venta nueva.
-        // Ojo: no van ni el nombre ni la aclaración, sólo los productos.
+        // Ojo: el nombre no va. La aclaración sí (parte 50), para verla en el panel.
         // La firma NO incluye el medio de pago: cambiar de efectivo a
         // transferencia no hace que sea otro pedido.
         const firma = firmaPedido(items, total);
         if (!yaAnotado(firma)) {
             anotar(firma);
-            void registrarPedido({ items, total, medioPago: paymentMethod, envio, descuento: descuentoParaBase });
+            void registrarPedido({ items, total, medioPago: paymentMethod, envio, descuento: descuentoParaBase, aclaracion: note });
         }
 
         enviarWhatsApp();

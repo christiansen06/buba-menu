@@ -6,6 +6,7 @@ import DeliveryPeya from './DeliveryPeya.jsx';
 import ItemsPedido from './ItemsPedido.jsx';
 import { textoBuscable } from '../utils/itemsPedido.js';
 import { textoDescuento } from '../utils/descuento.js';
+import { EVENTO_NUEVOS, marcarVistos, vistoDesde } from '../utils/avisoPedidos.js';
 import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
 
 /**
@@ -668,11 +669,48 @@ function resumenItems(pedido) {
 
 /* ------------------------------------------------------------------ */
 
-function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar, onMover }) {
+/**
+ * Editar, Pasar al otro lado y Cancelar se usan poco: van juntos detrás de
+ * un "⋯" para que cada tarjeta ocupe menos y no se toquen sin querer.
+ */
+function MenuAcciones({ pedido, ocupado, onEditar, onMover, onCancelar }) {
+    const [abierto, setAbierto] = useState(false);
+    const elegir = (fn) => { setAbierto(false); fn(pedido); };
+    return (
+        <div className="panel-acciones">
+            <button
+                type="button"
+                className="panel-acciones-btn"
+                onClick={() => setAbierto((v) => !v)}
+                disabled={ocupado}
+                aria-expanded={abierto}
+                aria-label="Más acciones"
+            >
+                ⋯
+            </button>
+            {abierto && (
+                <>
+                    <div className="panel-acciones-fondo" onClick={() => setAbierto(false)} aria-hidden="true" />
+                    <div className="panel-acciones-menu" role="menu">
+                        <button type="button" role="menuitem" onClick={() => elegir(onEditar)}>✏️ Editar pedido</button>
+                        {puedeMoverse(pedido) && (
+                            <button type="button" role="menuitem" onClick={() => elegir(onMover)}>
+                                {OTRA_UNIDAD(pedido.unidad) === 'food_truck' ? '🚐 Pasar al Truck' : '🏠 Pasar al Local'}
+                            </button>
+                        )}
+                        <button type="button" role="menuitem" className="peligro" onClick={() => elegir(onCancelar)}>✖️ Cancelar pedido</button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+function TarjetaPedido({ pedido, nuevo, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar, onMover }) {
     const cancelado = pedido.estado === 'cancelado';
     const medio = medioEfectivo(pedido);
     return (
-        <article className={`panel-pedido ${cancelado ? 'cancelado' : ''} ${medio === 'uber' ? 'es-uber' : ''}`}>
+        <article className={`panel-pedido ${cancelado ? 'cancelado' : ''} ${medio === 'uber' ? 'es-uber' : ''} ${nuevo ? 'es-nuevo' : ''}`}>
             <div className="panel-pedido-cab">
                 <button
                     type="button"
@@ -684,12 +722,19 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                     {hora(pedido.creado_en)} <span aria-hidden="true">✎</span>
                     <span className="solo-lector"> — cambiar día u hora</span>
                 </button>
+                {nuevo && <span className="panel-pedido-nuevo">🆕 Nuevo</span>}
                 <span className="panel-pedido-canal">
                     {medio === 'uber' ? '🛵 Uber Eats' : pedido.peya_efectivo ? '🛵 PeYa en efectivo' : pedido.canal === 'mostrador' ? '🧾 Mostrador' : pedido.canal === 'qr' ? '📲 Menú QR' : '—'}
                 </span>
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
 
+            {pedido.aclaracion && (
+                <p className="panel-pedido-aclaracion">
+                    <span className="panel-pedido-aclaracion-label">📝 Aclaración</span>
+                    {pedido.aclaracion}
+                </p>
+            )}
             <ItemsPedido items={pedido.pedido_items} />
             {pedido.posnet_tipo && medio === 'posnet' && (
                 <p className="panel-pedido-envio">{pedido.posnet_tipo === 'qr' ? '📱 Se cobró con QR' : '💳 Se cobró con tarjeta'}</p>
@@ -737,32 +782,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                             <span className="panel-cobro-aviso">¿Tarjeta o QR? Tocá el que fue.</span>
                         )}
                     </div>
-                    <button
-                        type="button"
-                        className="panel-btn-sec"
-                        onClick={() => onEditar(pedido)}
-                        disabled={ocupado}
-                    >
-                        ✏️ Editar
-                    </button>
-                    {puedeMoverse(pedido) && (
-                        <button
-                            type="button"
-                            className="panel-btn-sec"
-                            onClick={() => onMover(pedido)}
-                            disabled={ocupado}
-                        >
-                            {OTRA_UNIDAD(pedido.unidad) === 'food_truck' ? '🚐 Pasar al Truck' : '🏠 Pasar al Local'}
-                        </button>
-                    )}
-                    <button
-                        type="button"
-                        className="panel-btn-cancelar"
-                        onClick={() => onCancelar(pedido)}
-                        disabled={ocupado}
-                    >
-                        Cancelar
-                    </button>
+                    <MenuAcciones pedido={pedido} ocupado={ocupado} onEditar={onEditar} onMover={onMover} onCancelar={onCancelar} />
                 </div>
             )}
         </article>
@@ -786,6 +806,11 @@ function PanelPedidos() {
     const [error, setError] = useState('');
     const [avisoPanel, setAvisoPanel] = useState('');   // "Pedido movido al …"
     const [version, setVersion] = useState(0);          // se incrementa para volver a cargar
+    // Los pedidos del QR que entraron desde la última vez que se miró el panel
+    // llevan "🆕 Nuevo" mientras el panel siga abierto; los que entran con el
+    // panel abierto, durante 10 minutos.
+    const [abierto] = useState(() => ({ visto: vistoDesde(), en: new Date().toISOString() }));
+    const [ahora, setAhora] = useState(() => Date.now());
 
     const recargar = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -806,7 +831,7 @@ function PanelPedidos() {
         const { ini, fin } = limitesDelDia(dia);
         supabase
             .from('pedidos')
-            .select('id, creado_en, total, envio, peya_efectivo, descuento, descuento_tipo, descuento_valor, descuento_nota, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
+            .select('id, creado_en, total, envio, peya_efectivo, descuento, descuento_tipo, descuento_valor, descuento_nota, aclaracion, posnet_tipo, medio_pago, medio_pago_cobro, canal, unidad, estado, motivo_cancelacion, pedido_items(id, categoria_id, producto_id, variante, nombre, cantidad, precio_unitario, detalle)')
             .eq('unidad', vista)            // la tablet del truck no ve (ni cancela) los del local: ver vistaInicial
             .is('plataforma', null)         // las ventas de Uber importadas del reporte no se tocan desde acá
             .gte('creado_en', ini)
@@ -836,6 +861,24 @@ function PanelPedidos() {
         document.addEventListener('visibilitychange', alVolver);
         return () => document.removeEventListener('visibilitychange', alVolver);
     }, [recargar]);
+
+    // Entró un pedido del QR (lo avisa utils/avisoPedidos.js): se recarga solo.
+    useEffect(() => {
+        const alAviso = (e) => { if (e.detail?.hayNuevos) recargar(); };
+        window.addEventListener(EVENTO_NUEVOS, alAviso);
+        const reloj = setInterval(() => setAhora(Date.now()), 60000);
+        return () => { window.removeEventListener(EVENTO_NUEVOS, alAviso); clearInterval(reloj); };
+    }, [recargar]);
+
+    // Mirando hoy la unidad de este aparato: lo que entró queda visto.
+    useEffect(() => {
+        if (pedidos && vista === getUnidad() && esHoy(dia)) marcarVistos();
+    }, [pedidos, vista, dia]);
+
+    const esNuevo = (p) => {
+        if (p.canal !== 'qr' || p.unidad !== getUnidad() || p.estado === 'cancelado' || !abierto.visto || p.creado_en <= abierto.visto) return false;
+        return p.creado_en <= abierto.en || ahora - new Date(p.creado_en).getTime() < 10 * 60000;
+    };
 
     const salir = async () => { await supabase.auth.signOut(); volverAlMenu(); };
 
@@ -968,6 +1011,7 @@ function PanelPedidos() {
                         <TarjetaPedido
                             key={p.id}
                             pedido={p}
+                            nuevo={esNuevo(p)}
                             ocupado={ocupado === p.id}
                             onCobro={cobro}
                             onCancelar={pedirCancelar}

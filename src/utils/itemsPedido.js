@@ -144,5 +144,5 @@ export function textoBuscable(pedido) {
             const b = bloqueDe(it);
             return [it.nombre, b.titulo, b.sub, ...b.badges.map((x) => x.texto), ...b.secciones.flatMap((s) => s.valores)].join(' ');
         })
-        .join(' ');
+        .join(' ') + (pedido.aclaracion ? ` aclaracion ${pedido.aclaracion}` : '');
 }

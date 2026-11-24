@@ -5350,3 +5350,154 @@ img.product-image.product-photo {
 [data-theme="dark"] .pedido-badge-caliente { background: rgb(239 68 68 / 0.22); color: #fecaca; }
 [data-theme="dark"] .pedido-badge-frio { background: rgb(59 130 246 / 0.22); color: #bfdbfe; }
 [data-theme="dark"] .pedido-badge-aviso { background: rgb(139 92 246 / 0.22); color: #ddd6fe; }
+
+/* =============================================
+   Aviso de pedidos nuevos, aclaración y menú "⋯" (parte 50)
+   ============================================= */
+
+/* Círculo con los pedidos del QR sin mirar, sobre el botón "Pedidos". */
+.indicador-mostrador-link { position: relative; gap: 0.35rem; }
+.indicador-badge {
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px hsl(var(--buba-cyan-h) 34.4% 12.5%);
+}
+.indicador-mostrador-link.con-nuevos { animation: pedidos-latido 1.6s ease-in-out infinite; }
+@keyframes pedidos-latido {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.55); }
+  50% { box-shadow: 0 0 0 7px rgb(239 68 68 / 0); }
+}
+
+/* Cartel arriba cuando recién entra un pedido. */
+.aviso-pedido-nuevo {
+  position: fixed;
+  top: calc(0.6rem + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  width: min(420px, calc(100vw - 2rem));
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.7rem 0.65rem 1rem;
+  border-radius: 16px;
+  background: hsl(var(--buba-cyan-h) 34.4% 12.5%);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
+  animation: aviso-baja 0.3s ease-out;
+}
+.aviso-pedido-nuevo > span { flex: 1; }
+.aviso-pedido-nuevo-ver {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--buba-cyan);
+  color: hsl(var(--buba-cyan-h) 34.4% 12.5%);
+  text-decoration: none;
+  font-weight: 900;
+}
+.aviso-pedido-nuevo-x {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  min-width: 36px;
+  min-height: 36px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+@keyframes aviso-baja { from { transform: translate(-50%, -120%); } to { transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) {
+  .indicador-mostrador-link.con-nuevos, .aviso-pedido-nuevo { animation: none; }
+}
+
+/* Pedido nuevo en el panel. */
+.panel-pedido.es-nuevo { box-shadow: 0 0 0 3px #ef4444; }
+.panel-pedido-nuevo {
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+/* La aclaración del cliente: arriba de los productos, imposible de pasar por alto. */
+.panel-pedido-aclaracion {
+  margin: 0.2rem 0 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  background: #fef3c7;
+  color: #78350f;
+  border: 2px solid #f59e0b;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.panel-pedido-aclaracion-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.15rem;
+}
+[data-theme="dark"] .panel-pedido-aclaracion { background: rgb(245 158 11 / 0.18); color: #fde68a; }
+
+/* Menú "⋯": Editar, Pasar al otro lado, Cancelar. */
+.panel-pedido-pie { align-items: flex-end; flex-wrap: nowrap; }
+.panel-pedido-pie .panel-cobro { flex: 1; min-width: 0; }
+.panel-acciones { position: relative; flex-shrink: 0; }
+.panel-acciones-btn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid hsl(var(--buba-cyan-h) 40% 75%);
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+.panel-acciones-btn[aria-expanded="true"] { background: hsl(var(--buba-cyan-h) 70% 92%); }
+.panel-acciones-fondo { position: fixed; inset: 0; z-index: 40; }
+.panel-acciones-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.4rem);
+  z-index: 41;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem;
+  border-radius: 14px;
+  background: var(--color-bg, #fff);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.2);
+}
+.panel-acciones-menu button {
+  min-height: 44px;
+  padding: 0 0.8rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.panel-acciones-menu button:hover { background: hsl(var(--buba-cyan-h) 70% 94%); }
+.panel-acciones-menu .peligro { color: #be185d; }
+[data-theme="dark"] .panel-acciones-menu { background: hsl(var(--buba-cyan-h) 30% 16%); }
+[data-theme="dark"] .panel-acciones-menu button:hover,
+[data-theme="dark"] .panel-acciones-btn[aria-expanded="true"] { background: hsl(var(--buba-cyan-h) 30% 24%); }

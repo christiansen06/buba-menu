@@ -1000,7 +1000,7 @@ export const promociones = [
     id: 'promo-cafe-cookie-medialuna',
     name: 'Café + Cookie + Medialuna',
     description: 'Café grande + 1 cookie + 1 medialuna',
-    price: 11000,
+    price: 12000,
     slots: [
       CAFE_CHICO,
       {

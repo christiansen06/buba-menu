@@ -3,6 +3,8 @@ import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import EditarPedido from './EditarPedido.jsx';
 import DeliveryPeya from './DeliveryPeya.jsx';
+import ItemsPedido from './ItemsPedido.jsx';
+import { textoBuscable } from '../utils/itemsPedido.js';
 import { textoDescuento } from '../utils/descuento.js';
 import { esMostrador, getUnidad, UNIDAD_LABEL, configurarAparato } from '../config/unidad.js';
 
@@ -123,6 +125,9 @@ function pilaDe(pedido) {
  * está en la caja. Uber no se muestra: no pasa por la caja.
  */
 function ParaElCierre({ pedidos, unidad, dia }) {
+    // Arranca cerrado siempre (no se guarda): los montos no tienen que quedar
+    // a la vista de un empleado o de un cliente que mira la pantalla.
+    const [abierto, setAbierto] = useState(false);
     const [copiado, setCopiado] = useState(false);
     const suma = (claves) => pedidos.filter((p) => claves.includes(pilaDe(p))).reduce((a, p) => a + (Number(p.total) || 0), 0);
     const efectivo = suma(['efectivo', 'peya']);
@@ -151,11 +156,22 @@ function ParaElCierre({ pedidos, unidad, dia }) {
         } catch { /* sin portapapeles: se lee en pantalla */ }
     };
 
+    if (!abierto) {
+        return (
+            <button type="button" className="panel-desplegable" onClick={() => setAbierto(true)} aria-expanded="false">
+                <span>🧮 Para el cierre</span><span aria-hidden="true">▸</span>
+            </button>
+        );
+    }
+
     return (
         <section className="panel-cierre" aria-label="Para el cierre">
             <div className="panel-cierre-cab">
                 <h3>🧮 Para el cierre</h3>
-                <button type="button" className="panel-btn-sec" onClick={copiar}>{copiado ? '✓ Copiado' : 'Copiar'}</button>
+                <div className="panel-cierre-acciones">
+                    <button type="button" className="panel-btn-sec" onClick={copiar}>{copiado ? '✓ Copiado' : 'Copiar'}</button>
+                    <button type="button" className="panel-btn-sec" onClick={() => setAbierto(false)} aria-expanded="true">Ocultar</button>
+                </div>
             </div>
             <dl className="panel-cierre-filas">
                 {filas.map((f) => (
@@ -174,16 +190,15 @@ function ParaElCierre({ pedidos, unidad, dia }) {
 function AvisoSinMedio({ pedidos, onVer }) {
     const sin = pedidos.filter((p) => pilaDe(p) === 'sin');
     if (!sin.length) return null;
-    const monto = sin.reduce((a, p) => a + (Number(p.total) || 0), 0);
     return (
         <p className="panel-aviso-sin" role="alert">
-            <span>⚠️ <strong>{sin.length} {sin.length === 1 ? 'pedido' : 'pedidos'} sin medio de pago</strong> ({formatPrice(monto)}). Marcá con qué se cobró antes de cerrar.</span>
+            <span>⚠️ <strong>{sin.length} {sin.length === 1 ? 'pedido' : 'pedidos'} sin medio de pago</strong>. Marcá con qué se cobró antes de cerrar.</span>
             <button type="button" className="panel-btn-sec" onClick={onVer}>Ver</button>
         </p>
     );
 }
 
-/** Chips con cantidad y plata de cada medio. Sólo aparecen los que tienen algo (y el elegido). */
+/** Chips con la cantidad de pedidos de cada medio (sin plata: eso va en "Para el cierre"). Sólo los que tienen algo (y el elegido). */
 function FiltroMedios({ pedidos, filtro, onFiltro }) {
     const pilas = {};
     pedidos.forEach((p) => {
@@ -208,10 +223,80 @@ function FiltroMedios({ pedidos, filtro, onFiltro }) {
                         onClick={() => onFiltro(filtro === f.id ? 'todos' : f.id)}
                     >
                         <span className="panel-filtro-nombre">{f.label} <strong>{d.n}</strong></span>
-                        {f.id !== 'cancelado' && <span className="panel-filtro-total">{formatPrice(d.total)}</span>}
                     </button>
                 );
             })}
+        </div>
+    );
+}
+
+const ORDENES = [
+    { id: 'nuevos', label: 'Más nuevos' },
+    { id: 'viejos', label: 'Más viejos' },
+    { id: 'caros', label: 'Mayor precio' },
+    { id: 'baratos', label: 'Menor precio' },
+];
+
+/** Sin tildes ni mayúsculas, para buscar "cafe" y encontrar "Café". */
+const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+function ordenarPedidos(lista, orden) {
+    const fecha = (p) => new Date(p.creado_en).getTime();
+    const copia = [...lista];
+    if (orden === 'viejos') copia.sort((a, b) => fecha(a) - fecha(b));
+    else if (orden === 'caros') copia.sort((a, b) => b.total - a.total || fecha(b) - fecha(a));
+    else if (orden === 'baratos') copia.sort((a, b) => a.total - b.total || fecha(b) - fecha(a));
+    else copia.sort((a, b) => fecha(b) - fecha(a));
+    return copia;
+}
+
+/**
+ * Buscador de productos (siempre a la vista) y "Filtros" desplegable con el
+ * orden y los medios de pago. Si hay un filtro puesto se avisa, aunque el
+ * desplegable esté cerrado, para que nadie crea que faltan pedidos.
+ */
+function BarraPedidos({ pedidos, busqueda, onBusqueda, orden, onOrden, filtro, onFiltro }) {
+    const [abierto, setAbierto] = useState(false);
+    const activos = (filtro !== 'todos' ? 1 : 0) + (orden !== 'nuevos' ? 1 : 0);
+    const etiquetaFiltro = FILTROS.find((f) => f.id === filtro)?.label;
+    return (
+        <div className="panel-barra">
+            <div className="panel-barra-fila">
+                <label className="panel-buscador">
+                    <span aria-hidden="true">🔍</span>
+                    <input
+                        type="search"
+                        placeholder="Buscar producto (ej: matcha, oreo, perlas)"
+                        value={busqueda}
+                        onChange={(e) => onBusqueda(e.target.value)}
+                        aria-label="Buscar producto en los pedidos"
+                    />
+                </label>
+                <button type="button" className={`panel-btn-sec panel-barra-filtros ${activos ? 'con-filtros' : ''}`} onClick={() => setAbierto((v) => !v)} aria-expanded={abierto}>
+                    Filtros{activos ? ` (${activos})` : ''} <span aria-hidden="true">{abierto ? '▾' : '▸'}</span>
+                </button>
+            </div>
+            {!abierto && filtro !== 'todos' && (
+                <p className="panel-barra-activo">
+                    Mostrando sólo: <strong>{etiquetaFiltro}</strong>{' '}
+                    <button type="button" className="panel-link" onClick={() => onFiltro('todos')}>Ver todos</button>
+                </p>
+            )}
+            {abierto && (
+                <div className="panel-barra-panel">
+                    <span className="panel-barra-label">Ordenar</span>
+                    <div className="panel-orden" role="radiogroup" aria-label="Ordenar pedidos">
+                        {ORDENES.map((o) => (
+                            <button key={o.id} type="button" role="radio" aria-checked={orden === o.id}
+                                className={`panel-orden-op ${orden === o.id ? 'activo' : ''}`} onClick={() => onOrden(o.id)}>
+                                {o.label}
+                            </button>
+                        ))}
+                    </div>
+                    <span className="panel-barra-label">Medio de pago</span>
+                    <FiltroMedios pedidos={pedidos} filtro={filtro} onFiltro={onFiltro} />
+                </div>
+            )}
         </div>
     );
 }
@@ -605,7 +690,7 @@ function TarjetaPedido({ pedido, ocupado, onCobro, onCancelar, onReactivar, onCa
                 <span className="panel-pedido-total">{formatPrice(pedido.total)}</span>
             </div>
 
-            <p className="panel-pedido-items">{resumenItems(pedido) || 'Sin detalle'}</p>
+            <ItemsPedido items={pedido.pedido_items} />
             {pedido.posnet_tipo && medio === 'posnet' && (
                 <p className="panel-pedido-envio">{pedido.posnet_tipo === 'qr' ? '📱 Se cobró con QR' : '💳 Se cobró con tarjeta'}</p>
             )}
@@ -692,6 +777,8 @@ function PanelPedidos() {
     const [dia, setDia] = useState(() => new Date());
     const [pedidos, setPedidos] = useState(null);       // null = todavía no cargó
     const [filtro, setFiltro] = useState('todos');     // medio de pago (FILTROS)
+    const [busqueda, setBusqueda] = useState('');       // texto del buscador de productos
+    const [orden, setOrden] = useState('nuevos');       // ORDENES
     const [vista, setVista] = useState(vistaInicial);   // de qué unidad se ven los pedidos
     const [hayPin, setHayPin] = useState(null);         // null = no se sabe todavía
     const [modal, setModal] = useState(null);           // { tipo: 'cancelar', pedido } | { tipo: 'pin' }
@@ -814,7 +901,17 @@ function PanelPedidos() {
 
     const confirmados = (pedidos || []).filter((p) => p.estado !== 'cancelado');
     const cancelados = (pedidos || []).length - confirmados.length;
-    const filtrados = filtro === 'todos' ? (pedidos || []) : (pedidos || []).filter((p) => pilaDe(p) === filtro);
+    const palabras = normalizar(busqueda).split(/\s+/).filter(Boolean);
+    const filtrados = ordenarPedidos(
+        (pedidos || [])
+            .filter((p) => filtro === 'todos' || pilaDe(p) === filtro)
+            .filter((p) => {
+                if (!palabras.length) return true;
+                const texto = normalizar(textoBuscable(p));
+                return palabras.every((w) => texto.includes(w));
+            }),
+        orden,
+    );
 
     const cambiarVista = (u) => {
         if (u === vista) return;
@@ -858,11 +955,12 @@ function PanelPedidos() {
                 <>
                 <AvisoSinMedio pedidos={pedidos} onVer={() => setFiltro('sin')} />
                 <ParaElCierre pedidos={pedidos} unidad={vista} dia={dia} />
-                <FiltroMedios pedidos={pedidos} filtro={filtro} onFiltro={setFiltro} />
+                <BarraPedidos pedidos={pedidos} busqueda={busqueda} onBusqueda={setBusqueda}
+                    orden={orden} onOrden={setOrden} filtro={filtro} onFiltro={setFiltro} />
                 {filtrados.length === 0 && (
                     <p className="panel-ayuda panel-vacio">
-                        No hay pedidos con ese medio este día.{' '}
-                        <button type="button" className="panel-link" onClick={() => setFiltro('todos')}>Ver todos</button>
+                        {palabras.length ? `Ningún pedido de este día tiene "${busqueda.trim()}".` : 'No hay pedidos con ese medio este día.'}{' '}
+                        <button type="button" className="panel-link" onClick={() => { setFiltro('todos'); setBusqueda(''); }}>Ver todos</button>
                     </p>
                 )}
                 <div className="panel-lista">

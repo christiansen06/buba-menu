@@ -13,6 +13,9 @@ const ALIAS = {
     food_truck: 'buba.fud',
 };
 
+/** El alias de una unidad en particular (para un pedido que puede ser del otro lado). */
+export const aliasDe = (unidad) => ALIAS[unidad] || ALIAS.local;
+
 export const PAYMENT_CONFIG = {
     alias: ALIAS[getUnidad()] || ALIAS.local,
     aliasHolder: 'Agustín Christiansen',

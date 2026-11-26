@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase, hayBase } from '../utils/supabase.js';
 import { formatPrice } from '../utils/format.js';
 import EditarPedido from './EditarPedido.jsx';
+import MandarAlCliente from './MandarAlCliente.jsx';
 import DeliveryPeya from './DeliveryPeya.jsx';
 import ItemsPedido from './ItemsPedido.jsx';
 import { textoBuscable } from '../utils/itemsPedido.js';
@@ -673,7 +674,7 @@ function resumenItems(pedido) {
  * Editar, Pasar al otro lado y Cancelar se usan poco: van juntos detrás de
  * un "⋯" para que cada tarjeta ocupe menos y no se toquen sin querer.
  */
-function MenuAcciones({ pedido, ocupado, onEditar, onMover, onCancelar }) {
+function MenuAcciones({ pedido, ocupado, onEditar, onMover, onCancelar, onMandar }) {
     const [abierto, setAbierto] = useState(false);
     const elegir = (fn) => { setAbierto(false); fn(pedido); };
     return (
@@ -693,6 +694,7 @@ function MenuAcciones({ pedido, ocupado, onEditar, onMover, onCancelar }) {
                     <div className="panel-acciones-fondo" onClick={() => setAbierto(false)} aria-hidden="true" />
                     <div className="panel-acciones-menu" role="menu">
                         <button type="button" role="menuitem" onClick={() => elegir(onEditar)}>✏️ Editar pedido</button>
+                        <button type="button" role="menuitem" onClick={() => elegir(onMandar)}>📲 Mandar al cliente</button>
                         {puedeMoverse(pedido) && (
                             <button type="button" role="menuitem" onClick={() => elegir(onMover)}>
                                 {OTRA_UNIDAD(pedido.unidad) === 'food_truck' ? '🚐 Pasar al Truck' : '🏠 Pasar al Local'}
@@ -706,7 +708,7 @@ function MenuAcciones({ pedido, ocupado, onEditar, onMover, onCancelar }) {
     );
 }
 
-function TarjetaPedido({ pedido, nuevo, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar, onMover }) {
+function TarjetaPedido({ pedido, nuevo, ocupado, onCobro, onCancelar, onReactivar, onCambiarHora, onEditar, onMover, onMandar }) {
     const cancelado = pedido.estado === 'cancelado';
     const medio = medioEfectivo(pedido);
     return (
@@ -782,7 +784,7 @@ function TarjetaPedido({ pedido, nuevo, ocupado, onCobro, onCancelar, onReactiva
                             <span className="panel-cobro-aviso">¿Tarjeta o QR? Tocá el que fue.</span>
                         )}
                     </div>
-                    <MenuAcciones pedido={pedido} ocupado={ocupado} onEditar={onEditar} onMover={onMover} onCancelar={onCancelar} />
+                    <MenuAcciones pedido={pedido} ocupado={ocupado} onEditar={onEditar} onMover={onMover} onCancelar={onCancelar} onMandar={onMandar} />
                 </div>
             )}
         </article>
@@ -1019,6 +1021,7 @@ function PanelPedidos() {
                             onCambiarHora={(pedido) => setModal({ tipo: 'hora', pedido })}
                             onEditar={(pedido) => setModal({ tipo: 'editar', pedido })}
                             onMover={(pedido) => setModal({ tipo: 'unidad', pedido })}
+                            onMandar={(pedido) => setModal({ tipo: 'mandar', pedido })}
                         />
                     ))}
                 </div>
@@ -1038,6 +1041,9 @@ function PanelPedidos() {
                     onCerrar={() => setModal(null)}
                     onListo={() => { setModal(null); setAvisoPanel('Pedido actualizado.'); recargar(); }}
                 />
+            )}
+            {modal?.tipo === 'mandar' && (
+                <MandarAlCliente pedido={modal.pedido} onCerrar={() => setModal(null)} />
             )}
             {modal?.tipo === 'cancelar' && (
                 <ModalCancelar

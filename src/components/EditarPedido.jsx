@@ -13,6 +13,7 @@ import MilkshakeBuilder from './MilkshakeBuilder.jsx';
 import WaffleBuilder from './WaffleBuilder.jsx';
 import ProductosDeCategoria from './ProductosDeCategoria.jsx';
 import PromoSection from './PromoSection.jsx';
+import MandarAlCliente from './MandarAlCliente.jsx';
 
 /**
  * Editar un pedido ya tomado (parte 30): cambiar cantidades, sacar, sumar o
@@ -84,7 +85,12 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
         monto: pedido.descuento_tipo === 'tarjeta' ? pedido.descuento : 0,   // tarjeta ya guardada: lo que se regaló
     }));
 
-    const envio = pedido.envio || 0;
+    // Delivery (parte 51): el cliente del QR no puede elegirlo; se suma acá con lo que cotizó la moto.
+    const [conEnvio, setConEnvio] = useState(() => (pedido.envio || 0) > 0);
+    const [envioTexto, setEnvioTexto] = useState(() => (pedido.envio ? String(pedido.envio) : ''));
+    const [guardado, setGuardado] = useState(null);   // el pedido ya guardado, para mandárselo al cliente
+    const envio = conEnvio ? (parseInt(envioTexto, 10) || 0) : 0;
+    const envioCambio = envio !== (pedido.envio || 0);
     const subtotal = lineas.reduce((s, l) => s + l.cantidad * (l.precio || 0), 0);
     const lineaGratis = desc.tipo === 'tarjeta' ? lineas.find((l) => l.clave === desc.linea && l.cantidad > 0) : null;
     const valorDescuento = desc.tipo === 'tarjeta' ? (lineaGratis ? lineaGratis.precio : desc.monto) : desc.valor;
@@ -94,7 +100,7 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
     const descuentoCambio = (desc.tipo || '') !== (pedido.descuento_tipo || '') || descuento !== (pedido.descuento || 0)
         || (desc.nota || '') !== (pedido.descuento_nota || '');
     const vivas = lineas.filter((l) => l.cantidad > 0).length;
-    const cambio = lineas.some((l) => l.cantidad !== l.antes || !l.id) || descuentoCambio;
+    const cambio = lineas.some((l) => l.cantidad !== l.antes || !l.id) || descuentoCambio || envioCambio;
 
     const cambiarCantidad = (clave, delta) => setLineas((ls) => ls.map((l) => (
         l.clave === clave ? { ...l, cantidad: Math.max(0, Math.min(99, l.cantidad + delta)) } : l
@@ -147,6 +153,7 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
     const guardar = async (e) => {
         e.preventDefault();
         if (vivas === 0) { setError('El pedido quedaría vacío: cancelalo en su lugar.'); return; }
+        if (conEnvio && !envio) { setError('Poné cuánto sale el envío'); return; }
         if (baja && pin.length !== 4) { setError('Para bajar el total ingresá el PIN de 4 números'); return; }
         setError('');
         setEnviando(true);
@@ -158,13 +165,31 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
         const p_descuento = !descuentoCambio ? null
             : !desc.tipo ? {}
                 : { tipo: desc.tipo, valor: desc.tipo === 'tarjeta' ? valorDescuento : Number(desc.valor), nota: desc.nota.trim() };
-        const { error: err } = await supabase.rpc('editar_pedido', { p_id: pedido.id, p_items: items, p_pin: baja ? pin : null, p_descuento });
+        // null = no tocar el envío; 0 = sacarlo; > 0 = ese envío.
+        const p_envio = envioCambio ? envio : null;
+        const { data: totalNuevo, error: err } = await supabase.rpc('editar_pedido', { p_id: pedido.id, p_items: items, p_pin: baja ? pin : null, p_descuento, p_envio });
         setEnviando(false);
         if (err) { setError(err.message); if (baja) setPin(''); return; }
-        onListo();
+        setGuardado({
+            ...pedido,
+            pedido_items: lineas.map((l) => ({ nombre: l.nombre, cantidad: l.cantidad, precio_unitario: l.precio })),
+            envio, descuento, total: typeof totalNuevo === 'number' ? totalNuevo : total,
+        });
     };
 
     const categoria = picker && CATEGORIAS.find((c) => c.id === picker.catId);
+
+    // ---- Guardado: ofrecer mandarle al cliente el total nuevo ----
+    if (guardado) {
+        return (
+            <MandarAlCliente
+                pedido={guardado}
+                titulo="Pedido guardado ✓"
+                intro={`Total nuevo: ${formatPrice(guardado.total)}${guardado.envio > 0 ? ` (con envío de ${formatPrice(guardado.envio)})` : ''}. Si querés, mandáselo al cliente.`}
+                onCerrar={onListo}
+            />
+        );
+    }
 
     // ---- Elegir / armar un producto ----
     if (picker) {
@@ -236,9 +261,23 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
                         </li>
                     ))}
                 </ul>
-                {envio > 0 && <p className="panel-ayuda">🛵 Incluye el envío de {formatPrice(envio)}.</p>}
 
                 <button type="button" className="panel-btn-sec editar-agregar" onClick={() => setPicker({ catId: CATEGORIAS[0].id })}>+ Agregar algo</button>
+
+                <fieldset className="editar-descuento">
+                    <legend>🛵 Delivery</legend>
+                    <div className="editar-cats" role="group" aria-label="Delivery">
+                        <button type="button" className={`panel-chip ${!conEnvio ? 'activo' : ''}`} onClick={() => setConEnvio(false)}>Sin envío</button>
+                        <button type="button" className={`panel-chip ${conEnvio ? 'activo' : ''}`} onClick={() => setConEnvio(true)}>Con envío</button>
+                    </div>
+                    {conEnvio && (
+                        <label className="checkout-field">
+                            <span>Cuánto sale el envío ($) <small>lo que cotizó la moto</small></span>
+                            <input type="text" inputMode="numeric" placeholder="3500" value={envioTexto} autoFocus={!pedido.envio}
+                                onChange={(e) => setEnvioTexto(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+                        </label>
+                    )}
+                </fieldset>
 
                 <fieldset className="editar-descuento">
                     <legend>Descuento</legend>
@@ -283,6 +322,13 @@ export default function EditarPedido({ pedido, hayPin, onCerrar, onListo }) {
                     {descuento > 0 && <p className="panel-ayuda">Descuento: −{formatPrice(descuento)}</p>}
                 </fieldset>
 
+                {(envio > 0 || descuento > 0) && (
+                    <p className="editar-desglose">
+                        Productos {formatPrice(subtotal)}
+                        {descuento > 0 && <> · Descuento −{formatPrice(descuento)}</>}
+                        {envio > 0 && <> · Envío {formatPrice(envio)}</>}
+                    </p>
+                )}
                 <p className="editar-total">
                     <span>Total</span>
                     <span>{total !== pedido.total && <s>{formatPrice(pedido.total)}</s>} <strong>{formatPrice(total)}</strong></span>

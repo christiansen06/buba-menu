@@ -5501,3 +5501,20 @@ img.product-image.product-photo {
 [data-theme="dark"] .panel-acciones-menu { background: hsl(var(--buba-cyan-h) 30% 16%); }
 [data-theme="dark"] .panel-acciones-menu button:hover,
 [data-theme="dark"] .panel-acciones-btn[aria-expanded="true"] { background: hsl(var(--buba-cyan-h) 30% 24%); }
+
+/* Editar pedido: desglose y "Mandar al cliente" (parte 51) */
+.editar-desglose { margin: 0.6rem 0 -0.2rem; font-size: 0.85rem; font-weight: 600; opacity: 0.75; text-align: right; }
+.mandar-cliente-texto {
+  width: 100%;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  border: 1.5px solid hsl(var(--buba-cyan-h) 40% 80%);
+  resize: vertical;
+  box-sizing: border-box;
+}
+.mandar-cliente-botones { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+.mandar-cliente-wa { flex: 1; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: #25d366; color: #fff; }
+.mandar-cliente-listo { width: 100%; margin-top: 0.4rem; }
